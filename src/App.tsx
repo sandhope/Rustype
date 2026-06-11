@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import Editor, { type EditorHandle } from './components/Editor';
 import TabBar, { type Tab } from './components/TabBar';
 import Sidebar from './components/Sidebar';
@@ -706,6 +707,24 @@ function App() {
                         <span className="file-name">{activeTab.file?.name || 'Untitled'}</span>
                         {activeTab.dirty && <span className="dirty-indicator">● 未保存</span>}
                         {activeTab.externallyModified && <span className="dirty-indicator">⚠ 外部修改</span>}
+                    </div>
+                    <div className="window-controls">
+                        <button className="window-control-btn" onClick={() => getCurrentWindow().minimize()}>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <line x1="6" y1="12" x2="18" y2="12" />
+                            </svg>
+                        </button>
+                        <button className="window-control-btn" onClick={() => getCurrentWindow().toggleMaximize()}>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <rect x="6" y="6" width="12" height="12" rx="1" />
+                            </svg>
+                        </button>
+                        <button className="window-control-btn window-control-close" onClick={() => getCurrentWindow().close()}>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </header>

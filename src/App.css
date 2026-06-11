@@ -193,6 +193,36 @@ html, body, #root {
   background-color: rgba(0, 0, 0, 0.06);
 }
 
+/* Window Controls */
+.window-controls {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.window-control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: var(--app-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.window-control-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.window-control-close:hover {
+  background-color: #e81123;
+  color: white;
+}
+
 /* ============ Main Content ============ */
 .app-main {
   flex: 1;
