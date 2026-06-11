@@ -594,113 +594,119 @@ function App() {
     return (
         <div className={appRootClass} onClick={() => setActiveMenu(null)}>
             <header className="app-header">
-                <div className="menu-bar">
-                    <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
-                        <div
-                            className={`menu-trigger ${activeMenu === 'file' ? 'active' : ''}`}
-                            onClick={() => toggleMenu('file')}
-                        >
-                            文件
-                        </div>
-                        <div className={`menu-dropdown-content ${activeMenu === 'file' ? 'is-open' : ''}`}>
-                            <div className="menu-item" onClick={() => handleMenuItemClick('new')}>
-                                <span className="menu-item-label">新建</span>
-                                <span className="menu-item-shortcut">Ctrl+N</span>
-                            </div>
-                            <div className="menu-item" onClick={() => handleMenuItemClick('open')}>
-                                <span className="menu-item-label">打开</span>
-                                <span className="menu-item-shortcut">Ctrl+O</span>
-                            </div>
-                            <div className="menu-divider" />
-                            <div className="menu-item" onClick={() => handleMenuItemClick('save')}>
-                                <span className="menu-item-label">保存</span>
-                                <span className="menu-item-shortcut">Ctrl+S</span>
-                            </div>
-                            <div className="menu-item" onClick={() => handleMenuItemClick('saveAs')}>
-                                <span className="menu-item-label">另存为</span>
-                                <span className="menu-item-shortcut">Ctrl+Shift+S</span>
-                            </div>
-                            <div className="menu-divider" />
-                            <div className="menu-item" onClick={() => handleMenuItemClick('sidebar')}>
-                                <span className="menu-item-label">{sidebarOpen ? '关闭' : '打开'} 最近文件</span>
-                            </div>
-                        </div>
+                <div className="title-bar">
+                    <div className="app-title">
+                        <img src="data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='3' y='3' width='18' height='18' rx='3' fill='%231976d2'/%3E%3Cpath d='M6 6h12v9H6z' fill='white'/%3E%3Cpath d='M8 8h4v2H8zM8 12h6v1.5H8z' fill='%231976d2'/%3E%3C/svg%3E" alt="Rustype" width="20" height="20" />
+                        <span className="app-name">Rustype</span>
                     </div>
+                    <div className="menu-bar">
+                        <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                            <div
+                                className={`menu-trigger ${activeMenu === 'file' ? 'active' : ''}`}
+                                onClick={() => toggleMenu('file')}
+                            >
+                                文件
+                            </div>
+                            <div className={`menu-dropdown-content ${activeMenu === 'file' ? 'is-open' : ''}`}>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('new')}>
+                                    <span className="menu-item-label">新建</span>
+                                    <span className="menu-item-shortcut">Ctrl+N</span>
+                                </div>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('open')}>
+                                    <span className="menu-item-label">打开</span>
+                                    <span className="menu-item-shortcut">Ctrl+O</span>
+                                </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item" onClick={() => handleMenuItemClick('save')}>
+                                    <span className="menu-item-label">保存</span>
+                                    <span className="menu-item-shortcut">Ctrl+S</span>
+                                </div>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('saveAs')}>
+                                    <span className="menu-item-label">另存为</span>
+                                    <span className="menu-item-shortcut">Ctrl+Shift+S</span>
+                                </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item" onClick={() => handleMenuItemClick('sidebar')}>
+                                    <span className="menu-item-label">{sidebarOpen ? '关闭' : '打开'} 最近文件</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
-                        <div
-                            className={`menu-trigger ${activeMenu === 'edit' ? 'active' : ''}`}
-                            onClick={() => toggleMenu('edit')}
-                        >
-                            编辑
+                        <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                            <div
+                                className={`menu-trigger ${activeMenu === 'edit' ? 'active' : ''}`}
+                                onClick={() => toggleMenu('edit')}
+                            >
+                                编辑
+                            </div>
+                            <div className={`menu-dropdown-content ${activeMenu === 'edit' ? 'is-open' : ''}`}>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('findReplace')}>
+                                    <span className="menu-item-label">查找 / 替换</span>
+                                    <span className="menu-item-shortcut">Ctrl+F</span>
+                                </div>
+                                <div className="menu-item" onClick={() => { editorRef.current?.undo(); setActiveMenu(null); }}>
+                                    <span className="menu-item-label">撤销</span>
+                                    <span className="menu-item-shortcut">Ctrl+Z</span>
+                                </div>
+                                <div className="menu-item" onClick={() => { editorRef.current?.redo(); setActiveMenu(null); }}>
+                                    <span className="menu-item-label">重做</span>
+                                    <span className="menu-item-shortcut">Ctrl+Y</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className={`menu-dropdown-content ${activeMenu === 'edit' ? 'is-open' : ''}`}>
-                            <div className="menu-item" onClick={() => handleMenuItemClick('findReplace')}>
-                                <span className="menu-item-label">查找 / 替换</span>
-                                <span className="menu-item-shortcut">Ctrl+F</span>
-                            </div>
-                            <div className="menu-item" onClick={() => { editorRef.current?.undo(); setActiveMenu(null); }}>
-                                <span className="menu-item-label">撤销</span>
-                                <span className="menu-item-shortcut">Ctrl+Z</span>
-                            </div>
-                            <div className="menu-item" onClick={() => { editorRef.current?.redo(); setActiveMenu(null); }}>
-                                <span className="menu-item-label">重做</span>
-                                <span className="menu-item-shortcut">Ctrl+Y</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
-                        <div
-                            className={`menu-trigger ${activeMenu === 'view' ? 'active' : ''}`}
-                            onClick={() => toggleMenu('view')}
-                        >
-                            视图
+                        <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                            <div
+                                className={`menu-trigger ${activeMenu === 'view' ? 'active' : ''}`}
+                                onClick={() => toggleMenu('view')}
+                            >
+                                视图
+                            </div>
+                            <div className={`menu-dropdown-content ${activeMenu === 'view' ? 'is-open' : ''}`}>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('sourceMode')}>
+                                    <span className="menu-item-label">源代码模式</span>
+                                    <span className="menu-item-shortcut">{sourceMode ? '✓' : ''}</span>
+                                </div>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('focusMode')}>
+                                    <span className="menu-item-label">聚焦模式</span>
+                                    <span className="menu-item-shortcut">{focusMode ? '✓' : ''}</span>
+                                </div>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('typewriterMode')}>
+                                    <span className="menu-item-label">打字机模式</span>
+                                    <span className="menu-item-shortcut">{typewriterMode ? '✓' : ''}</span>
+                                </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item" onClick={() => handleMenuItemClick('outline')}>
+                                    <span className="menu-item-label">显示大纲</span>
+                                    <span className="menu-item-shortcut">{outlineOpen ? '✓' : ''}</span>
+                                </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item" onClick={() => handleMenuItemClick('settings')}>
+                                    <span className="menu-item-label">设置</span>
+                                    <span className="menu-item-shortcut">Ctrl+,</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className={`menu-dropdown-content ${activeMenu === 'view' ? 'is-open' : ''}`}>
-                            <div className="menu-item" onClick={() => handleMenuItemClick('sourceMode')}>
-                                <span className="menu-item-label">源代码模式</span>
-                                <span className="menu-item-shortcut">{sourceMode ? '✓' : ''}</span>
-                            </div>
-                            <div className="menu-item" onClick={() => handleMenuItemClick('focusMode')}>
-                                <span className="menu-item-label">聚焦模式</span>
-                                <span className="menu-item-shortcut">{focusMode ? '✓' : ''}</span>
-                            </div>
-                            <div className="menu-item" onClick={() => handleMenuItemClick('typewriterMode')}>
-                                <span className="menu-item-label">打字机模式</span>
-                                <span className="menu-item-shortcut">{typewriterMode ? '✓' : ''}</span>
-                            </div>
-                            <div className="menu-divider" />
-                            <div className="menu-item" onClick={() => handleMenuItemClick('outline')}>
-                                <span className="menu-item-label">显示大纲</span>
-                                <span className="menu-item-shortcut">{outlineOpen ? '✓' : ''}</span>
-                            </div>
-                            <div className="menu-divider" />
-                            <div className="menu-item" onClick={() => handleMenuItemClick('settings')}>
-                                <span className="menu-item-label">设置</span>
-                                <span className="menu-item-shortcut">Ctrl+,</span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
-                        <div
-                            className={`menu-trigger ${activeMenu === 'help' ? 'active' : ''}`}
-                            onClick={() => toggleMenu('help')}
-                        >
-                            帮助
-                        </div>
-                        <div className={`menu-dropdown-content ${activeMenu === 'help' ? 'is-open' : ''}`}>
-                            <div className="menu-item" onClick={() => handleMenuItemClick('about')}>
-                                <span className="menu-item-label">关于 Rustype</span>
+                        <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                            <div
+                                className={`menu-trigger ${activeMenu === 'help' ? 'active' : ''}`}
+                                onClick={() => toggleMenu('help')}
+                            >
+                                帮助
+                            </div>
+                            <div className={`menu-dropdown-content ${activeMenu === 'help' ? 'is-open' : ''}`}>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('about')}>
+                                    <span className="menu-item-label">关于 Rustype</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div className="file-info">
-                    <span className="file-name">{activeTab.file?.name || 'Untitled'}</span>
-                    {activeTab.dirty && <span className="dirty-indicator">● 未保存</span>}
-                    {activeTab.externallyModified && <span className="dirty-indicator">⚠ 外部修改</span>}
+                    <div className="file-info">
+                        <span className="file-name">{activeTab.file?.name || 'Untitled'}</span>
+                        {activeTab.dirty && <span className="dirty-indicator">● 未保存</span>}
+                        {activeTab.externallyModified && <span className="dirty-indicator">⚠ 外部修改</span>}
+                    </div>
                 </div>
             </header>
 
