@@ -631,6 +631,11 @@ function App() {
                                 <div className="menu-item" onClick={() => handleMenuItemClick('sidebar')}>
                                     <span className="menu-item-label">{sidebarOpen ? '关闭' : '打开'} 最近文件</span>
                                 </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item" onClick={() => handleMenuItemClick('settings')}>
+                                    <span className="menu-item-label">设置</span>
+                                    <span className="menu-item-shortcut">Ctrl+,</span>
+                                </div>
                             </div>
                         </div>
 
@@ -681,11 +686,6 @@ function App() {
                                 <div className="menu-item" onClick={() => handleMenuItemClick('outline')}>
                                     <span className="menu-item-label">显示大纲</span>
                                     <span className="menu-item-shortcut">{outlineOpen ? '✓' : ''}</span>
-                                </div>
-                                <div className="menu-divider" />
-                                <div className="menu-item" onClick={() => handleMenuItemClick('settings')}>
-                                    <span className="menu-item-label">设置</span>
-                                    <span className="menu-item-shortcut">Ctrl+,</span>
                                 </div>
                             </div>
                         </div>
