@@ -125,20 +125,15 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
 
         ensurePlugins();
         const container = containerRef.current;
-        console.log('[Editor] useEffect running, container:', container);
 
         if (!container) {
-            console.error('[Editor] container ref is null');
             return;
         }
 
         // If muya already exists (StrictMode re-mount), reuse it
         if (muyaRef.current) {
-            console.log('[Editor] Reusing existing muya instance');
             return;
         }
-
-        console.log('[Editor] container before Muya:', container.outerHTML);
 
         let muya: Muya;
         try {
@@ -147,19 +142,15 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
                 ...options,
                 markdown: initialContent,
             });
-            console.log('[Editor] Muya constructed successfully, domNode:', muya.domNode);
         }
         catch (err) {
-            console.error('[Editor] Muya constructor failed:', err);
             return;
         }
         try {
             muya.locale(zhCN);
             muya.init();
-            console.log('[Editor] muya.init() completed');
         }
         catch (err) {
-            console.error('[Editor] muya init failed:', err);
             return;
         }
         muyaRef.current = muya;
@@ -178,14 +169,12 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         });
 
         return () => {
-            console.log('[Editor] cleanup called');
             // Delay destruction to handle StrictMode's double invocation
             // If the component re-mounts quickly, we keep the muya instance
             const muyaToDestroy = muyaRef.current;
             destroyedRef.current = true;
             requestAnimationFrame(() => {
                 if (destroyedRef.current && muyaToDestroy) {
-                    console.log('[Editor] destroying muya');
                     muyaToDestroy.destroy();
                     if (muyaRef.current === muyaToDestroy) {
                         muyaRef.current = null;
