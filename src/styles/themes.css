@@ -150,6 +150,18 @@
   background-color: var(--app-tab-active-bg);
 }
 
+.theme-dark .menu-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.theme-dark .menu-trigger.active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.theme-dark .dirty-indicator {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .theme-light .modal,
 .theme-dark .modal {
   background-color: var(--app-modal-bg);
