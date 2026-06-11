@@ -33,40 +33,6 @@ export default function AboutDialog({ onClose }: AboutDialogProps) {
                     </div>
 
                     <div className="about-section">
-                        <h4>快捷键</h4>
-                        <div className="about-shortcuts">
-                            <div className="shortcut-row">
-                                <span>新建文件</span>
-                                <kbd>Ctrl+N</kbd>
-                            </div>
-                            <div className="shortcut-row">
-                                <span>打开文件</span>
-                                <kbd>Ctrl+O</kbd>
-                            </div>
-                            <div className="shortcut-row">
-                                <span>保存</span>
-                                <kbd>Ctrl+S</kbd>
-                            </div>
-                            <div className="shortcut-row">
-                                <span>另存为</span>
-                                <kbd>Ctrl+Shift+S</kbd>
-                            </div>
-                            <div className="shortcut-row">
-                                <span>查找</span>
-                                <kbd>Ctrl+F</kbd>
-                            </div>
-                            <div className="shortcut-row">
-                                <span>撤销</span>
-                                <kbd>Ctrl+Z</kbd>
-                            </div>
-                            <div className="shortcut-row">
-                                <span>重做</span>
-                                <kbd>Ctrl+Y</kbd>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="about-section">
                         <h4>技术栈</h4>
                         <p className="tech-stack">
                             <span className="tech-tag">Tauri</span>

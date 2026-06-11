@@ -9,6 +9,7 @@ import SourceMode from './components/SourceMode';
 import Outline from './components/Outline';
 import SettingsPanel from './components/SettingsPanel';
 import AboutDialog from './components/AboutDialog';
+import ShortcutsPanel from './components/ShortcutsPanel';
 import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, type FileInfo } from './utils/file';
 import { getRecentFiles, addRecentFile, removeRecentFile } from './utils/recentFiles';
 import { loadSettings, saveSettings, type AppSettings } from './utils/settings';
@@ -78,6 +79,7 @@ function App() {
     const [promptData, setPromptData] = useState<{ tabId: string; filePath: string } | null>(null);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [aboutOpen, setAboutOpen] = useState(false);
+    const [shortcutsOpen, setShortcutsOpen] = useState(false);
     const [settings, setSettings] = useState<AppSettings>(loadSettings());
 
     // Feature flags for current tab
@@ -460,6 +462,10 @@ function App() {
                 setAboutOpen(true);
                 setActiveMenu(null);
                 break;
+            case 'shortcuts':
+                setShortcutsOpen(true);
+                setActiveMenu(null);
+                break;
         }
     }, [handleNewFile, handleOpenFile, handleSaveFile, handleSaveAs, sourceMode, focusMode, activeTabId]);
 
@@ -698,6 +704,9 @@ function App() {
                                 帮助
                             </div>
                             <div className={`menu-dropdown-content ${activeMenu === 'help' ? 'is-open' : ''}`}>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('shortcuts')}>
+                                    <span className="menu-item-label">键盘快捷键</span>
+                                </div>
                                 <div className="menu-item" onClick={() => handleMenuItemClick('about')}>
                                     <span className="menu-item-label">关于 Rustype</span>
                                 </div>
@@ -811,6 +820,10 @@ function App() {
 
             {aboutOpen && (
                 <AboutDialog onClose={() => setAboutOpen(false)} />
+            )}
+
+            {shortcutsOpen && (
+                <ShortcutsPanel onClose={() => setShortcutsOpen(false)} />
             )}
         </div>
     );
