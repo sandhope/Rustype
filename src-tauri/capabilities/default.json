@@ -1,10 +1,22 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capability for the main window",
+  "description": "Default capabilities for Rustype desktop app",
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "opener:default"
+    "opener:default",
+    "dialog:default",
+    "shell:default",
+    "store:default",
+    "window-state:default",
+    "fs:default",
+    "fs:read-all",
+    "fs:write-all",
+    "fs:scope-home",
+    "fs:scope-desktop",
+    "fs:scope-document",
+    "fs:scope-download",
+    "core:window:default"
   ]
 }
