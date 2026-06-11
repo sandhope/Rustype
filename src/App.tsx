@@ -320,9 +320,9 @@ function App() {
         }
     }, [tabs, activeTabId]);
 
-    const handleChange = useCallback(() => {
+    const handleChange = useCallback((content: string) => {
         setTabs(prev => prev.map(t =>
-            t.id === activeTabId ? { ...t, dirty: true } : t
+            t.id === activeTabId ? { ...t, content, dirty: true } : t
         ));
     }, [activeTabId]);
 

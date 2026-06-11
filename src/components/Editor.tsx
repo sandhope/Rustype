@@ -119,6 +119,13 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     const containerRef = useRef<HTMLDivElement>(null);
     const muyaRef = useRef<Muya | null>(null);
     const destroyedRef = useRef(false);
+    const onChangeRef = useRef(onChange);
+    const onFocusRef = useRef(onFocus);
+    const onBlurRef = useRef(onBlur);
+
+    onChangeRef.current = onChange;
+    onFocusRef.current = onFocus;
+    onBlurRef.current = onBlur;
 
     useEffect(() => {
         destroyedRef.current = false;
@@ -156,10 +163,10 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         muyaRef.current = muya;
 
         muya.on('json-change', () => {
-            onChange?.(muya.getMarkdown());
+            onChangeRef.current?.(muya.getMarkdown());
         });
-        muya.on('focus', () => onFocus?.());
-        muya.on('blur', () => onBlur?.());
+        muya.on('focus', () => onFocusRef.current?.());
+        muya.on('blur', () => onBlurRef.current?.());
 
         // muya.init() creates the scrollPage and attaches the contenteditable
         // to the DOM. Give it one micro-task to settle before we try to focus,
