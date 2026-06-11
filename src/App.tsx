@@ -704,11 +704,6 @@ function App() {
                             </div>
                         </div>
                     </div>
-                    <div className="file-info">
-                        <span className="file-name">{activeTab.file?.name || 'Untitled'}</span>
-                        {activeTab.dirty && <span className="dirty-indicator">● 未保存</span>}
-                        {activeTab.externallyModified && <span className="dirty-indicator">⚠ 外部修改</span>}
-                    </div>
                     <div className="window-controls">
                         <button className="window-control-btn" onClick={() => getCurrentWindow().minimize()}>
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5">
