@@ -17,6 +17,12 @@
     "fs:scope-desktop",
     "fs:scope-document",
     "fs:scope-download",
-    "core:window:default"
+    "core:window:default",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-start-dragging",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-internal-toggle-maximize",
+    "core:window:allow-set-decorations"
   ]
 }
