@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import logo from '../src-tauri/icons/32x32.png';
 import Editor, { type EditorHandle } from './components/Editor';
 import TabBar, { type Tab } from './components/TabBar';
 import Sidebar from './components/Sidebar';
@@ -597,7 +598,7 @@ function App() {
             <header className="app-header">
                 <div className="title-bar">
                     <div className="app-title">
-                        <img src="data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='3' y='3' width='18' height='18' rx='3' fill='%231976d2'/%3E%3Cpath d='M6 6h12v9H6z' fill='white'/%3E%3Cpath d='M8 8h4v2H8zM8 12h6v1.5H8z' fill='%231976d2'/%3E%3C/svg%3E" alt="Rustype" width="20" height="20" />
+                        <img src={logo} alt="Rustype" width="20" height="20" />
                         <span className="app-name">Rustype</span>
                     </div>
                     <div className="menu-bar">

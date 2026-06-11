@@ -1,4 +1,4 @@
-import appIcon from '../../app-icon.png';
+import appIcon from '../../src-tauri/icons/128x128.png';
 
 interface AboutDialogProps {
     onClose: () => void;
