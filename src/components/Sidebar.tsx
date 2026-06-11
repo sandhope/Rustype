@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import type { FileInfo, FileTreeNode } from '../utils/file';
 import { loadChildren } from '../utils/file';
+import fileIcons from '../muya/src/ui/utils/fileIcons';
+import '../muya/src/ui/utils/fileIcons'; // side-effect: imports CSS
 
 interface SidebarProps {
     isOpen: boolean;
@@ -53,8 +55,19 @@ function FolderTreeNode({
                     style={{ paddingLeft: `${depth * 16 + 8}px` }}
                     onClick={handleToggle}
                 >
-                    <span className={`tree-arrow ${expanded ? 'expanded' : ''}`}>▶</span>
-                    <span className="tree-folder-icon">{expanded ? '📂' : '📁'}</span>
+                    <span className={`tree-arrow ${expanded ? 'expanded' : ''}`}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+                            <path fill="currentColor" d="M340.864 149.312a30.59 30.59 0 0 0 0 42.752L652.736 512 340.864 831.872a30.59 30.59 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z"></path>
+                        </svg>
+                    </span>
+                    <span className="tree-folder-icon">
+                        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                            <path d={expanded
+                                ? "M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V5.5A1.5 1.5 0 0 0 14.5 4H7.7l-1.15-1.15A1.5 1.5 0 0 0 5.5 2H1.5z"
+                                : "M1.5 2A1.5 1.5 0 0 0 0 3.5v2A1.5 1.5 0 0 0 1.5 7h13A1.5 1.5 0 0 0 16 5.5V5a1.5 1.5 0 0 0-1.5-1.5H7.7L6.56 2.35A1.5 1.5 0 0 0 5.5 2h-4zM1.5 8A1.5 1.5 0 0 0 0 9.5v3A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-3A1.5 1.5 0 0 0 14.5 8h-13z"
+                            }/>
+                        </svg>
+                    </span>
                     <span className="tree-folder-name" title={node.path}>
                         {node.name}
                     </span>
@@ -88,7 +101,7 @@ function FolderTreeNode({
             onClick={() => onFileClick(node.path)}
             title={node.path}
         >
-            <span className="tree-file-icon">📄</span>
+            <span className={`tree-file-icon ${(fileIcons.getClassByName(node.name) || '').split(/\s/).join(' ')}`.trim()} />
             <span className="tree-file-name">{node.name}</span>
         </div>
     );
@@ -149,7 +162,7 @@ export default function Sidebar({
                                     onClick={() => onFolderFileSelect(file.path)} // 或使用 onFileSelect 如果有
                                     title={file.path}
                                 >
-                                    <span className="file-icon">📄</span>
+                                    <span className={`file-icon ${(fileIcons.getClassByName(file.name) || '').split(/\s/).join(' ')}`.trim()} />
                                     <span className="file-name">{file.name}</span>
                                 </div>
                             ))}
