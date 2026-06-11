@@ -39,6 +39,7 @@ export class PreviewToolBar extends BaseFloat {
 
     override listen() {
         const { eventCenter } = this.muya;
+        const { domNode } = this.muya;
         super.listen();
 
         const handler = throttle((event: Event) => {
@@ -66,7 +67,9 @@ export class PreviewToolBar extends BaseFloat {
             }
         }, 300);
 
-        eventCenter.attachDOMEvent(document.body, 'mousemove', handler);
+        // Listen on the editor container (not document.body) so the preview
+        // toolbar is only shown when the mouse is inside the editor area.
+        eventCenter.attachDOMEvent(domNode, 'mousemove', handler);
     }
 
     render() {

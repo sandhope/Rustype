@@ -120,6 +120,7 @@ export class TableDragBar extends BaseFloat {
 
     override listen() {
         const { eventCenter } = this.muya;
+        const { domNode } = this.muya;
         const { container } = this;
         super.listen();
 
@@ -166,7 +167,9 @@ export class TableDragBar extends BaseFloat {
             }
         });
 
-        eventCenter.attachDOMEvent(document.body, 'mousemove', handler);
+        // Listen on the editor container (not document.body) so the drag bar
+        // is only shown when the mouse is inside the editor area.
+        eventCenter.attachDOMEvent(domNode, 'mousemove', handler);
         eventCenter.attachDOMEvent(container!, 'mousedown', this.mousedown);
         eventCenter.attachDOMEvent(container!, 'mouseup', this.mouseup);
     }

@@ -42,6 +42,7 @@ export class TableColumnToolbar extends BaseFloat {
 
     override listen() {
         const { eventCenter } = this.muya;
+        const { domNode } = this.muya;
         super.listen();
 
         const handler = throttle((event: Event) => {
@@ -81,7 +82,10 @@ export class TableColumnToolbar extends BaseFloat {
             }
         }, 300);
 
-        eventCenter.attachDOMEvent(document.body, 'mousemove', handler);
+        // Listen on the editor container (not document.body) so the toolbar
+        // is only shown when the mouse is inside the editor area.  This
+        // prevents the toolbar from appearing on top of modals / help pages.
+        eventCenter.attachDOMEvent(domNode, 'mousemove', handler);
     }
 
     render() {

@@ -149,7 +149,9 @@ export class ParagraphFrontButton {
 
         eventCenter.attachDOMEvent(container, 'mousedown', this.dragBarMouseDown);
         eventCenter.attachDOMEvent(container, 'mouseup', this.dragBarMouseUp);
-        eventCenter.attachDOMEvent(document, 'mousemove', mousemoveHandler);
+        // Listen on the editor container (not document) so the front button
+        // is only shown when the mouse is inside the editor area.
+        eventCenter.attachDOMEvent(this.muya.domNode, 'mousemove', mousemoveHandler);
         eventCenter.attachDOMEvent(container, 'click', clickHandler);
     }
 
