@@ -1,4 +1,4 @@
-import type { AppSettings } from '../utils/settings';
+import appIcon from '../../app-icon.png';
 
 interface AboutDialogProps {
     onClose: () => void;
@@ -10,13 +10,7 @@ export default function AboutDialog({ onClose }: AboutDialogProps) {
             <div className="about-dialog" onClick={(e) => e.stopPropagation()}>
                 <div className="about-header">
                     <div className="about-logo">
-                        <svg viewBox="0 0 100 100" width="64" height="64">
-                            <rect x="10" y="10" width="80" height="80" rx="12" fill="#1976d2" />
-                            <path
-                                d="M30 30 L70 30 L70 70 L30 70 Z M40 40 L60 40 L60 50 L40 50 Z M40 55 L60 55 L60 60 L40 60 Z"
-                                fill="white"
-                            />
-                        </svg>
+                        <img src={appIcon} alt="Rustype Logo" width="64" height="64" />
                     </div>
                     <h2>Rustype</h2>
                     <p className="about-version">版本 0.1.0</p>
