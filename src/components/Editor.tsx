@@ -29,7 +29,7 @@ export interface EditorHandle {
     getMarkdown: () => string;
     setContent: (content: string, autoFocus?: boolean) => void;
     focus: () => void;
-    blur: () => void;
+    blur: (isRemoveAllRange?: boolean, unSelect?: boolean) => void;
     undo: () => void;
     redo: () => void;
     selectAll: () => void;
@@ -194,8 +194,8 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             focus: () => {
                 muyaRef.current?.focus();
             },
-            blur: () => {
-                muyaRef.current?.blur();
+            blur: (isRemoveAllRange = false, unSelect = false) => {
+                muyaRef.current?.blur(isRemoveAllRange, unSelect);
             },
             undo: () => {
                 muyaRef.current?.undo();
@@ -219,7 +219,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
                 return (muyaRef.current?.getTOC?.() as any) ?? [];
             },
             setFocusMode: (focusMode: boolean) => {
-                muyaRef.current?.setFocusMode?.(focusMode);
+                muyaRef.current?.setOptions({ focusMode });
             },
             setOptions: (options: Record<string, unknown>, forceRender = false) => {
                 muyaRef.current?.setOptions?.(options, forceRender);

@@ -67,6 +67,7 @@ declare module '@muyajs/core' {
         replaceContent(content: any[] | string): boolean;
         setOptions(options: Partial<IMuyaOptions>, forceRender?: boolean): void;
         focus(): void;
+        blur(isRemoveAllRange?: boolean, unSelect?: boolean): void;
         selectAll(): void;
         format(type: string): void;
         search(value: string, opts?: Record<string, unknown>): void;
