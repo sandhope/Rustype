@@ -6,6 +6,7 @@ import FindReplace from './components/FindReplace';
 import SourceMode from './components/SourceMode';
 import Outline from './components/Outline';
 import SettingsPanel from './components/SettingsPanel';
+import AboutDialog from './components/AboutDialog';
 import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, type FileInfo } from './utils/file';
 import { getRecentFiles, addRecentFile, removeRecentFile } from './utils/recentFiles';
 import { loadSettings, saveSettings, type AppSettings } from './utils/settings';
@@ -74,6 +75,7 @@ function App() {
     const [recentFiles, setRecentFiles] = useState<FileInfo[]>([]);
     const [promptData, setPromptData] = useState<{ tabId: string; filePath: string } | null>(null);
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [aboutOpen, setAboutOpen] = useState(false);
     const [settings, setSettings] = useState<AppSettings>(loadSettings());
 
     // Feature flags for current tab
@@ -89,6 +91,49 @@ function App() {
     // Load recent files on mount
     useEffect(() => {
         setRecentFiles(getRecentFiles());
+    }, []);
+
+    // Native file drag & drop support
+    useEffect(() => {
+        const handleDragOver = (e: DragEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        const handleDrop = async (e: DragEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const files = e.dataTransfer?.files;
+            if (!files || files.length === 0) return;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                // Check if it's a markdown file
+                if (file.type === 'text/markdown' || file.name.endsWith('.md') || file.name.endsWith('.markdown')) {
+                    try {
+                        const content = await file.text();
+                        const newTab: Tab = {
+                            ...createNewTab({ name: file.name, path: '' }, content),
+                            dirty: true,
+                        };
+                        setTabs(prev => [...prev, newTab]);
+                        setActiveTabId(newTab.id);
+                        editorRef.current?.setContent(content);
+                    } catch (error) {
+                        console.error('Failed to open dropped file:', error);
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('dragover', handleDragOver);
+        window.addEventListener('drop', handleDrop);
+
+        return () => {
+            window.removeEventListener('dragover', handleDragOver);
+            window.removeEventListener('drop', handleDrop);
+        };
     }, []);
 
     // Apply theme on mount and when settings change
@@ -169,38 +214,6 @@ function App() {
             setTocItems(toc);
         }
     }, [activeTabId, outlineOpen, activeTab.content]);
-
-    // Keyboard shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
-                // Ctrl/Cmd + F: Find
-                if (e.key === 'f' || e.key === 'F') {
-                    e.preventDefault();
-                    setFindReplaceOpen(prev => !prev);
-                }
-                // Ctrl/Cmd + S: Save (handled by browser menu too)
-            }
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-                // Ctrl/Cmd + Shift + F: Toggle focus mode
-                if (e.key === 'f' || e.key === 'F') {
-                    e.preventDefault();
-                    setFocusMode(prev => {
-                        const next = !prev;
-                        editorRef.current?.setFocusMode(next);
-                        return next;
-                    });
-                }
-            }
-            if (e.key === 'Escape') {
-                if (findReplaceOpen) setFindReplaceOpen(false);
-                if (outlineOpen) setOutlineOpen(false);
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [findReplaceOpen, outlineOpen]);
 
     const handleNewFile = useCallback(() => {
         const newTab = createNewTab();
@@ -441,6 +454,10 @@ function App() {
                 setSettingsOpen(true);
                 setActiveMenu(null);
                 break;
+            case 'about':
+                setAboutOpen(true);
+                setActiveMenu(null);
+                break;
         }
     }, [handleNewFile, handleOpenFile, handleSaveFile, handleSaveAs, sourceMode, focusMode, activeTabId]);
 
@@ -488,6 +505,84 @@ function App() {
             // ignore
         }
     }, []);
+
+    // Keyboard shortcuts - placed after all callbacks are defined
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                if (e.key === 'Escape') {
+                    if (findReplaceOpen) setFindReplaceOpen(false);
+                    if (outlineOpen) setOutlineOpen(false);
+                    if (settingsOpen) setSettingsOpen(false);
+                    if (aboutOpen) setAboutOpen(false);
+                }
+                return;
+            }
+
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'n':
+                        e.preventDefault();
+                        handleNewFile();
+                        break;
+                    case 'o':
+                        e.preventDefault();
+                        handleOpenFile();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        handleSaveFile();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        setFindReplaceOpen(prev => !prev);
+                        break;
+                    case 'z':
+                        if (!sourceMode) {
+                            e.preventDefault();
+                            editorRef.current?.undo();
+                        }
+                        break;
+                    case 'y':
+                        if (!sourceMode) {
+                            e.preventDefault();
+                            editorRef.current?.redo();
+                        }
+                        break;
+                    case ',':
+                        e.preventDefault();
+                        setSettingsOpen(true);
+                        break;
+                }
+            }
+
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey) {
+                if (e.key === 'S' || e.key === 's') {
+                    e.preventDefault();
+                    handleSaveAs();
+                }
+                if (e.key === 'F' || e.key === 'f') {
+                    e.preventDefault();
+                    setFocusMode(prev => {
+                        const next = !prev;
+                        editorRef.current?.setFocusMode(next);
+                        return next;
+                    });
+                }
+            }
+
+            if (e.key === 'Escape') {
+                if (findReplaceOpen) setFindReplaceOpen(false);
+                if (outlineOpen) setOutlineOpen(false);
+                if (settingsOpen) setSettingsOpen(false);
+                if (aboutOpen) setAboutOpen(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [findReplaceOpen, outlineOpen, settingsOpen, aboutOpen, sourceMode, handleNewFile, handleOpenFile, handleSaveFile, handleSaveAs]);
 
     const appRootClass = [
         'app-root',
@@ -587,6 +682,20 @@ function App() {
                             </div>
                         </div>
                     </div>
+
+                    <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                        <div
+                            className={`menu-trigger ${activeMenu === 'help' ? 'active' : ''}`}
+                            onClick={() => toggleMenu('help')}
+                        >
+                            帮助
+                        </div>
+                        <div className={`menu-dropdown-content ${activeMenu === 'help' ? 'is-open' : ''}`}>
+                            <div className="menu-item" onClick={() => handleMenuItemClick('about')}>
+                                <span className="menu-item-label">关于 Rustype</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div className="file-info">
                     <span className="file-name">{activeTab.file?.name || 'Untitled'}</span>
@@ -677,6 +786,10 @@ function App() {
                     onUpdate={handleSettingsUpdate}
                     onClose={handleSettingsClose}
                 />
+            )}
+
+            {aboutOpen && (
+                <AboutDialog onClose={() => setAboutOpen(false)} />
             )}
         </div>
     );

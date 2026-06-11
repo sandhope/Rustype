@@ -1214,3 +1214,183 @@ html, body, #root {
     background-color: #4d4d4d;
   }
 }
+
+/* ============ About Dialog ============ */
+.about-dialog {
+  background: #fff;
+  border-radius: 12px;
+  width: 480px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.about-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+}
+
+.about-logo {
+  margin-bottom: 12px;
+}
+
+.about-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.about-version {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.about-content {
+  padding: 20px 24px;
+}
+
+.about-description {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  text-align: center;
+  margin: 0 0 20px 0;
+}
+
+.about-section {
+  margin-bottom: 20px;
+}
+
+.about-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 10px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #eee;
+}
+
+.about-section ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.8;
+}
+
+.about-shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #555;
+}
+
+.shortcut-row kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 12px;
+  color: #333;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 1px 0 #ccc;
+}
+
+.tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+
+.tech-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #1976d2;
+  background: #e3f2fd;
+  border-radius: 12px;
+}
+
+.about-footer {
+  display: flex;
+  justify-content: center;
+  padding: 16px 24px 24px;
+}
+
+.about-close-btn {
+  padding: 8px 32px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: #1976d2;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.about-close-btn:hover {
+  background: #1565c0;
+}
+
+/* Dark mode for about dialog */
+@media (prefers-color-scheme: dark) {
+  .about-dialog {
+    background: #2d2d2d;
+  }
+
+  .about-header {
+    background: linear-gradient(135deg, #3d3d3d 0%, #2d2d2d 100%);
+  }
+
+  .about-header h2 {
+    color: #f0f0f0;
+  }
+
+  .about-version {
+    color: #aaa;
+  }
+
+  .about-description {
+    color: #bbb;
+  }
+
+  .about-section h4 {
+    color: #ddd;
+    border-bottom-color: #3d3d3d;
+  }
+
+  .about-section ul {
+    color: #aaa;
+  }
+
+  .shortcut-row {
+    color: #aaa;
+  }
+
+  .shortcut-row kbd {
+    color: #ddd;
+    background: #3d3d3d;
+    border-color: #4d4d4d;
+    box-shadow: 0 1px 0 #2d2d2d;
+  }
+
+  .tech-tag {
+    color: #90caf9;
+    background: #1a3a5c;
+  }
+}
