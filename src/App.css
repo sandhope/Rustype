@@ -169,6 +169,79 @@ html, body, #root {
   margin: 4px 8px;
 }
 
+/* Submenu */
+.menu-item-submenu {
+  position: relative;
+}
+
+.menu-item-arrow {
+  font-size: 16px;
+  line-height: 1;
+  color: var(--app-text-secondary);
+  margin-left: 8px;
+}
+
+.menu-submenu {
+  position: absolute;
+  top: -4px;
+  left: 100%;
+  min-width: 280px;
+  max-width: 400px;
+  background: var(--float-bg-color);
+  border: 1px solid var(--float-border-color);
+  border-radius: 4px;
+  box-shadow: var(--float-shadow);
+  padding: 4px 0;
+  z-index: 2001;
+  margin-left: 1px;
+}
+
+.menu-submenu-item {
+  display: flex;
+  align-items: center;
+  padding: 5px 12px;
+  font-size: 13px;
+  color: var(--app-text-color);
+  cursor: pointer;
+  transition: background-color 0.1s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-submenu-item:hover {
+  background-color: var(--float-hover-color);
+}
+
+.menu-submenu-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-submenu-empty {
+  color: var(--app-text-secondary);
+  cursor: default;
+}
+
+.menu-submenu-empty:hover {
+  background-color: transparent;
+}
+
+.menu-submenu-divider {
+  height: 1px;
+  background-color: var(--float-border-color);
+  margin: 4px 8px;
+}
+
+.menu-submenu-item-danger {
+  color: var(--delete-color);
+}
+
+.menu-submenu-item-danger:hover {
+  background-color: rgba(255, 105, 105, 0.1);
+}
+
 /* File Info Section */
 .file-info {
   display: flex;

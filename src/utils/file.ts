@@ -5,6 +5,7 @@ import { join } from '@tauri-apps/api/path';
 export interface FileInfo {
     path: string;
     name: string;
+    isDir?: boolean;
 }
 
 export interface FileTreeNode {

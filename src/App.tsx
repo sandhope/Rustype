@@ -11,7 +11,7 @@ import SettingsPanel from './components/SettingsPanel';
 import AboutDialog from './components/AboutDialog';
 import ShortcutsPanel from './components/ShortcutsPanel';
 import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, type FileInfo, type FileTreeNode } from './utils/file';
-import { getRecentFiles, addRecentFile, removeRecentFile } from './utils/recentFiles';
+import { getRecentFiles, addRecentFile, removeRecentFile, clearRecentFiles } from './utils/recentFiles';
 import { loadSettings, saveSettings, type AppSettings } from './utils/settings';
 import './App.css';
 import './styles/themes.css';
@@ -74,6 +74,7 @@ function App() {
     const [tabs, setTabs] = useState<Tab[]>([createNewTab()]);
     const [activeTabId, setActiveTabId] = useState<string>(tabs[0].id);
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
+    const [openRecentSubmenu, setOpenRecentSubmenu] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [projectTree, setProjectTree] = useState<FileTreeNode | null>(null);
     const [recentFiles, setRecentFiles] = useState<FileInfo[]>([]);
@@ -239,6 +240,9 @@ function App() {
         setProjectTree(tree);
         setSidebarOpen(true);
         setActiveMenu(null);
+
+        addRecentFile({ path: dirPath, name: dirPath.split(/[/\\]/).pop() || dirPath, isDir: true });
+        setRecentFiles(getRecentFiles());
     }, []);
 
     const handleFolderFileSelect = useCallback(async (filePath: string) => {
@@ -670,6 +674,7 @@ function App() {
                                     <span className="menu-item-label">新建</span>
                                     <span className="menu-item-shortcut">Ctrl+N</span>
                                 </div>
+                                <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('openFile')}>
                                     <span className="menu-item-label">打开文件…</span>
                                     <span className="menu-item-shortcut">Ctrl+O</span>
@@ -677,6 +682,58 @@ function App() {
                                 <div className="menu-item" onClick={() => handleMenuItemClick('openFolder')}>
                                     <span className="menu-item-label">打开文件夹…</span>
                                     <span className="menu-item-shortcut">Ctrl+Shift+O</span>
+                                </div>
+                                <div
+                                    className="menu-item menu-item-submenu"
+                                    onMouseEnter={() => setOpenRecentSubmenu(true)}
+                                    onMouseLeave={() => setOpenRecentSubmenu(false)}
+                                >
+                                    <span className="menu-item-label">打开最近</span>
+                                    <span className="menu-item-arrow">›</span>
+                                    {openRecentSubmenu && (
+                                        <div className="menu-submenu">
+                                            {recentFiles.length === 0 ? (
+                                                <div className="menu-submenu-item menu-submenu-empty">暂无最近使用</div>
+                                            ) : (
+                                                <>
+                                                    {recentFiles.map((file, index) => (
+                                                        <div
+                                                            key={file.path + index}
+                                                            className="menu-submenu-item"
+                                                            title={file.path}
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                setActiveMenu(null);
+                                                                setOpenRecentSubmenu(false);
+                                                                if (file.isDir) {
+                                                                    const tree = await readDirectoryTree(file.path);
+                                                                    setProjectTree(tree);
+                                                                    setSidebarOpen(true);
+                                                                } else {
+                                                                    handleRecentFileSelect(file);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <span className="menu-submenu-item-label">{file.path}</span>
+                                                        </div>
+                                                    ))}
+                                                    <div className="menu-submenu-divider" />
+                                                    <div
+                                                        className="menu-submenu-item menu-submenu-item-danger"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            clearRecentFiles();
+                                                            setRecentFiles([]);
+                                                            setActiveMenu(null);
+                                                            setOpenRecentSubmenu(false);
+                                                        }}
+                                                    >
+                                                        <span className="menu-submenu-item-label">清除最近使用</span>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('save')}>
@@ -791,9 +848,7 @@ function App() {
             <main className="app-main">
                 <Sidebar
                     isOpen={sidebarOpen}
-                    recentFiles={recentFiles}
                     projectTree={projectTree}
-                    onFileSelect={handleRecentFileSelect}
                     onFolderFileSelect={handleFolderFileSelect}
                     onClose={handleSidebarClose}
                 />

@@ -1,12 +1,11 @@
 import { useState, useCallback } from 'react';
-import type { FileInfo, FileTreeNode } from '../utils/file';
+import type { FileTreeNode } from '../utils/file';
 import { loadChildren } from '../utils/file';
 import fileIcons from '../muya/src/ui/utils/fileIcons';
 import '../muya/src/ui/utils/fileIcons'; // side-effect: imports CSS
 
 interface SidebarProps {
     isOpen: boolean;
-    recentFiles: FileInfo[];
     projectTree: FileTreeNode | null;
     onFolderFileSelect: (filePath: string) => void;
     onClose: () => void;
@@ -109,7 +108,6 @@ function FolderTreeNode({
 
 export default function Sidebar({
     isOpen,
-    recentFiles,
     projectTree,
     onFolderFileSelect,
     onClose,
@@ -146,28 +144,6 @@ export default function Sidebar({
                             <div className="sidebar-empty">空项目</div>
                         )}
                     </div>
-                </div>
-
-                {/* 最近文件 */}
-                <div className="sidebar-section">
-                    <div className="sidebar-section-title">最近文件</div>
-                    {recentFiles.length === 0 ? (
-                        <div className="sidebar-empty">暂无最近文件</div>
-                    ) : (
-                        <div className="file-list">
-                            {recentFiles.map((file, index) => (
-                                <div
-                                    key={file.path + index}
-                                    className="file-item"
-                                    onClick={() => onFolderFileSelect(file.path)} // 或使用 onFileSelect 如果有
-                                    title={file.path}
-                                >
-                                    <span className={`file-icon ${(fileIcons.getClassByName(file.name) || '').split(/\s/).join(' ')}`.trim()} />
-                                    <span className="file-name">{file.name}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
