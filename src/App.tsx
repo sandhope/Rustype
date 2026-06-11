@@ -5,9 +5,12 @@ import Sidebar from './components/Sidebar';
 import FindReplace from './components/FindReplace';
 import SourceMode from './components/SourceMode';
 import Outline from './components/Outline';
+import SettingsPanel from './components/SettingsPanel';
 import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, type FileInfo } from './utils/file';
 import { getRecentFiles, addRecentFile, removeRecentFile } from './utils/recentFiles';
+import { loadSettings, saveSettings, type AppSettings } from './utils/settings';
 import './App.css';
+import './styles/themes.css';
 
 const WELCOME_MARKDOWN = `# 欢迎使用 Rustype
 
@@ -70,6 +73,8 @@ function App() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [recentFiles, setRecentFiles] = useState<FileInfo[]>([]);
     const [promptData, setPromptData] = useState<{ tabId: string; filePath: string } | null>(null);
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [settings, setSettings] = useState<AppSettings>(loadSettings());
 
     // Feature flags for current tab
     const [findReplaceOpen, setFindReplaceOpen] = useState(false);
@@ -85,6 +90,48 @@ function App() {
     useEffect(() => {
         setRecentFiles(getRecentFiles());
     }, []);
+
+    // Apply theme on mount and when settings change
+    useEffect(() => {
+        const applyTheme = () => {
+            const root = document.documentElement;
+            root.classList.remove('theme-light', 'theme-dark');
+            
+            if (settings.theme === 'system') {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                root.classList.add(isDark ? 'theme-dark' : 'theme-light');
+            } else {
+                root.classList.add(`theme-${settings.theme}`);
+            }
+            
+            // Apply font size
+            root.classList.remove('editor-font-size-12', 'editor-font-size-13', 'editor-font-size-14',
+                'editor-font-size-15', 'editor-font-size-16', 'editor-font-size-17', 'editor-font-size-18',
+                'editor-font-size-19', 'editor-font-size-20', 'editor-font-size-21', 'editor-font-size-22',
+                'editor-font-size-23', 'editor-font-size-24');
+            root.classList.add(`editor-font-size-${settings.fontSize}`);
+            
+            // Apply line height
+            const lh = Math.round(settings.lineHeight * 10);
+            root.classList.remove('editor-line-height-1-2', 'editor-line-height-1-3', 'editor-line-height-1-4',
+                'editor-line-height-1-5', 'editor-line-height-1-6', 'editor-line-height-1-7', 'editor-line-height-1-8',
+                'editor-line-height-1-9', 'editor-line-height-2-0');
+            root.classList.add(`editor-line-height-${lh / 10}-${lh % 10}`);
+            
+            // Apply editor width
+            root.style.setProperty('--editor-area-width', settings.editorLineWidth || '800px');
+        };
+        
+        applyTheme();
+        
+        // Listen for system theme changes
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handler = () => {
+            if (settings.theme === 'system') applyTheme();
+        };
+        mediaQuery.addEventListener('change', handler);
+        return () => mediaQuery.removeEventListener('change', handler);
+    }, [settings]);
 
     // Update editor when active tab changes
     useEffect(() => {
@@ -390,11 +437,24 @@ function App() {
                 setOutlineOpen(prev => !prev);
                 setActiveMenu(null);
                 break;
+            case 'settings':
+                setSettingsOpen(true);
+                setActiveMenu(null);
+                break;
         }
     }, [handleNewFile, handleOpenFile, handleSaveFile, handleSaveAs, sourceMode, focusMode, activeTabId]);
 
     const handleSidebarClose = useCallback(() => {
         setSidebarOpen(false);
+    }, []);
+
+    const handleSettingsUpdate = useCallback((newSettings: AppSettings) => {
+        setSettings(newSettings);
+        saveSettings(newSettings);
+    }, []);
+
+    const handleSettingsClose = useCallback(() => {
+        setSettingsOpen(false);
     }, []);
 
     const handleSourceChange = useCallback((content: string) => {
@@ -520,6 +580,11 @@ function App() {
                                 <span className="menu-item-label">显示大纲</span>
                                 <span className="menu-item-shortcut">{outlineOpen ? '✓' : ''}</span>
                             </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => handleMenuItemClick('settings')}>
+                                <span className="menu-item-label">设置</span>
+                                <span className="menu-item-shortcut">Ctrl+,</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -604,6 +669,14 @@ function App() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {settingsOpen && (
+                <SettingsPanel
+                    settings={settings}
+                    onUpdate={handleSettingsUpdate}
+                    onClose={handleSettingsClose}
+                />
             )}
         </div>
     );

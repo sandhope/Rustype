@@ -1,0 +1,187 @@
+/* Light Theme - Default */
+.theme-light {
+  --theme-color: rgb(33 181 111 / 100%);
+  --highlight-color: rgb(33 181 111 / 40%);
+  --selection-color: rgb(45 170 219 / 30%);
+  --editor-color: rgb(0 0 0 / 70%);
+  --editor-color-80: rgb(0 0 0 / 80%);
+  --editor-color-50: rgb(0 0 0 / 50%);
+  --editor-color-30: rgb(0 0 0 / 30%);
+  --editor-color-10: rgb(0 0 0 / 10%);
+  --editor-color-04: rgb(0 0 0 / 3%);
+  --editor-bg-color: rgb(255 255 255 / 100%);
+  
+  --editor-area-width: 800px;
+  --delete-color: #ff6969;
+  --icon-color: #6b737b;
+  --code-block-bg-color: rgb(0 0 0 / 3%);
+  --table-border-color: #e5e5e5;
+  --input-bg-color: rgb(0 0 0 / 6%);
+  
+  --link-color: rgb(20 86 240);
+  --h1-color: var(--editor-color-80);
+  --h2-color: var(--editor-color-80);
+  --h3-color: var(--editor-color-80);
+  --h4-color: var(--editor-color-80);
+  --h5-color: var(--editor-color-80);
+  --h6-color: var(--editor-color-80);
+  --blockquote-text-color: var(--editor-color-50);
+  --blockquote-border-color: var(--editor-color-30);
+  --strong-color: inherit;
+  --em-color: inherit;
+  --list-marker-color: inherit;
+  --hr-color: var(--editor-color-10);
+  
+  --float-bg-color: #fff;
+  --float-hover-color: rgb(0 0 0 / 4%);
+  --float-border-color: rgb(0 0 0 / 10%);
+  --float-shadow: rgb(15 15 15 / 3%) 0 0 0 1px, rgb(15 15 15 / 4%) 0 3px 6px, rgb(15 15 15 / 5%) 0 9px 24px;
+  
+  --button-font-color: var(--editor-color);
+  --button-bg-color: #fff;
+  --button-border: 1px solid #dcdfe6;
+  --button-bg-color-hover: linear-gradient(#f9f9f9, #f2f2f2);
+  --button-border-hover: var(--button-border);
+  --button-bg-color-active: var(--button-bg-color);
+  --button-border-active: var(--button-border);
+  --button-border-focus: var(--button-border);
+  
+  /* App colors */
+  --app-bg-color: #ffffff;
+  --app-header-bg: #fafafa;
+  --app-header-border: #e0e0e0;
+  --app-text-color: #333333;
+  --app-text-secondary: #666666;
+  --app-sidebar-bg: #fafafa;
+  --app-sidebar-border: #e0e0e0;
+  --app-tab-bg: #f5f5f5;
+  --app-tab-active-bg: #ffffff;
+  --app-modal-bg: #ffffff;
+}
+
+/* Dark Theme */
+.theme-dark {
+  --theme-color: rgb(33 181 111 / 100%);
+  --highlight-color: rgb(33 181 111 / 40%);
+  --selection-color: rgb(45 170 219 / 30%);
+  --editor-color: rgb(255 255 255 / 70%);
+  --editor-color-80: rgb(255 255 255 / 80%);
+  --editor-color-50: rgb(255 255 255 / 50%);
+  --editor-color-30: rgb(255 255 255 / 30%);
+  --editor-color-10: rgb(255 255 255 / 10%);
+  --editor-color-04: rgb(255 255 255 / 3%);
+  --editor-bg-color: rgb(30 30 30 / 100%);
+  
+  --editor-area-width: 800px;
+  --delete-color: #ff6969;
+  --icon-color: #9ca3af;
+  --code-block-bg-color: rgb(255 255 255 / 5%);
+  --table-border-color: #4d4d4d;
+  --input-bg-color: rgb(255 255 255 / 6%);
+  
+  --link-color: rgb(100 180 255);
+  --h1-color: var(--editor-color-80);
+  --h2-color: var(--editor-color-80);
+  --h3-color: var(--editor-color-80);
+  --h4-color: var(--editor-color-80);
+  --h5-color: var(--editor-color-80);
+  --h6-color: var(--editor-color-80);
+  --blockquote-text-color: var(--editor-color-50);
+  --blockquote-border-color: var(--editor-color-30);
+  --strong-color: inherit;
+  --em-color: inherit;
+  --list-marker-color: inherit;
+  --hr-color: var(--editor-color-10);
+  
+  --float-bg-color: #2d2d2d;
+  --float-hover-color: rgb(255 255 255 / 4%);
+  --float-border-color: rgb(255 255 255 / 10%);
+  --float-shadow: rgb(0 0 0 / 30%) 0 0 0 1px, rgb(0 0 0 / 40%) 0 3px 6px, rgb(0 0 0 / 50%) 0 9px 24px;
+  
+  --button-font-color: var(--editor-color);
+  --button-bg-color: #3d3d3d;
+  --button-border: 1px solid #4d4d4d;
+  --button-bg-color-hover: linear-gradient(#4d4d4d, #3d3d3d);
+  --button-border-hover: var(--button-border);
+  --button-bg-color-active: var(--button-bg-color);
+  --button-border-active: var(--button-border);
+  --button-border-focus: var(--button-border);
+  
+  /* App colors */
+  --app-bg-color: #1a1a1a;
+  --app-header-bg: #252525;
+  --app-header-border: #3d3d3d;
+  --app-text-color: #f0f0f0;
+  --app-text-secondary: #aaaaaa;
+  --app-sidebar-bg: #252525;
+  --app-sidebar-border: #3d3d3d;
+  --app-tab-bg: #252525;
+  --app-tab-active-bg: #1a1a1a;
+  --app-modal-bg: #2d2d2d;
+}
+
+/* Apply theme to app */
+.theme-light .app-root,
+.theme-dark .app-root {
+  background-color: var(--app-bg-color);
+  color: var(--app-text-color);
+}
+
+.theme-light .app-header,
+.theme-dark .app-header {
+  background-color: var(--app-header-bg);
+  border-bottom-color: var(--app-header-border);
+}
+
+.theme-light .sidebar,
+.theme-dark .sidebar {
+  background-color: var(--app-sidebar-bg);
+  border-right-color: var(--app-sidebar-border);
+}
+
+.theme-light .tab-bar,
+.theme-dark .tab-bar {
+  background-color: var(--app-tab-bg);
+  border-bottom-color: var(--app-header-border);
+}
+
+.theme-light .tab.active,
+.theme-dark .tab.active {
+  background-color: var(--app-tab-active-bg);
+}
+
+.theme-light .modal,
+.theme-dark .modal {
+  background-color: var(--app-modal-bg);
+}
+
+/* Editor font size */
+.editor-font-size-12 .mu-container { font-size: 12px; }
+.editor-font-size-13 .mu-container { font-size: 13px; }
+.editor-font-size-14 .mu-container { font-size: 14px; }
+.editor-font-size-15 .mu-container { font-size: 15px; }
+.editor-font-size-16 .mu-container { font-size: 16px; }
+.editor-font-size-17 .mu-container { font-size: 17px; }
+.editor-font-size-18 .mu-container { font-size: 18px; }
+.editor-font-size-19 .mu-container { font-size: 19px; }
+.editor-font-size-20 .mu-container { font-size: 20px; }
+.editor-font-size-21 .mu-container { font-size: 21px; }
+.editor-font-size-22 .mu-container { font-size: 22px; }
+.editor-font-size-23 .mu-container { font-size: 23px; }
+.editor-font-size-24 .mu-container { font-size: 24px; }
+
+/* Editor line height */
+.editor-line-height-1-2 .mu-container { line-height: 1.2; }
+.editor-line-height-1-3 .mu-container { line-height: 1.3; }
+.editor-line-height-1-4 .mu-container { line-height: 1.4; }
+.editor-line-height-1-5 .mu-container { line-height: 1.5; }
+.editor-line-height-1-6 .mu-container { line-height: 1.6; }
+.editor-line-height-1-7 .mu-container { line-height: 1.7; }
+.editor-line-height-1-8 .mu-container { line-height: 1.8; }
+.editor-line-height-1-9 .mu-container { line-height: 1.9; }
+.editor-line-height-2-0 .mu-container { line-height: 2.0; }
+
+/* Editor width */
+.editor-width-custom .mu-container {
+  max-width: var(--editor-area-width, 800px);
+}
