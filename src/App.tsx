@@ -3,10 +3,9 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import logo from '../src-tauri/icons/32x32.png';
 import Editor, { type EditorHandle } from './components/Editor';
 import TabBar, { type Tab } from './components/TabBar';
-import Sidebar from './components/Sidebar';
+import Sidebar, { type SidebarPanel } from './components/Sidebar';
 import FindReplace from './components/FindReplace';
 import SourceMode from './components/SourceMode';
-import Outline from './components/Outline';
 import SettingsPanel from './components/SettingsPanel';
 import AboutDialog from './components/AboutDialog';
 import ShortcutsPanel from './components/ShortcutsPanel';
@@ -75,7 +74,7 @@ function App() {
     const [activeTabId, setActiveTabId] = useState<string>(tabs[0].id);
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const [openRecentSubmenu, setOpenRecentSubmenu] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [activeSidebarPanel, setActiveSidebarPanel] = useState<SidebarPanel | null>(null);
     const [projectTree, setProjectTree] = useState<FileTreeNode | null>(null);
     const [recentFiles, setRecentFiles] = useState<FileInfo[]>([]);
     const [promptData, setPromptData] = useState<{ tabId: string; filePath: string } | null>(null);
@@ -87,7 +86,6 @@ function App() {
     // Feature flags for current tab
     const [findReplaceOpen, setFindReplaceOpen] = useState(false);
     const [sourceMode, setSourceMode] = useState(false);
-    const [outlineOpen, setOutlineOpen] = useState(false);
     const [focusMode, setFocusMode] = useState(false);
     const [typewriterMode, setTypewriterMode] = useState(false);
     const [tocItems, setTocItems] = useState<TocItem[]>([]);
@@ -215,11 +213,11 @@ function App() {
 
     // Refresh TOC when tab changes
     useEffect(() => {
-        if (outlineOpen && editorRef.current) {
+        if (activeSidebarPanel === 'outline' && editorRef.current) {
             const toc = editorRef.current.getTOC();
             setTocItems(toc);
         }
-    }, [activeTabId, outlineOpen, activeTab.content]);
+    }, [activeTabId, activeSidebarPanel, activeTab.content]);
 
     const handleNewFile = useCallback(() => {
         const newTab = createNewTab();
@@ -238,7 +236,7 @@ function App() {
 
         const tree = await readDirectoryTree(dirPath);
         setProjectTree(tree);
-        setSidebarOpen(true);
+        setActiveSidebarPanel('explorer');
         setActiveMenu(null);
 
         addRecentFile({ path: dirPath, name: dirPath.split(/[/\\]/).pop() || dirPath, isDir: true });
@@ -438,7 +436,7 @@ function App() {
                 editorRef.current?.setContent(fileContent);
             }
 
-            setSidebarOpen(false);
+            setActiveSidebarPanel(null);
         } catch (error) {
             console.error('Failed to open recent file:', error);
             removeRecentFile(file.path);
@@ -469,7 +467,7 @@ function App() {
                 handleSaveAs();
                 break;
             case 'sidebar':
-                setSidebarOpen(prev => !prev);
+                setActiveSidebarPanel(prev => prev ? null : 'explorer');
                 setActiveMenu(null);
                 break;
             case 'findReplace':
@@ -501,7 +499,7 @@ function App() {
                     const toc = editorRef.current.getTOC();
                     setTocItems(toc);
                 }
-                setOutlineOpen(prev => !prev);
+                setActiveSidebarPanel(prev => prev === 'outline' ? null : 'outline');
                 setActiveMenu(null);
                 break;
             case 'settings':
@@ -518,10 +516,6 @@ function App() {
                 break;
         }
     }, [handleNewFile, handleOpenFile, handleOpenFolder, handleSaveFile, handleSaveAs, sourceMode, focusMode, activeTabId]);
-
-    const handleSidebarClose = useCallback(() => {
-        setSidebarOpen(false);
-    }, []);
 
     const handleSettingsUpdate = useCallback((newSettings: AppSettings) => {
         setSettings(newSettings);
@@ -571,7 +565,7 @@ function App() {
             if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
                 if (e.key === 'Escape') {
                     if (findReplaceOpen) setFindReplaceOpen(false);
-                    if (outlineOpen) setOutlineOpen(false);
+                    if (activeSidebarPanel === 'outline') setActiveSidebarPanel(null);
                     if (settingsOpen) setSettingsOpen(false);
                     if (aboutOpen) setAboutOpen(false);
                 }
@@ -636,7 +630,7 @@ function App() {
 
             if (e.key === 'Escape') {
                 if (findReplaceOpen) setFindReplaceOpen(false);
-                if (outlineOpen) setOutlineOpen(false);
+                if (activeSidebarPanel === 'outline') setActiveSidebarPanel(null);
                 if (settingsOpen) setSettingsOpen(false);
                 if (aboutOpen) setAboutOpen(false);
             }
@@ -644,7 +638,7 @@ function App() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [findReplaceOpen, outlineOpen, settingsOpen, aboutOpen, sourceMode, handleNewFile, handleOpenFile, handleSaveFile, handleSaveAs]);
+    }, [findReplaceOpen, activeSidebarPanel, settingsOpen, aboutOpen, sourceMode, handleNewFile, handleOpenFile, handleSaveFile, handleSaveAs]);
 
     const appRootClass = [
         'app-root',
@@ -708,7 +702,7 @@ function App() {
                                                                 if (file.isDir) {
                                                                     const tree = await readDirectoryTree(file.path);
                                                                     setProjectTree(tree);
-                                                                    setSidebarOpen(true);
+                                                                    setActiveSidebarPanel('explorer');
                                                                 } else {
                                                                     handleRecentFileSelect(file);
                                                                 }
@@ -746,7 +740,7 @@ function App() {
                                 </div>
                                 <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('sidebar')}>
-                                    <span className="menu-item-label">{sidebarOpen ? '关闭' : '打开'}侧边栏</span>
+                                    <span className="menu-item-label">{activeSidebarPanel ? '关闭' : '打开'}侧边栏</span>
                                 </div>
                                 <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('settings')}>
@@ -802,7 +796,7 @@ function App() {
                                 <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('outline')}>
                                     <span className="menu-item-label">显示大纲</span>
-                                    <span className="menu-item-shortcut">{outlineOpen ? '✓' : ''}</span>
+                                    <span className="menu-item-shortcut">{activeSidebarPanel === 'outline' ? '✓' : ''}</span>
                                 </div>
                             </div>
                         </div>
@@ -847,10 +841,14 @@ function App() {
 
             <main className="app-main">
                 <Sidebar
-                    isOpen={sidebarOpen}
+                    activePanel={activeSidebarPanel}
+                    onPanelChange={setActiveSidebarPanel}
                     projectTree={projectTree}
                     onFolderFileSelect={handleFolderFileSelect}
-                    onClose={handleSidebarClose}
+                    activeFilePath={activeTab.file?.path ?? null}
+                    onOpenSettings={() => setSettingsOpen(true)}
+                    tocItems={tocItems}
+                    onTocItemClick={handleOutlineItemClick}
                 />
 
                 <div className="app-content">
@@ -880,14 +878,6 @@ function App() {
                         <FindReplace
                             editorRef={editorRef}
                             onClose={() => setFindReplaceOpen(false)}
-                        />
-                    )}
-
-                    {outlineOpen && !sourceMode && (
-                        <Outline
-                            items={tocItems}
-                            onClose={() => setOutlineOpen(false)}
-                            onItemClick={handleOutlineItemClick}
                         />
                     )}
                 </div>

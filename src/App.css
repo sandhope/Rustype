@@ -465,6 +465,71 @@ html, body, #root {
 }
 
 /* ============ Sidebar ============ */
+.sidebar-wrapper {
+  display: flex;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.activity-bar {
+  width: 48px;
+  background-color: var(--app-sidebar-bg);
+  border-right: 1px solid var(--app-sidebar-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 4px 0;
+}
+
+.activity-bar-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.activity-bar-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--app-sidebar-border);
+  margin-top: 4px;
+}
+
+.activity-bar-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--app-text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s;
+}
+
+.activity-bar-icon:hover {
+  color: var(--app-text-color);
+}
+
+.activity-bar-icon.active {
+  color: var(--app-text-color);
+}
+
+.activity-bar-icon.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background-color: var(--app-text-color);
+  border-radius: 1px;
+}
+
 .sidebar {
   width: 240px;
   background-color: var(--app-sidebar-bg);
@@ -485,26 +550,6 @@ html, body, #root {
 .sidebar-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--app-text-color);
-}
-
-.sidebar-close {
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  color: var(--app-text-secondary);
-  background: none;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.sidebar-close:hover {
-  background-color: var(--tab-bg-hover);
   color: var(--app-text-color);
 }
 
@@ -610,6 +655,10 @@ html, body, #root {
 
 .tree-file:hover {
   background-color: var(--tab-bg-hover);
+}
+
+.tree-file.active {
+  background-color: var(--tab-bg-active, rgba(0, 0, 0, 0.08));
 }
 
 .tree-file-icon {
@@ -1058,6 +1107,35 @@ html, body, #root {
     color: #fff;
   }
 
+  .sidebar-wrapper {
+    background-color: #252525;
+  }
+
+  .activity-bar {
+    background-color: #1e1e1e;
+    border-right-color: #3d3d3d;
+  }
+
+  .activity-bar-icon {
+    color: #888;
+  }
+
+  .activity-bar-icon:hover {
+    color: #ccc;
+  }
+
+  .activity-bar-icon.active {
+    color: #fff;
+  }
+
+  .activity-bar-icon.active::before {
+    background-color: #fff;
+  }
+
+  .activity-bar-bottom {
+    border-top-color: #3d3d3d;
+  }
+
   .sidebar {
     background-color: #252525;
     border-right-color: #3d3d3d;
@@ -1069,15 +1147,6 @@ html, body, #root {
 
   .sidebar-title {
     color: #ccc;
-  }
-
-  .sidebar-close {
-    color: #888;
-  }
-
-  .sidebar-close:hover {
-    background-color: #3d3d3d;
-    color: #fff;
   }
 
   .sidebar-content {
@@ -1110,6 +1179,10 @@ html, body, #root {
 
   .tree-file:hover {
     background-color: #3d3d3d;
+  }
+
+  .tree-file.active {
+    background-color: #37373d;
   }
 
   .file-item {
