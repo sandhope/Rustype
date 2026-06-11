@@ -1,4 +1,4 @@
-import { readTextFile, writeTextFile, BaseDirectory } from '@tauri-apps/plugin-fs';
+import { readTextFile, writeTextFile, BaseDirectory, stat } from '@tauri-apps/plugin-fs';
 import { open, save } from '@tauri-apps/plugin-dialog';
 
 export interface FileInfo {
@@ -70,4 +70,22 @@ export async function saveMarkdownFile(content: string, filePath?: string): Prom
 
 export function getFileName(filePath: string): string {
     return filePath.split(/[/\\]/).pop() || 'Untitled';
+}
+
+export interface FileStat {
+    mtime?: number;
+    size: number;
+}
+
+export async function getFileStat(filePath: string): Promise<FileStat | null> {
+    try {
+        const fileStat = await stat(filePath, { dir: BaseDirectory.None });
+        return {
+            mtime: fileStat.mtime,
+            size: fileStat.size,
+        };
+    } catch (error) {
+        console.error('Failed to get file stat:', error);
+        return null;
+    }
 }

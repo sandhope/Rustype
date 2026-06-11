@@ -27,11 +27,18 @@ import '@muyajs/core/assets/styles/prismjs/light.theme.css';
 
 export interface EditorHandle {
     getMarkdown: () => string;
-    setContent: (content: string) => void;
+    setContent: (content: string, autoFocus?: boolean) => void;
     focus: () => void;
+    blur: () => void;
     undo: () => void;
     redo: () => void;
     selectAll: () => void;
+    search: (value: string, opts?: Record<string, unknown>) => void;
+    find: (action: 'previous' | 'next') => void;
+    replace: (replaceValue: string, opts?: Record<string, unknown>) => void;
+    getTOC: () => Array<{ content: string; lvl: number; slug: string; githubSlug: string }>;
+    setFocusMode: (focusMode: boolean) => void;
+    setOptions: (options: Record<string, unknown>, forceRender?: boolean) => void;
 }
 
 interface EditorProps {
@@ -192,11 +199,14 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         ref,
         () => ({
             getMarkdown: () => muyaRef.current?.getMarkdown() ?? '',
-            setContent: (content: string) => {
-                muyaRef.current?.setContent(content);
+            setContent: (content: string, autoFocus: boolean = false) => {
+                muyaRef.current?.setContent(content, autoFocus);
             },
             focus: () => {
                 muyaRef.current?.focus();
+            },
+            blur: () => {
+                muyaRef.current?.blur();
             },
             undo: () => {
                 muyaRef.current?.undo();
@@ -206,6 +216,24 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             },
             selectAll: () => {
                 muyaRef.current?.selectAll();
+            },
+            search: (value: string, opts = {}) => {
+                muyaRef.current?.search(value, opts);
+            },
+            find: (action: 'previous' | 'next') => {
+                muyaRef.current?.find(action);
+            },
+            replace: (replaceValue: string, opts = {}) => {
+                muyaRef.current?.replace(replaceValue, opts);
+            },
+            getTOC: () => {
+                return (muyaRef.current?.getTOC?.() as any) ?? [];
+            },
+            setFocusMode: (focusMode: boolean) => {
+                muyaRef.current?.setFocusMode?.(focusMode);
+            },
+            setOptions: (options: Record<string, unknown>, forceRender = false) => {
+                muyaRef.current?.setOptions?.(options, forceRender);
             },
         }),
         [],
