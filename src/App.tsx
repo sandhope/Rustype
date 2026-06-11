@@ -10,7 +10,7 @@ import Outline from './components/Outline';
 import SettingsPanel from './components/SettingsPanel';
 import AboutDialog from './components/AboutDialog';
 import ShortcutsPanel from './components/ShortcutsPanel';
-import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, type FileInfo } from './utils/file';
+import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, type FileInfo, type FileTreeNode } from './utils/file';
 import { getRecentFiles, addRecentFile, removeRecentFile } from './utils/recentFiles';
 import { loadSettings, saveSettings, type AppSettings } from './utils/settings';
 import './App.css';
@@ -75,6 +75,7 @@ function App() {
     const [activeTabId, setActiveTabId] = useState<string>(tabs[0].id);
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [projectTree, setProjectTree] = useState<FileTreeNode | null>(null);
     const [recentFiles, setRecentFiles] = useState<FileInfo[]>([]);
     const [promptData, setPromptData] = useState<{ tabId: string; filePath: string } | null>(null);
     const [settingsOpen, setSettingsOpen] = useState(false);
@@ -226,6 +227,48 @@ function App() {
         editorRef.current?.setContent(newTab.content);
         setActiveMenu(null);
     }, []);
+
+    const handleOpenFolder = useCallback(async () => {
+        const dirPath = await openFolderDialog();
+        if (!dirPath) {
+            setActiveMenu(null);
+            return;
+        }
+
+        const tree = await readDirectoryTree(dirPath);
+        setProjectTree(tree);
+        setSidebarOpen(true);
+        setActiveMenu(null);
+    }, []);
+
+    const handleFolderFileSelect = useCallback(async (filePath: string) => {
+        try {
+            const fileName = filePath.split(/[/\\]/).pop() || '';
+            const fileInfo: FileInfo = { path: filePath, name: fileName };
+
+            // Check if file is already open in a tab
+            const existingTab = tabs.find(t => t.file?.path === filePath);
+            if (existingTab) {
+                setActiveTabId(existingTab.id);
+                return;
+            }
+
+            const fileContent = await readFileContent(filePath);
+            const fileStat = await getFileStat(filePath);
+            addRecentFile(fileInfo);
+            setRecentFiles(getRecentFiles());
+
+            const newTab: Tab = {
+                ...createNewTab(fileInfo, fileContent),
+                lastModified: fileStat?.mtime,
+                externallyModified: false,
+            };
+            setTabs(prev => [...prev, newTab]);
+            setActiveTabId(newTab.id);
+        } catch (error) {
+            console.error('Failed to open file from folder:', error);
+        }
+    }, [tabs]);
 
     const handleOpenFile = useCallback(async () => {
         const fileInfo = await openMarkdownFile();
@@ -409,8 +452,11 @@ function App() {
             case 'new':
                 handleNewFile();
                 break;
-            case 'open':
+            case 'openFile':
                 handleOpenFile();
+                break;
+            case 'openFolder':
+                handleOpenFolder();
                 break;
             case 'save':
                 handleSaveFile();
@@ -467,7 +513,7 @@ function App() {
                 setActiveMenu(null);
                 break;
         }
-    }, [handleNewFile, handleOpenFile, handleSaveFile, handleSaveAs, sourceMode, focusMode, activeTabId]);
+    }, [handleNewFile, handleOpenFile, handleOpenFolder, handleSaveFile, handleSaveAs, sourceMode, focusMode, activeTabId]);
 
     const handleSidebarClose = useCallback(() => {
         setSidebarOpen(false);
@@ -536,7 +582,11 @@ function App() {
                         break;
                     case 'o':
                         e.preventDefault();
-                        handleOpenFile();
+                        if (e.shiftKey) {
+                            handleOpenFolder();
+                        } else {
+                            handleOpenFile();
+                        }
                         break;
                     case 's':
                         e.preventDefault();
@@ -620,9 +670,13 @@ function App() {
                                     <span className="menu-item-label">新建</span>
                                     <span className="menu-item-shortcut">Ctrl+N</span>
                                 </div>
-                                <div className="menu-item" onClick={() => handleMenuItemClick('open')}>
-                                    <span className="menu-item-label">打开</span>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('openFile')}>
+                                    <span className="menu-item-label">打开文件…</span>
                                     <span className="menu-item-shortcut">Ctrl+O</span>
+                                </div>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('openFolder')}>
+                                    <span className="menu-item-label">打开文件夹…</span>
+                                    <span className="menu-item-shortcut">Ctrl+Shift+O</span>
                                 </div>
                                 <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('save')}>
@@ -630,12 +684,12 @@ function App() {
                                     <span className="menu-item-shortcut">Ctrl+S</span>
                                 </div>
                                 <div className="menu-item" onClick={() => handleMenuItemClick('saveAs')}>
-                                    <span className="menu-item-label">另存为</span>
+                                    <span className="menu-item-label">另存为…</span>
                                     <span className="menu-item-shortcut">Ctrl+Shift+S</span>
                                 </div>
                                 <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('sidebar')}>
-                                    <span className="menu-item-label">{sidebarOpen ? '关闭' : '打开'} 最近文件</span>
+                                    <span className="menu-item-label">{sidebarOpen ? '关闭' : '打开'}侧边栏</span>
                                 </div>
                                 <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('settings')}>
@@ -738,7 +792,9 @@ function App() {
                 <Sidebar
                     isOpen={sidebarOpen}
                     recentFiles={recentFiles}
+                    projectTree={projectTree}
                     onFileSelect={handleRecentFileSelect}
+                    onFolderFileSelect={handleFolderFileSelect}
                     onClose={handleSidebarClose}
                 />
 
