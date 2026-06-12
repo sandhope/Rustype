@@ -195,15 +195,11 @@ function App() {
         const interval = setInterval(async () => {
             for (const tab of tabs) {
                 if (!tab.file) continue;
-                try {
-                    const stat = await getFileStat(tab.file.path);
-                    if (stat && tab.lastModified && stat.mtime > tab.lastModified) {
-                        setTabs(prev => prev.map(t =>
-                            t.id === tab.id ? { ...t, externallyModified: true } : t
-                        ));
-                    }
-                } catch (e) {
-                    // File may have been deleted — ignore
+                const stat = await getFileStat(tab.file.path);
+                if (stat && tab.lastModified && stat.mtime > tab.lastModified) {
+                    setTabs(prev => prev.map(t =>
+                        t.id === tab.id ? { ...t, externallyModified: true } : t
+                    ));
                 }
             }
         }, 3000);
@@ -241,6 +237,28 @@ function App() {
 
         addRecentFile({ path: dirPath, name: dirPath.split(/[/\\]/).pop() || dirPath, isDir: true });
         setRecentFiles(getRecentFiles());
+    }, []);
+
+    const handleTreeRefresh = useCallback(async () => {
+        if (!projectTree) return;
+        const tree = await readDirectoryTree(projectTree.path);
+        setProjectTree(tree);
+    }, [projectTree]);
+
+    /** 关闭指定路径下的所有 tab（删除文件/文件夹时调用） */
+    const closeTabsForPath = useCallback((deletedPath: string) => {
+        setTabs(prev => {
+            const remaining = prev.filter(t => !t.file || !t.file.path.startsWith(deletedPath));
+            if (remaining.length !== prev.length) {
+                setActiveTabId(activeId => {
+                    if (prev.find(t => t.id === activeId && t.file?.path.startsWith(deletedPath))) {
+                        return remaining.length > 0 ? remaining[remaining.length - 1].id : '';
+                    }
+                    return activeId;
+                });
+            }
+            return remaining;
+        });
     }, []);
 
     const handleFolderFileSelect = useCallback(async (filePath: string) => {
@@ -849,6 +867,8 @@ function App() {
                     onOpenSettings={() => setSettingsOpen(true)}
                     tocItems={tocItems}
                     onTocItemClick={handleOutlineItemClick}
+                    onTreeRefresh={handleTreeRefresh}
+                    onCloseTabsForPath={closeTabsForPath}
                 />
 
                 <div className="app-content">

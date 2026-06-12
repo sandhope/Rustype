@@ -1,6 +1,16 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type { FileTreeNode } from '../utils/file';
-import { loadChildren } from '../utils/file';
+import {
+    loadChildren,
+    fsCreateFile,
+    fsCreateDirectory,
+    fsRename,
+    fsCopy,
+    fsRemove,
+    fsRevealInFolder,
+    fsExists,
+} from '../utils/file';
+import { join } from '@tauri-apps/api/path';
 import fileIcons from '../muya/src/ui/utils/fileIcons';
 import '../muya/src/ui/utils/fileIcons'; // side-effect: imports CSS
 
@@ -15,7 +25,266 @@ interface SidebarProps {
     onOpenSettings: () => void;
     tocItems: { content: string; lvl: number; slug: string; githubSlug: string }[];
     onTocItemClick: (item: { content: string; lvl: number; slug: string; githubSlug: string }) => void;
+    onTreeRefresh: () => void;
+    onCloseTabsForPath: (path: string) => void;
 }
+
+/* ==================== 剪贴板状态（模块级，跨组件共享） ==================== */
+let clipboardPath: string | null = null;
+let clipboardIsCut = false;
+
+function setClipboard(path: string, isCut: boolean) {
+    clipboardPath = path;
+    clipboardIsCut = isCut;
+}
+
+function getClipboard(): { path: string | null; isCut: boolean } {
+    return { path: clipboardPath, isCut: clipboardIsCut };
+}
+
+function clearClipboard() {
+    clipboardPath = null;
+    clipboardIsCut = false;
+}
+
+function getParentPath(filePath: string): string | null {
+    const idx = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+    return idx > 0 ? filePath.substring(0, idx) : null;
+}
+
+/**
+ * 生成复制后的文件名：file.txt → file copy.txt → file copy 2.txt → ...
+ * copyIndex 从 1 开始，1 时省略数字
+ */
+function generateCopyName(name: string, copyIndex: number): string {
+    const dotIdx = name.lastIndexOf('.');
+    const baseName = dotIdx > 0 ? name.substring(0, dotIdx) : name;
+    const ext = dotIdx > 0 ? name.substring(dotIdx) : '';
+    const suffix = copyIndex === 1 ? ' copy' : ` copy ${copyIndex}`;
+    return `${baseName}${suffix}${ext}`;
+}
+
+/* ==================== 右键菜单 ==================== */
+interface ContextMenuState {
+    visible: boolean;
+    x: number;
+    y: number;
+    node: FileTreeNode | null;
+    rootPath: string | null;
+}
+
+function ContextMenu({
+    state,
+    onClose,
+    onNewFile,
+    onNewDir,
+    onCopy,
+    onCut,
+    onPaste,
+    onRename,
+    onTrash,
+    onReveal,
+}: {
+    state: ContextMenuState;
+    onClose: () => void;
+    onNewFile: () => void;
+    onNewDir: () => void;
+    onCopy: () => void;
+    onCut: () => void;
+    onPaste: () => void;
+    onRename: () => void;
+    onTrash: () => void;
+    onReveal: () => void;
+}) {
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!state.visible) return;
+        const handleClick = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                onClose();
+            }
+        };
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
+        document.addEventListener('mousedown', handleClick);
+        document.addEventListener('keydown', handleKey);
+        return () => {
+            document.removeEventListener('mousedown', handleClick);
+            document.removeEventListener('keydown', handleKey);
+        };
+    }, [state.visible, onClose]);
+
+    if (!state.visible) return null;
+
+    const isBlankArea = !state.node;
+    const { path: clipPath, isCut: clipIsCut } = getClipboard();
+    // 粘贴目标：文件夹节点直接粘贴到自身，文件节点粘贴到其父目录，空白区粘贴到项目根
+    const pasteTarget = isBlankArea
+        ? state.rootPath
+        : state.node!.isDir
+            ? state.node!.path
+            : getParentPath(state.node!.path);
+    // 剪切到同目录不允许；复制到同目录允许（自动加 copy 后缀）；无剪贴板不允许
+    const srcDir = clipPath ? getParentPath(clipPath) : null;
+    const sameDir = srcDir !== null && srcDir === pasteTarget;
+    const canPaste = clipPath !== null && pasteTarget !== null && !(clipIsCut && sameDir);
+
+    return (
+        <div
+            ref={menuRef}
+            className="tree-context-menu"
+            style={{ left: state.x, top: state.y }}
+        >
+            <div className="tree-context-item" onClick={() => { onNewFile(); onClose(); }}>
+                新建文件
+            </div>
+            <div className="tree-context-item" onClick={() => { onNewDir(); onClose(); }}>
+                新建目录
+            </div>
+            <div className="tree-context-divider" />
+            {!isBlankArea && (
+                <>
+                    <div className="tree-context-item" onClick={() => { onCopy(); onClose(); }}>
+                        复制
+                    </div>
+                    <div className="tree-context-item" onClick={() => { onCut(); onClose(); }}>
+                        剪切
+                    </div>
+                </>
+            )}
+            <div
+                className={`tree-context-item${canPaste ? '' : ' disabled'}`}
+                onClick={() => { if (canPaste) { onPaste(); onClose(); } }}
+            >
+                粘贴
+            </div>
+            <div className="tree-context-divider" />
+            {!isBlankArea && (
+                <>
+                    <div className="tree-context-item" onClick={() => { onRename(); onClose(); }}>
+                        重命名
+                    </div>
+                    <div className="tree-context-item tree-context-danger" onClick={() => { onTrash(); onClose(); }}>
+                        移动到废纸篓
+                    </div>
+                    <div className="tree-context-divider" />
+                </>
+            )}
+            <div className="tree-context-item" onClick={() => { onReveal(); onClose(); }}>
+                在文件夹中显示
+            </div>
+        </div>
+    );
+}
+
+/* ==================== 内联重命名输入 ==================== */
+function InlineRename({
+    initialName,
+    onConfirm,
+    onCancel,
+}: {
+    initialName: string;
+    onConfirm: (newName: string) => void;
+    onCancel: () => void;
+}) {
+    const [value, setValue] = useState(initialName);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        inputRef.current?.focus();
+        inputRef.current?.select();
+    }, []);
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            if (value.trim() && value.trim() !== initialName) {
+                onConfirm(value.trim());
+            } else {
+                onCancel();
+            }
+        } else if (e.key === 'Escape') {
+            onCancel();
+        }
+    };
+
+    const handleBlur = () => {
+        if (value.trim() && value.trim() !== initialName) {
+            onConfirm(value.trim());
+        } else {
+            onCancel();
+        }
+    };
+
+    return (
+        <input
+            ref={inputRef}
+            className="tree-rename-input"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+        />
+    );
+}
+
+/* ==================== 内联新建输入 ==================== */
+function InlineCreate({
+    placeholder,
+    onConfirm,
+    onCancel,
+}: {
+    placeholder: string;
+    onConfirm: (name: string) => void;
+    onCancel: () => void;
+}) {
+    const [value, setValue] = useState('');
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        inputRef.current?.focus();
+    }, []);
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            if (value.trim()) {
+                onConfirm(value.trim());
+            } else {
+                onCancel();
+            }
+        } else if (e.key === 'Escape') {
+            onCancel();
+        }
+    };
+
+    const handleBlur = () => {
+        if (value.trim()) {
+            onConfirm(value.trim());
+        } else {
+            onCancel();
+        }
+    };
+
+    return (
+        <input
+            ref={inputRef}
+            className="tree-rename-input"
+            placeholder={placeholder}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
+        />
+    );
+}
+
+/* ==================== 目录树节点 ==================== */
+type NodeAction =
+    | { type: 'none' }
+    | { type: 'rename'; targetPath: string }
+    | { type: 'newFile'; parentPath: string }
+    | { type: 'newDir'; parentPath: string };
 
 function FolderTreeNode({
     node,
@@ -23,16 +292,37 @@ function FolderTreeNode({
     onFileClick,
     onLoadChildren,
     activeFilePath,
+    onContextMenu,
+    onTreeRefresh,
+    nodeAction,
+    onActionDone,
+    refreshKey,
 }: {
     node: FileTreeNode;
     depth: number;
     onFileClick: (filePath: string) => void;
     onLoadChildren: (dirPath: string) => Promise<FileTreeNode[]>;
     activeFilePath: string | null;
+    onContextMenu: (e: React.MouseEvent, node: FileTreeNode) => void;
+    onTreeRefresh: () => void;
+    nodeAction: NodeAction;
+    onActionDone: () => void;
+    refreshKey: number;
 }) {
     const [expanded, setExpanded] = useState(false);
     const [children, setChildren] = useState<FileTreeNode[]>(node.children);
     const [loading, setLoading] = useState(false);
+
+    // refreshKey 变化时，如果目录已展开则重新加载子节点
+    useEffect(() => {
+        if (expanded && node.isDir) {
+            onLoadChildren(node.path).then(setChildren).catch(console.error);
+        }
+    }, [refreshKey]);
+
+    const isRenaming = nodeAction.type === 'rename' && nodeAction.targetPath === node.path;
+    const isCreatingFile = nodeAction.type === 'newFile' && nodeAction.parentPath === node.path;
+    const isCreatingDir = nodeAction.type === 'newDir' && nodeAction.parentPath === node.path;
 
     const handleToggle = async () => {
         if (!node.isDir) return;
@@ -40,7 +330,6 @@ function FolderTreeNode({
         const nextExpanded = !expanded;
         setExpanded(nextExpanded);
 
-        // 懒加载：第一次展开时加载子节点
         if (nextExpanded && children.length === 0) {
             setLoading(true);
             try {
@@ -54,9 +343,55 @@ function FolderTreeNode({
         }
     };
 
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onContextMenu(e, node);
+    };
+
+    const handleNewFile = async (name: string) => {
+        onActionDone();
+        try {
+            const newPath = await join(node.path, name);
+            await fsCreateFile(newPath);
+            if (!expanded) setExpanded(true);
+            const loadedChildren = await onLoadChildren(node.path);
+            setChildren(loadedChildren);
+            onTreeRefresh();
+        } catch (error) {
+            console.error('Failed to create file:', error);
+        }
+    };
+
+    const handleNewDir = async (name: string) => {
+        onActionDone();
+        try {
+            const newPath = await join(node.path, name);
+            await fsCreateDirectory(newPath);
+            if (!expanded) setExpanded(true);
+            const loadedChildren = await onLoadChildren(node.path);
+            setChildren(loadedChildren);
+            onTreeRefresh();
+        } catch (error) {
+            console.error('Failed to create directory:', error);
+        }
+    };
+
+    const handleRename = async (newName: string) => {
+        onActionDone();
+        try {
+            const parentPath = node.path.substring(0, node.path.lastIndexOf('/') !== -1 ? node.path.lastIndexOf('/') : node.path.lastIndexOf('\\'));
+            const newPath = await join(parentPath, newName);
+            await fsRename(node.path, newPath);
+            onTreeRefresh();
+        } catch (error) {
+            console.error('Failed to rename:', error);
+        }
+    };
+
     if (node.isDir) {
         return (
-            <div className="tree-folder">
+            <div className="tree-folder" onContextMenu={handleContextMenu}>
                 <div
                     className="tree-folder-header"
                     style={{ paddingLeft: `${depth * 16 + 8}px` }}
@@ -75,14 +410,52 @@ function FolderTreeNode({
                             }/>
                         </svg>
                     </span>
-                    <span className="tree-folder-name" title={node.path}>
-                        {node.name}
-                    </span>
+                    {isRenaming ? (
+                        <InlineRename
+                            initialName={node.name}
+                            onConfirm={handleRename}
+                            onCancel={onActionDone}
+                        />
+                    ) : (
+                        <span className="tree-folder-name" title={node.path}>
+                            {node.name}
+                        </span>
+                    )}
                     {loading && <span className="tree-loading">加载中...</span>}
                 </div>
 
                 {expanded && (
                     <div className="tree-folder-children">
+                        {isCreatingFile && (
+                            <div
+                                className="tree-file tree-creating"
+                                style={{ paddingLeft: `${(depth + 1) * 16 + 28}px` }}
+                            >
+                                <InlineCreate
+                                    placeholder="新文件名"
+                                    onConfirm={handleNewFile}
+                                    onCancel={onActionDone}
+                                />
+                            </div>
+                        )}
+                        {isCreatingDir && (
+                            <div
+                                className="tree-folder-header tree-creating"
+                                style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }}
+                            >
+                                <span className="tree-arrow" />
+                                <span className="tree-folder-icon">
+                                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                                        <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v2A1.5 1.5 0 0 0 1.5 7h13A1.5 1.5 0 0 0 16 5.5V5a1.5 1.5 0 0 0-1.5-1.5H7.7L6.56 2.35A1.5 1.5 0 0 0 5.5 2h-4zM1.5 8A1.5 1.5 0 0 0 0 9.5v3A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-3A1.5 1.5 0 0 0 14.5 8h-13z"/>
+                                    </svg>
+                                </span>
+                                <InlineCreate
+                                    placeholder="新目录名"
+                                    onConfirm={handleNewDir}
+                                    onCancel={onActionDone}
+                                />
+                            </div>
+                        )}
                         {children.length > 0 && (
                             children.map((child) => (
                                 <FolderTreeNode
@@ -92,6 +465,11 @@ function FolderTreeNode({
                                     onFileClick={onFileClick}
                                     onLoadChildren={onLoadChildren}
                                     activeFilePath={activeFilePath}
+                                    onContextMenu={onContextMenu}
+                                    onTreeRefresh={onTreeRefresh}
+                                    nodeAction={nodeAction}
+                                    onActionDone={onActionDone}
+                                    refreshKey={refreshKey}
                                 />
                             ))
                         )}
@@ -108,14 +486,26 @@ function FolderTreeNode({
             className={`tree-file${isActive ? ' active' : ''}`}
             style={{ paddingLeft: `${depth * 16 + 28}px` }}
             onClick={() => onFileClick(node.path)}
+            onContextMenu={handleContextMenu}
             title={node.path}
         >
-            <span className={`tree-file-icon ${(fileIcons.getClassByName(node.name) || '').split(/\s/).join(' ')}`.trim()} />
-            <span className="tree-file-name">{node.name}</span>
+            {isRenaming ? (
+                <InlineRename
+                    initialName={node.name}
+                    onConfirm={handleRename}
+                    onCancel={onActionDone}
+                />
+            ) : (
+                <>
+                    <span className={`tree-file-icon ${(fileIcons.getClassByName(node.name) || '').split(/\s/).join(' ')}`.trim()} />
+                    <span className="tree-file-name">{node.name}</span>
+                </>
+            )}
         </div>
     );
 }
 
+/* ==================== Sidebar 主组件 ==================== */
 export default function Sidebar({
     activePanel,
     onPanelChange,
@@ -125,7 +515,24 @@ export default function Sidebar({
     onOpenSettings,
     tocItems,
     onTocItemClick,
+    onTreeRefresh,
+    onCloseTabsForPath,
 }: SidebarProps) {
+    const [contextMenu, setContextMenu] = useState<ContextMenuState>({
+        visible: false,
+        x: 0,
+        y: 0,
+        node: null,
+        rootPath: null,
+    });
+    const [nodeAction, setNodeAction] = useState<NodeAction>({ type: 'none' });
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const bumpRefresh = useCallback(() => {
+        onTreeRefresh();
+        setRefreshKey((k) => k + 1);
+    }, [onTreeRefresh]);
+
     const handleLoadChildren = useCallback(async (dirPath: string): Promise<FileTreeNode[]> => {
         return await loadChildren(dirPath);
     }, []);
@@ -133,6 +540,136 @@ export default function Sidebar({
     const handleIconClick = (panel: SidebarPanel) => {
         onPanelChange(activePanel === panel ? null : panel);
     };
+
+    const handleContextMenu = useCallback((e: React.MouseEvent, node: FileTreeNode) => {
+        setContextMenu({
+            visible: true,
+            x: e.clientX,
+            y: e.clientY,
+            node,
+            rootPath: projectTree?.path ?? null,
+        });
+    }, [projectTree]);
+
+    const closeContextMenu = useCallback(() => {
+        setContextMenu((prev) => ({ ...prev, visible: false }));
+    }, []);
+
+    const handleActionDone = useCallback(() => {
+        setNodeAction({ type: 'none' });
+    }, []);
+
+    const handleContextNewFile = useCallback(() => {
+        if (!contextMenu.node) {
+            // 空白区右键：在项目根目录新建
+            if (projectTree) setNodeAction({ type: 'newFile', parentPath: projectTree.path });
+            return;
+        }
+        const parentPath = contextMenu.node.isDir ? contextMenu.node.path : getParentPath(contextMenu.node.path);
+        if (parentPath) {
+            setNodeAction({ type: 'newFile', parentPath });
+        }
+    }, [contextMenu.node, projectTree]);
+
+    const handleContextNewDir = useCallback(() => {
+        if (!contextMenu.node) {
+            // 空白区右键：在项目根目录新建
+            if (projectTree) setNodeAction({ type: 'newDir', parentPath: projectTree.path });
+            return;
+        }
+        const parentPath = contextMenu.node.isDir ? contextMenu.node.path : getParentPath(contextMenu.node.path);
+        if (parentPath) {
+            setNodeAction({ type: 'newDir', parentPath });
+        }
+    }, [contextMenu.node, projectTree]);
+
+    const handleContextCopy = useCallback(() => {
+        if (contextMenu.node) {
+            setClipboard(contextMenu.node.path, false);
+        }
+    }, [contextMenu.node]);
+
+    const handleContextCut = useCallback(() => {
+        if (contextMenu.node) {
+            setClipboard(contextMenu.node.path, true);
+        }
+    }, [contextMenu.node]);
+
+    const handleContextPaste = useCallback(async () => {
+        const { path, isCut } = getClipboard();
+        if (!path) return;
+
+        let targetDir: string | null;
+        if (!contextMenu.node) {
+            targetDir = projectTree?.path ?? null;
+        } else {
+            targetDir = contextMenu.node.isDir ? contextMenu.node.path : getParentPath(contextMenu.node.path);
+        }
+        if (!targetDir) return;
+
+        try {
+            const srcName = path.split(/[/\\]/).pop() || '';
+            let destName = srcName;
+
+            if (isCut) {
+                // 剪切：同目录不允许
+                const srcDir = getParentPath(path);
+                if (srcDir === targetDir) {
+                    clearClipboard();
+                    return;
+                }
+            }
+
+            // 检查目标路径是否已存在同名文件，存在则自动加 copy 后缀
+            const directPath = await join(targetDir, destName);
+            if (await fsExists(directPath)) {
+                let copyIndex = 1;
+                do {
+                    destName = generateCopyName(srcName, copyIndex);
+                    const testPath = await join(targetDir, destName);
+                    if (!(await fsExists(testPath))) break;
+                    copyIndex++;
+                } while (copyIndex < 100);
+            }
+
+            const destPath = await join(targetDir, destName);
+            await fsCopy(path, destPath);
+            if (isCut) {
+                await fsRemove(path);
+                onCloseTabsForPath(path);
+                clearClipboard();
+            }
+            bumpRefresh();
+        } catch (error) {
+            console.error('Failed to paste:', error);
+        }
+    }, [contextMenu.node, projectTree, bumpRefresh, onCloseTabsForPath]);
+
+    const handleContextRename = useCallback(() => {
+        if (contextMenu.node) {
+            setNodeAction({ type: 'rename', targetPath: contextMenu.node.path });
+        }
+    }, [contextMenu.node]);
+
+    const handleContextTrash = useCallback(async () => {
+        if (!contextMenu.node) return;
+        try {
+            await fsRemove(contextMenu.node.path);
+            onCloseTabsForPath(contextMenu.node.path);
+            bumpRefresh();
+        } catch (error) {
+            console.error('Failed to move to trash:', error);
+        }
+    }, [contextMenu.node, bumpRefresh, onCloseTabsForPath]);
+
+    const handleContextReveal = useCallback(() => {
+        if (contextMenu.node) {
+            fsRevealInFolder(contextMenu.node.path);
+        } else if (projectTree) {
+            // 空白区右键：打开项目根目录的父目录
+            fsRevealInFolder(projectTree.path);
+        }
+    }, [contextMenu.node, projectTree]);
 
     const panelTitle = activePanel === 'explorer' ? '资源管理器'
         : activePanel === 'search' ? '搜索'
@@ -192,7 +729,14 @@ export default function Sidebar({
                         <span className="sidebar-title">{panelTitle}</span>
                     </div>
 
-                    <div className="sidebar-content">
+                    <div className="sidebar-content" onContextMenu={(e) => {
+                        // 拦截整个 sidebar-content 的右键，阻止系统默认菜单
+                        e.preventDefault();
+                        // 如果不是从节点冒泡上来的，显示空白区菜单
+                        if (!(e.target as HTMLElement).closest('.tree-folder, .tree-file')) {
+                            setContextMenu({ visible: true, x: e.clientX, y: e.clientY, node: null, rootPath: projectTree?.path ?? null });
+                        }
+                    }}>
                         {activePanel === 'explorer' && (
                             projectTree ? (
                                 <div className="sidebar-section">
@@ -207,6 +751,11 @@ export default function Sidebar({
                                                     onFileClick={onFolderFileSelect}
                                                     onLoadChildren={handleLoadChildren}
                                                     activeFilePath={activeFilePath}
+                                                    onContextMenu={handleContextMenu}
+                                                    onTreeRefresh={onTreeRefresh}
+                                                    nodeAction={nodeAction}
+                                                    onActionDone={handleActionDone}
+                                                    refreshKey={refreshKey}
                                                 />
                                             ))
                                         ) : (
@@ -245,6 +794,19 @@ export default function Sidebar({
                     </div>
                 </div>
             )}
+
+            <ContextMenu
+                state={contextMenu}
+                onClose={closeContextMenu}
+                onNewFile={handleContextNewFile}
+                onNewDir={handleContextNewDir}
+                onCopy={handleContextCopy}
+                onCut={handleContextCut}
+                onPaste={handleContextPaste}
+                onRename={handleContextRename}
+                onTrash={handleContextTrash}
+                onReveal={handleContextReveal}
+            />
         </div>
     );
 }

@@ -1,6 +1,7 @@
 import { readTextFile, writeTextFile, BaseDirectory, stat, readDir, type DirEntry } from '@tauri-apps/plugin-fs';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { join } from '@tauri-apps/api/path';
+import { invoke } from '@tauri-apps/api/core';
 
 export interface FileInfo {
     path: string;
@@ -158,8 +159,43 @@ export async function getFileStat(filePath: string): Promise<FileStat | null> {
     try {
         const fileStat = await stat(filePath, { dir: BaseDirectory.None });
         return { mtime: fileStat.mtime, size: fileStat.size };
-    } catch (error) {
+    } catch {
         console.error('Failed to get file stat:', error);
         return null;
+    }
+}
+
+/* ==================== 文件系统操作（通过 Rust 命令） ==================== */
+
+export async function fsCreateFile(filePath: string): Promise<void> {
+    await invoke('create_file', { path: filePath });
+}
+
+export async function fsCreateDirectory(dirPath: string): Promise<void> {
+    await invoke('create_directory', { path: dirPath });
+}
+
+export async function fsRename(oldPath: string, newPath: string): Promise<void> {
+    await invoke('rename_file_or_dir', { oldPath, newPath });
+}
+
+export async function fsCopy(source: string, destination: string): Promise<void> {
+    await invoke('copy_file_or_dir', { source, destination });
+}
+
+export async function fsRemove(path: string): Promise<void> {
+    await invoke('remove_file_or_dir', { path });
+}
+
+export async function fsRevealInFolder(path: string): Promise<void> {
+    await invoke('reveal_in_folder', { path });
+}
+
+export async function fsExists(filePath: string): Promise<boolean> {
+    try {
+        await stat(filePath, { dir: BaseDirectory.None });
+        return true;
+    } catch {
+        return false;
     }
 }
