@@ -25,3 +25,6 @@ dist-ssr
 
 .logo/
 todo.md
+
+docs/*
+!docs/.gitkeep
