@@ -854,6 +854,7 @@ function App() {
                                                                 }
                                                             }}
                                                         >
+                                                            <span className="menu-submenu-item-icon">{file.isDir ? '📂' : '📝'}</span>
                                                             <span className="menu-submenu-item-label">{file.path}</span>
                                                         </div>
                                                     ))}

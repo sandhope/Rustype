@@ -18,7 +18,9 @@
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   width: 100%;
 }
@@ -213,10 +215,16 @@ html, body, #root {
   background-color: var(--float-hover-color);
 }
 
+.menu-submenu-item-icon {
+  font-size: 13px;
+}
+
 .menu-submenu-item-label {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin-left: 8px;
 }
 
 .menu-submenu-empty {
@@ -827,8 +835,13 @@ html, body, #root {
 }
 
 @keyframes tree-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .tree-folder-children {
