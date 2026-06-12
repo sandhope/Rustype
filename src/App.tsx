@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { readText as readClipboardText } from '@tauri-apps/plugin-clipboard-manager';
 import logo from '../src-tauri/icons/32x32.png';
 import Editor, { type EditorHandle } from './components/Editor';
 import TabBar, { type Tab } from './components/TabBar';
@@ -47,6 +48,7 @@ function greet(name) {
 > 提示：你可以直接在上方开始编辑！
 
 [^1]: 这是一个脚注示例。
+
 `;
 
 let tabIdCounter = 0;
@@ -89,6 +91,25 @@ function App() {
     const [focusMode, setFocusMode] = useState(false);
     const [typewriterMode, setTypewriterMode] = useState(false);
     const [tocItems, setTocItems] = useState<TocItem[]>([]);
+
+    // Editor context menu state
+    const [editorCtxMenu, setEditorCtxMenu] = useState<{
+        visible: boolean;
+        x: number;
+        y: number;
+        hasSelection: boolean;
+    }>({ visible: false, x: 0, y: 0, hasSelection: false });
+
+    // Track muya selection state (kept in ref for use in handlers)
+    const hasSelectionRef = useRef(false);
+
+    // Preserve the DOM selection across context-menu clicks so that
+    // muya's clipboard handler can still read it after the menu steals focus.
+    const savedSelectionRangeRef = useRef<Range | null>(null);
+
+    const handleEditorSelectionChange = useCallback((hasSelection: boolean) => {
+        hasSelectionRef.current = hasSelection;
+    }, []);
 
     const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
 
@@ -554,6 +575,119 @@ function App() {
         editorRef.current?.scrollToHeading(item.slug);
     }, []);
 
+    // Editor context menu handlers
+    const handleEditorContextMenu = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        // Save the DOM selection before the menu steals focus
+        const sel = document.getSelection();
+        if (sel && sel.rangeCount > 0) {
+            savedSelectionRangeRef.current = sel.getRangeAt(0).cloneRange();
+        } else {
+            savedSelectionRangeRef.current = null;
+        }
+        setEditorCtxMenu({
+            visible: true,
+            x: e.clientX,
+            y: e.clientY,
+            hasSelection: hasSelectionRef.current,
+        });
+    }, []);
+
+    const handleEditorCtxAction = useCallback(async (action: string) => {
+        setEditorCtxMenu(prev => ({ ...prev, visible: false }));
+        const editor = editorRef.current;
+        if (!editor) return;
+
+        const domNode = editor.getDomNode();
+        if (!domNode) return;
+
+        // Restore the saved selection so muya's clipboard can read it
+        const needsSelection = ['cut', 'copy', 'copy-rich', 'copy-html', 'paste', 'paste-plain'].includes(action);
+        if (needsSelection && savedSelectionRangeRef.current) {
+            const sel = document.getSelection();
+            if (sel) {
+                sel.removeAllRanges();
+                sel.addRange(savedSelectionRangeRef.current);
+            }
+        }
+
+        switch (action) {
+            case 'insert-before':
+                editor.insertParagraph('before');
+                break;
+            case 'insert-after':
+                editor.insertParagraph('after');
+                break;
+            case 'cut':
+                document.execCommand('cut');
+                break;
+            case 'copy':
+                document.execCommand('copy');
+                break;
+            case 'paste': {
+                try {
+                    const text = await readClipboardText();
+                    // Re-restore selection (may have been lost during async await)
+                    if (savedSelectionRangeRef.current) {
+                        const sel = document.getSelection();
+                        if (sel) {
+                            sel.removeAllRanges();
+                            sel.addRange(savedSelectionRangeRef.current);
+                        }
+                    }
+                    editor.pasteText(text);
+                } catch {
+                    // clipboard read failed — do nothing
+                }
+                break;
+            }
+            case 'copy-rich':
+                editor.copyAsRich();
+                break;
+            case 'copy-html':
+                editor.copyAsHtml();
+                break;
+            case 'paste-plain': {
+                try {
+                    const text = await readClipboardText();
+                    // Re-restore selection (may have been lost during async await)
+                    if (savedSelectionRangeRef.current) {
+                        const sel = document.getSelection();
+                        if (sel) {
+                            sel.removeAllRanges();
+                            sel.addRange(savedSelectionRangeRef.current);
+                        }
+                    }
+                    editor.pasteText(text, true);
+                } catch {
+                    // clipboard read failed — do nothing
+                }
+                break;
+            }
+        }
+
+        savedSelectionRangeRef.current = null;
+    }, []);
+
+    // Close editor context menu on click elsewhere or Escape
+    useEffect(() => {
+        if (!editorCtxMenu.visible) return;
+        const handleMouseDown = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.closest('.editor-context-menu')) return;
+            setEditorCtxMenu(prev => ({ ...prev, visible: false }));
+        };
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setEditorCtxMenu(prev => ({ ...prev, visible: false }));
+        };
+        window.addEventListener('mousedown', handleMouseDown);
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('mousedown', handleMouseDown);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [editorCtxMenu.visible]);
+
     // Keyboard shortcuts - placed after all callbacks are defined
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -857,7 +991,7 @@ function App() {
                         onTabClose={handleTabClose}
                         onTabReorder={handleTabReorder}
                     />
-                    <div className="editor-container">
+                    <div className="editor-container" onContextMenu={handleEditorContextMenu}>
                         {sourceMode ? (
                             <SourceMode
                                 content={activeTab.content}
@@ -868,7 +1002,57 @@ function App() {
                                 ref={editorRef}
                                 initialContent={activeTab.content}
                                 onChange={handleChange}
+                                onSelectionChange={handleEditorSelectionChange}
                             />
+                        )}
+                        {editorCtxMenu.visible && (
+                            <div
+                                className="editor-context-menu"
+                                style={{ left: editorCtxMenu.x, top: editorCtxMenu.y }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                            >
+                                <div className="editor-context-item" onClick={() => handleEditorCtxAction('insert-before')}>
+                                    在前面插入段落
+                                </div>
+                                <div className="editor-context-item" onClick={() => handleEditorCtxAction('insert-after')}>
+                                    在后面插入段落
+                                </div>
+                                <div className="editor-context-divider" />
+                                <div
+                                    className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
+                                    onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('cut')}
+                                >
+                                    <span>剪切</span>
+                                    <span className="editor-context-shortcut">Ctrl+X</span>
+                                </div>
+                                <div
+                                    className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
+                                    onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('copy')}
+                                >
+                                    <span>复制</span>
+                                    <span className="editor-context-shortcut">Ctrl+C</span>
+                                </div>
+                                <div className="editor-context-item" onClick={() => handleEditorCtxAction('paste')}>
+                                    <span>粘贴</span>
+                                    <span className="editor-context-shortcut">Ctrl+V</span>
+                                </div>
+                                <div className="editor-context-divider" />
+                                <div
+                                    className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
+                                    onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('copy-rich')}
+                                >
+                                    复制为富文本
+                                </div>
+                                <div
+                                    className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
+                                    onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('copy-html')}
+                                >
+                                    复制为 HTML
+                                </div>
+                                <div className="editor-context-item" onClick={() => handleEditorCtxAction('paste-plain')}>
+                                    粘贴为纯文本
+                                </div>
+                            </div>
                         )}
                     </div>
 

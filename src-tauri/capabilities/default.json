@@ -26,6 +26,9 @@
     "core:window:allow-start-dragging",
     "core:window:allow-toggle-maximize",
     "core:window:allow-internal-toggle-maximize",
-    "core:window:allow-set-decorations"
+    "core:window:allow-set-decorations",
+    "clipboard-manager:default",
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text"
   ]
 }

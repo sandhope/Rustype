@@ -722,6 +722,55 @@ html, body, #root {
   background-color: #e0e0e0;
 }
 
+/* ==================== 编辑器右键菜单 ==================== */
+.editor-context-menu {
+  position: fixed;
+  z-index: 10000;
+  min-width: 200px;
+  padding: 4px 0;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 13px;
+  color: #333;
+  user-select: none;
+}
+
+.editor-context-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.editor-context-item:hover {
+  background-color: #f0f0f0;
+}
+
+.editor-context-item.disabled {
+  color: #bbb;
+  cursor: default;
+}
+
+.editor-context-item.disabled:hover {
+  background-color: transparent;
+}
+
+.editor-context-shortcut {
+  margin-left: 24px;
+  color: #888;
+  font-size: 12px;
+}
+
+.editor-context-divider {
+  height: 1px;
+  margin: 4px 8px;
+  background-color: #e0e0e0;
+}
+
 /* 内联重命名/新建输入 */
 .tree-rename-input {
   flex: 1;
@@ -1292,6 +1341,29 @@ html, body, #root {
   }
 
   .tree-context-divider {
+    background-color: #3d3d3d;
+  }
+
+  .editor-context-menu {
+    background-color: #2d2d2d;
+    border-color: #3d3d3d;
+    color: #ccc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .editor-context-item:hover {
+    background-color: #3d3d3d;
+  }
+
+  .editor-context-item.disabled {
+    color: #666;
+  }
+
+  .editor-context-item.disabled:hover {
+    background-color: transparent;
+  }
+
+  .editor-context-divider {
     background-color: #3d3d3d;
   }
 

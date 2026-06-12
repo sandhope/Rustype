@@ -41,6 +41,12 @@ export interface EditorHandle {
     scrollToHeading: (slug: string) => void;
     setFocusMode: (focusMode: boolean) => void;
     setOptions: (options: Record<string, unknown>, forceRender?: boolean) => void;
+    insertParagraph: (location: 'before' | 'after') => void;
+    copyAsRich: () => void;
+    copyAsHtml: () => void;
+    pasteAsPlainText: () => void;
+    pasteText: (text: string, asPlainText?: boolean) => void;
+    getDomNode: () => HTMLElement | null;
 }
 
 interface EditorProps {
@@ -48,6 +54,7 @@ interface EditorProps {
     onChange?: (markdown: string) => void;
     onFocus?: () => void;
     onBlur?: () => void;
+    onSelectionChange?: (hasSelection: boolean) => void;
     options?: Partial<IMuyaOptions>;
 }
 
@@ -115,7 +122,7 @@ function ensurePlugins() {
 }
 
 const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
-    { initialContent = '', onChange, onFocus, onBlur, options },
+    { initialContent = '', onChange, onFocus, onBlur, onSelectionChange, options },
     ref,
 ) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -124,10 +131,12 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     const onChangeRef = useRef(onChange);
     const onFocusRef = useRef(onFocus);
     const onBlurRef = useRef(onBlur);
+    const onSelectionChangeRef = useRef(onSelectionChange);
 
     onChangeRef.current = onChange;
     onFocusRef.current = onFocus;
     onBlurRef.current = onBlur;
+    onSelectionChangeRef.current = onSelectionChange;
 
     useEffect(() => {
         destroyedRef.current = false;
@@ -169,6 +178,9 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         });
         muya.on('focus', () => onFocusRef.current?.());
         muya.on('blur', () => onBlurRef.current?.());
+        muya.on('selection-change', (data: { type: string }) => {
+            onSelectionChangeRef.current?.(data.type === 'Range');
+        });
 
         // muya.init() creates the scrollPage and attaches the contenteditable
         // to the DOM. Give it one micro-task to settle before we try to focus,
@@ -248,6 +260,34 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             },
             setOptions: (options: Record<string, unknown>, forceRender = false) => {
                 muyaRef.current?.setOptions?.(options, forceRender);
+            },
+            insertParagraph: (location: 'before' | 'after') => {
+                (muyaRef.current as any)?.insertParagraph?.(location);
+            },
+            copyAsRich: () => {
+                (muyaRef.current as any)?.copyAsRich?.();
+            },
+            copyAsHtml: () => {
+                (muyaRef.current as any)?.copyAsHtml?.();
+            },
+            pasteAsPlainText: () => {
+                (muyaRef.current as any)?.pasteAsPlainText?.();
+            },
+            pasteText: (text: string, asPlainText = false) => {
+                const muya = muyaRef.current as any;
+                if (!muya?.domNode) return;
+                const dt = new DataTransfer();
+                dt.setData('text/plain', text);
+                if (asPlainText && muya.editor?.clipboard) {
+                    muya.editor.clipboard.pasteType = 'pasteAsPlainText';
+                }
+                muya.domNode.dispatchEvent(new ClipboardEvent('paste', { bubbles: true, clipboardData: dt }));
+                if (asPlainText && muya.editor?.clipboard) {
+                    muya.editor.clipboard.pasteType = 'normal';
+                }
+            },
+            getDomNode: () => {
+                return (muyaRef.current as any)?.domNode ?? null;
             },
         }),
         [],
