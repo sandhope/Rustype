@@ -16,9 +16,10 @@ interface TabBarProps {
     onTabSelect: (tabId: string) => void;
     onTabClose: (tabId: string) => void;
     onTabReorder?: (fromIndex: number, toIndex: number) => void;
+    onNewFile?: () => void;
 }
 
-export default function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onTabReorder }: TabBarProps) {
+export default function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onTabReorder, onNewFile }: TabBarProps) {
     const [dragIndex, setDragIndex] = useState<number | null>(null);
 
     const handleDragStart = (index: number) => {
@@ -37,8 +38,14 @@ export default function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onT
         setDragIndex(null);
     };
 
+    const handleTabBarDoubleClick = () => {
+        if (onNewFile) {
+            onNewFile();
+        }
+    };
+
     return (
-        <div className="tab-bar">
+        <div className="tab-bar" onDoubleClick={handleTabBarDoubleClick}>
             <div className="tab-list">
                 {tabs.map((tab, index) => (
                     <div

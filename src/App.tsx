@@ -1007,6 +1007,7 @@ function App() {
                             onTabSelect={handleTabSelect}
                             onTabClose={handleTabClose}
                             onTabReorder={handleTabReorder}
+                            onNewFile={handleNewFile}
                         />
                     )}
                     {hasOpenFile ? (

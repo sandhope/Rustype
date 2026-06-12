@@ -326,6 +326,11 @@ html, body, #root {
   flex-shrink: 0;
   overflow-x: auto;
   overflow-y: hidden;
+  cursor: default;
+}
+
+.tab-bar:hover {
+  cursor: default;
 }
 
 .tab-bar::-webkit-scrollbar {
