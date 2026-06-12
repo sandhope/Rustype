@@ -324,6 +324,13 @@ function FolderTreeNode({
     const isCreatingFile = nodeAction.type === 'newFile' && nodeAction.parentPath === node.path;
     const isCreatingDir = nodeAction.type === 'newDir' && nodeAction.parentPath === node.path;
 
+    // 新建文件/目录时自动展开当前目录
+    useEffect(() => {
+        if ((isCreatingFile || isCreatingDir) && !expanded) {
+            setExpanded(true);
+        }
+    }, [isCreatingFile, isCreatingDir]);
+
     const handleToggle = async () => {
         if (!node.isDir) return;
 
@@ -742,6 +749,55 @@ export default function Sidebar({
                                 <div className="sidebar-section">
                                     <div className="sidebar-section-title">{projectTree.name}</div>
                                     <div className="project-tree">
+                                        {/* 根目录层级的新建输入框 */}
+                                        {nodeAction.type === 'newFile' && nodeAction.parentPath === projectTree.path && (
+                                            <div
+                                                className="tree-file tree-creating"
+                                                style={{ paddingLeft: `28px` }}
+                                            >
+                                                <InlineCreate
+                                                    placeholder="新文件名"
+                                                    onConfirm={async (name: string) => {
+                                                        try {
+                                                            const newPath = await join(projectTree.path, name);
+                                                            await fsCreateFile(newPath);
+                                                            onTreeRefresh();
+                                                        } catch (error) {
+                                                            console.error('Failed to create file:', error);
+                                                        }
+                                                        handleActionDone();
+                                                    }}
+                                                    onCancel={handleActionDone}
+                                                />
+                                            </div>
+                                        )}
+                                        {nodeAction.type === 'newDir' && nodeAction.parentPath === projectTree.path && (
+                                            <div
+                                                className="tree-folder-header tree-creating"
+                                                style={{ paddingLeft: `8px` }}
+                                            >
+                                                <span className="tree-arrow" />
+                                                <span className="tree-folder-icon">
+                                                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                                                        <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v2A1.5 1.5 0 0 0 1.5 7h13A1.5 1.5 0 0 0 16 5.5V5a1.5 1.5 0 0 0-1.5-1.5H7.7L6.56 2.35A1.5 1.5 0 0 0 5.5 2h-4zM1.5 8A1.5 1.5 0 0 0 0 9.5v3A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-3A1.5 1.5 0 0 0 14.5 8h-13z"/>
+                                                    </svg>
+                                                </span>
+                                                <InlineCreate
+                                                    placeholder="新目录名"
+                                                    onConfirm={async (name: string) => {
+                                                        try {
+                                                            const newPath = await join(projectTree.path, name);
+                                                            await fsCreateDirectory(newPath);
+                                                            onTreeRefresh();
+                                                        } catch (error) {
+                                                            console.error('Failed to create directory:', error);
+                                                        }
+                                                        handleActionDone();
+                                                    }}
+                                                    onCancel={handleActionDone}
+                                                />
+                                            </div>
+                                        )}
                                         {projectTree.children.length > 0 ? (
                                             projectTree.children.map((child) => (
                                                 <FolderTreeNode
