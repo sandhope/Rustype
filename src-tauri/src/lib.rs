@@ -92,6 +92,19 @@ fn reveal_in_folder(path: String) -> Result<(), String> {
     Ok(())
 }
 
+/// Dynamically grant filesystem permissions for a specific directory
+#[tauri::command]
+fn grant_directory_access(app_handle: tauri::AppHandle, path: String) -> Result<(), String> {
+    use tauri_plugin_fs::FsExt;
+    
+    let fs_scope = app_handle.fs_scope();
+    
+    // Grant access to the directory and all its subdirectories recursively
+    fs_scope.allow_directory(&path, true).map_err(|e| e.to_string())?;
+    
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -109,6 +122,7 @@ pub fn run() {
             copy_file_or_dir,
             remove_file_or_dir,
             reveal_in_folder,
+            grant_directory_access,
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();

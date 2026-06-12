@@ -10,10 +10,11 @@ import SourceMode from './components/SourceMode';
 import SettingsPanel from './components/SettingsPanel';
 import AboutDialog from './components/AboutDialog';
 import ShortcutsPanel from './components/ShortcutsPanel';
-import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, type FileInfo, type FileTreeNode } from './utils/file';
+import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, grantDirectoryAccess, type FileInfo, type FileTreeNode } from './utils/file';
 import { dirname } from '@tauri-apps/api/path';
 import { getRecentFiles, addRecentFile, removeRecentFile, clearRecentlyOpened, getRecentFolders, addRecentFolder } from './utils/recentFiles';
 import { loadSettings, saveSettings, type AppSettings } from './utils/settings';
+import { loadSession, saveSession } from './utils/session';
 import './App.css';
 import './styles/themes.css';
 
@@ -105,6 +106,9 @@ function App() {
     // Track muya selection state (kept in ref for use in handlers)
     const hasSelectionRef = useRef(false);
 
+    // 标记是否正处于会话恢复过程中，用于避免恢复时触发保存
+    const isRestoringRef = useRef(false);
+
     // Preserve the DOM selection across context-menu clicks so that
     // muya's clipboard handler can still read it after the menu steals focus.
     const savedSelectionRangeRef = useRef<Range | null>(null);
@@ -121,6 +125,100 @@ function App() {
         setRecentFiles(getRecentFiles());
         setRecentFolders(getRecentFolders());
     }, []);
+
+    // Restore session on mount: restore folder + tabs + active tab
+    useEffect(() => {
+        const session = loadSession();
+        if (!session) return;
+
+        isRestoringRef.current = true;
+
+        const restore = async () => {
+            // Restore folder
+            if (session.folderPath) {
+                try {
+                    // Grant filesystem permissions for this directory
+                    await grantDirectoryAccess(session.folderPath);
+                    
+                    const tree = await readDirectoryTree(session.folderPath);
+                    setProjectTree(tree);
+                    setActiveSidebarPanel('explorer');
+                } catch {
+                    // Folder no longer accessible, skip
+                }
+            }
+
+            // Restore tabs (only those whose files still exist)
+            if (session.tabs.length > 0) {
+                const restoredTabs: Tab[] = [];
+                for (const savedTab of session.tabs) {
+                    if (savedTab.file?.path) {
+                        try {
+                            const content = await readFileContent(savedTab.file.path);
+                            const stat = await getFileStat(savedTab.file.path);
+                            const tabId = getNextTabId();
+                            restoredTabs.push({
+                                id: tabId,
+                                file: savedTab.file,
+                                content,
+                                dirty: false,
+                                lastModified: stat?.mtime,
+                                externallyModified: false,
+                            });
+                        } catch {
+                            // File was deleted or moved, skip this tab
+                        }
+                    } else {
+                        // Untitled tab: use saved content
+                        const tabId = getNextTabId();
+                        restoredTabs.push({
+                            id: tabId,
+                            file: null,
+                            content: savedTab.content,
+                            dirty: savedTab.content !== WELCOME_MARKDOWN,
+                            externallyModified: false,
+                        });
+                    }
+                }
+
+                if (restoredTabs.length > 0) {
+                    setTabs(restoredTabs);
+                    // Restore active tab by position (fall back to first tab)
+                    const activeIdx = session.activeTabId
+                        ? parseInt(session.activeTabId.split('-').pop() || '0', 10) - 1
+                        : 0;
+                    const safeIdx = Math.min(activeIdx, restoredTabs.length - 1);
+                    setActiveTabId(restoredTabs[safeIdx >= 0 ? safeIdx : 0].id);
+                }
+            }
+
+            isRestoringRef.current = false;
+        };
+
+        restore();
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Session persistence: save on folder change
+    useEffect(() => {
+        if (!isRestoringRef.current) {
+            saveSession({
+                folderPath: projectTree?.path ?? null,
+                tabs: tabs.map(t => ({ file: t.file, content: t.content, lastModified: t.lastModified })),
+                activeTabId,
+            });
+        }
+    }, [projectTree?.path, activeTabId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Session persistence: save on tabs change
+    useEffect(() => {
+        if (!isRestoringRef.current) {
+            saveSession({
+                folderPath: projectTree?.path ?? null,
+                tabs: tabs.map(t => ({ file: t.file, content: t.content, lastModified: t.lastModified })),
+                activeTabId,
+            });
+        }
+    }, [tabs]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Native file drag & drop support
     useEffect(() => {
@@ -253,6 +351,13 @@ function App() {
         if (!dirPath) {
             setActiveMenu(null);
             return;
+        }
+
+        // Grant filesystem permissions for this directory
+        try {
+            await grantDirectoryAccess(dirPath);
+        } catch (error) {
+            console.error('Failed to grant directory access:', error);
         }
 
         const tree = await readDirectoryTree(dirPath);

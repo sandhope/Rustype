@@ -124,7 +124,7 @@ export async function openMarkdownFile(): Promise<FileInfo | null> {
 }
 
 export async function readFileContent(filePath: string): Promise<string> {
-    return await readTextFile(filePath, { dir: BaseDirectory.None });
+    return await readTextFile(filePath);
 }
 
 export async function saveMarkdownFile(content: string, filePath?: string): Promise<FileInfo | null> {
@@ -140,7 +140,7 @@ export async function saveMarkdownFile(content: string, filePath?: string): Prom
     }
 
     if (typeof targetPath === 'string') {
-        await writeTextFile(targetPath, content, { dir: BaseDirectory.None });
+        await writeTextFile(targetPath, content);
         return { path: targetPath, name: getFileName(targetPath) };
     }
     return null;
@@ -157,9 +157,9 @@ export interface FileStat {
 
 export async function getFileStat(filePath: string): Promise<FileStat | null> {
     try {
-        const fileStat = await stat(filePath, { dir: BaseDirectory.None });
-        return { mtime: fileStat.mtime, size: fileStat.size };
-    } catch {
+        const fileStat = await stat(filePath);
+        return { mtime: fileStat.mtime?.getTime(), size: fileStat.size };
+    } catch (error) {
         console.error('Failed to get file stat:', error);
         return null;
     }
@@ -193,9 +193,14 @@ export async function fsRevealInFolder(path: string): Promise<void> {
 
 export async function fsExists(filePath: string): Promise<boolean> {
     try {
-        await stat(filePath, { dir: BaseDirectory.None });
+        await stat(filePath);
         return true;
     } catch {
         return false;
     }
+}
+
+/** 动态授予目录访问权限（运行时） */
+export async function grantDirectoryAccess(dirPath: string): Promise<void> {
+    await invoke('grant_directory_access', { path: dirPath });
 }
