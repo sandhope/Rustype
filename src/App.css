@@ -439,6 +439,183 @@ html, body, #root {
   min-height: 0;
 }
 
+/* ============ Welcome / Empty State ============ */
+.welcome-view {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  background-color: var(--app-bg-color);
+}
+
+.welcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.welcome-logo {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+
+.welcome-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--app-text-color);
+  margin: 0 0 4px;
+}
+
+.welcome-subtitle {
+  font-size: 14px;
+  color: var(--app-text-secondary);
+  margin: 0 0 32px;
+}
+
+.welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.welcome-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--app-header-border);
+  border-radius: 6px;
+  background: var(--float-bg-color);
+  color: var(--app-text-color);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+  text-align: left;
+}
+
+.welcome-action-btn:hover {
+  background: var(--float-hover-color);
+  border-color: var(--settings-input-focus);
+}
+
+.welcome-action-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.welcome-action-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.welcome-action-label {
+  font-weight: 500;
+}
+
+.welcome-action-shortcut {
+  font-size: 11px;
+  color: var(--app-text-secondary);
+  font-family: 'SF Mono', Consolas, monospace;
+}
+
+/* Scenario 2: Empty folder open — compact centered hint */
+.welcome-view-folder {
+  background-color: var(--app-bg-color);
+}
+
+.welcome-folder-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.welcome-folder-icon {
+  color: var(--app-text-secondary);
+  opacity: 0.5;
+  margin-bottom: 12px;
+}
+
+.welcome-folder-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--app-text-color);
+  margin: 0 0 6px;
+}
+
+.welcome-folder-subtitle {
+  font-size: 13px;
+  color: var(--app-text-secondary);
+  margin: 0;
+}
+
+.welcome-recent {
+  width: 100%;
+  max-width: 320px;
+  margin-top: 28px;
+}
+
+.welcome-recent-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 10px;
+}
+
+.welcome-recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.welcome-recent-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  font-size: 13px;
+  color: var(--app-text-color);
+}
+
+.welcome-recent-item:hover {
+  background: var(--float-hover-color);
+}
+
+.welcome-recent-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.welcome-recent-name {
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.welcome-recent-path {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--app-text-secondary);
+  text-align: right;
+}
+
 .rustype-editor {
   width: 100%;
   height: 100%;
@@ -1496,6 +1673,33 @@ html, body, #root {
   .outline-level-5,
   .outline-level-6 {
     color: #aaa;
+  }
+
+  .welcome-view {
+    background-color: #1a1a1a;
+  }
+
+  .welcome-action-btn {
+    border-color: #3d3d3d;
+    background: #2d2d2d;
+    color: #ccc;
+  }
+
+  .welcome-action-btn:hover {
+    background: #3d3d3d;
+    border-color: #1976d2;
+  }
+
+  .welcome-folder-icon {
+    color: #888;
+  }
+
+  .welcome-folder-title {
+    color: #f0f0f0;
+  }
+
+  .welcome-folder-subtitle {
+    color: #888;
   }
 }
 

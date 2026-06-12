@@ -1,26 +1,19 @@
 # Rustype
-
-A high-performance Markdown editor.
+Lightweight & High-performance Markdown Desktop Editor
 
 ## Background
+marktext delivers an outstanding real-time Markdown editing experience in the industry. Drawing on its well-polished Markdown interaction logic and editing capabilities as our functional baseline, this project features a full-stack technical architecture refactor, alongside a brand-new, independently redesigned overall user experience.
 
-This project is inspired by and based on [marktext](https://github.com/marktext/marktext), an open-source Markdown editor built with Electron and Vue.
-
-Rustype aims to deliver the same great editing experience while migrating the tech stack from Electron + Vue to Tauri + React.
-
-## Technology Stack
-
-- **Tauri** - Lightweight and secure desktop application framework
-- **React** - Modern frontend UI library
-
-## Development Roadmap
-
-- [ ] Migrate from Electron to Tauri framework
-- [ ] Migrate from Vue to React framework
+## Tech Stack
+- Tauri
+- React
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Acknowledgements
+Sincere gratitude to the open-source project [marktext](https://github.com/marktext/marktext). Its mature and complete Markdown editing implementation has offered invaluable ideas and inspiration for the design and development of this project.
 
 ## License
 

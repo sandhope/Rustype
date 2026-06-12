@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { readText as readClipboardText } from '@tauri-apps/plugin-clipboard-manager';
-import logo from '../src-tauri/icons/32x32.png';
+import logo from '../src-tauri/icons/128x128.png';
 import Editor, { type EditorHandle } from './components/Editor';
 import TabBar, { type Tab } from './components/TabBar';
 import Sidebar, { type SidebarPanel } from './components/Sidebar';
@@ -72,8 +72,8 @@ interface TocItem {
 
 function App() {
     const editorRef = useRef<EditorHandle>(null);
-    const [tabs, setTabs] = useState<Tab[]>([createNewTab()]);
-    const [activeTabId, setActiveTabId] = useState<string>(tabs[0].id);
+    const [tabs, setTabs] = useState<Tab[]>([]);
+    const [activeTabId, setActiveTabId] = useState<string>('');
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const [openRecentSubmenu, setOpenRecentSubmenu] = useState(false);
     const [activeSidebarPanel, setActiveSidebarPanel] = useState<SidebarPanel | null>(null);
@@ -111,7 +111,8 @@ function App() {
         hasSelectionRef.current = hasSelection;
     }, []);
 
-    const activeTab = tabs.find(t => t.id === activeTabId) || tabs[0];
+    const activeTab = tabs.find(t => t.id === activeTabId) || null;
+    const hasOpenFile = tabs.length > 0 && activeTab !== null;
 
     // Load recent files on mount
     useEffect(() => {
@@ -234,7 +235,7 @@ function App() {
             const toc = editorRef.current.getTOC();
             setTocItems(toc);
         }
-    }, [activeTabId, activeSidebarPanel, activeTab.content]);
+    }, [activeTabId, activeSidebarPanel, activeTab?.content]);
 
     const handleNewFile = useCallback(() => {
         const newTab = createNewTab();
@@ -272,8 +273,11 @@ function App() {
             const remaining = prev.filter(t => !t.file || !t.file.path.startsWith(deletedPath));
             if (remaining.length !== prev.length) {
                 setActiveTabId(activeId => {
-                    if (prev.find(t => t.id === activeId && t.file?.path.startsWith(deletedPath))) {
-                        return remaining.length > 0 ? remaining[remaining.length - 1].id : '';
+                    const shouldChange = prev.find(t => t.id === activeId && t.file?.path.startsWith(deletedPath));
+                    if (shouldChange) {
+                        const newActiveId = remaining.length > 0 ? remaining[remaining.length - 1].id : '';
+                        // React 会自动处理组件卸载，useEffect 清理函数会处理 muya 销毁
+                        return newActiveId;
                     }
                     return activeId;
                 });
@@ -345,6 +349,7 @@ function App() {
     }, [tabs]);
 
     const handleSaveFile = useCallback(async () => {
+        if (!activeTab) return;
         const markdown = sourceMode
             ? activeTab.content
             : (editorRef.current?.getMarkdown() || activeTab.content);
@@ -370,6 +375,7 @@ function App() {
     }, [activeTab, activeTabId, sourceMode]);
 
     const handleSaveAs = useCallback(async () => {
+        if (!activeTab) return;
         const markdown = sourceMode
             ? activeTab.content
             : (editorRef.current?.getMarkdown() || activeTab.content);
@@ -420,29 +426,39 @@ function App() {
     }, [tabs]);
 
     const handleTabClose = useCallback((tabId: string) => {
-        const tabIndex = tabs.findIndex(t => t.id === tabId);
-        const tab = tabs[tabIndex];
+        setTabs(prevTabs => {
+            const tabIndex = prevTabs.findIndex(t => t.id === tabId);
+            const tab = prevTabs[tabIndex];
 
-        if (tab.dirty) {
-            const confirmed = window.confirm(`${tab.file?.name || 'Untitled'} 有未保存的更改，确定要关闭吗？`);
-            if (!confirmed) return;
-        }
+            // 如果标签不存在，直接返回
+            if (!tab) return prevTabs;
 
-        const newTabs = tabs.filter(t => t.id !== tabId);
-
-        if (newTabs.length === 0) {
-            const newTab = createNewTab();
-            setTabs([newTab]);
-            setActiveTabId(newTab.id);
-            editorRef.current?.setContent(newTab.content);
-        } else {
-            setTabs(newTabs);
-            if (tabId === activeTabId) {
-                const newActiveIndex = Math.min(tabIndex, newTabs.length - 1);
-                setActiveTabId(newTabs[newActiveIndex].id);
+            // 如果有未保存的更改，弹出确认对话框
+            if (tab.dirty) {
+                const confirmed = window.confirm(`${tab.file?.name || 'Untitled'} 有未保存的更改，确定要关闭吗？`);
+                if (!confirmed) return prevTabs;
             }
-        }
-    }, [tabs, activeTabId]);
+
+            const newTabs = prevTabs.filter(t => t.id !== tabId);
+
+            if (newTabs.length === 0) {
+                // 所有标签都关闭了，清空活动标签
+                // React 会自动卸载 Editor 组件，useEffect 清理函数会处理 muya 销毁
+                setActiveTabId('');
+            } else {
+                // 如果关闭的是当前活动标签，选择新的活动标签
+                setActiveTabId(prevActiveId => {
+                    if (tabId === prevActiveId) {
+                        const newActiveIndex = Math.min(tabIndex, newTabs.length - 1);
+                        return newTabs[newActiveIndex].id;
+                    }
+                    return prevActiveId;
+                });
+            }
+
+            return newTabs;
+        });
+    }, []);
 
     const handleTabReorder = useCallback((fromIndex: number, toIndex: number) => {
         setTabs(prev => {
@@ -975,7 +991,7 @@ function App() {
                     onPanelChange={setActiveSidebarPanel}
                     projectTree={projectTree}
                     onFolderFileSelect={handleFolderFileSelect}
-                    activeFilePath={activeTab.file?.path ?? null}
+                    activeFilePath={activeTab?.file?.path ?? null}
                     onOpenSettings={() => setSettingsOpen(true)}
                     tocItems={tocItems}
                     onTocItemClick={handleOutlineItemClick}
@@ -984,77 +1000,170 @@ function App() {
                 />
 
                 <div className="app-content">
-                    <TabBar
-                        tabs={tabs}
-                        activeTabId={activeTabId}
-                        onTabSelect={handleTabSelect}
-                        onTabClose={handleTabClose}
-                        onTabReorder={handleTabReorder}
-                    />
-                    <div className="editor-container" onContextMenu={handleEditorContextMenu}>
-                        {sourceMode ? (
-                            <SourceMode
-                                content={activeTab.content}
-                                onChange={handleSourceChange}
-                            />
-                        ) : (
-                            <Editor
-                                ref={editorRef}
-                                initialContent={activeTab.content}
-                                onChange={handleChange}
-                                onSelectionChange={handleEditorSelectionChange}
-                            />
-                        )}
-                        {editorCtxMenu.visible && (
-                            <div
-                                className="editor-context-menu"
-                                style={{ left: editorCtxMenu.x, top: editorCtxMenu.y }}
-                                onMouseDown={(e) => e.stopPropagation()}
-                            >
-                                <div className="editor-context-item" onClick={() => handleEditorCtxAction('insert-before')}>
-                                    在前面插入段落
-                                </div>
-                                <div className="editor-context-item" onClick={() => handleEditorCtxAction('insert-after')}>
-                                    在后面插入段落
-                                </div>
-                                <div className="editor-context-divider" />
+                    {hasOpenFile && (
+                        <TabBar
+                            tabs={tabs}
+                            activeTabId={activeTabId}
+                            onTabSelect={handleTabSelect}
+                            onTabClose={handleTabClose}
+                            onTabReorder={handleTabReorder}
+                        />
+                    )}
+                    {hasOpenFile ? (
+                        <div className="editor-container" onContextMenu={handleEditorContextMenu}>
+                            {sourceMode ? (
+                                <SourceMode
+                                    content={activeTab!.content}
+                                    onChange={handleSourceChange}
+                                />
+                            ) : (
+                                <Editor
+                                    ref={editorRef}
+                                    initialContent={activeTab!.content}
+                                    onChange={handleChange}
+                                    onSelectionChange={handleEditorSelectionChange}
+                                />
+                            )}
+                            {editorCtxMenu.visible && (
                                 <div
-                                    className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
-                                    onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('cut')}
+                                    className="editor-context-menu"
+                                    style={{ left: editorCtxMenu.x, top: editorCtxMenu.y }}
+                                    onMouseDown={(e) => e.stopPropagation()}
                                 >
-                                    <span>剪切</span>
-                                    <span className="editor-context-shortcut">Ctrl+X</span>
+                                    <div className="editor-context-item" onClick={() => handleEditorCtxAction('insert-before')}>
+                                        在前面插入段落
+                                    </div>
+                                    <div className="editor-context-item" onClick={() => handleEditorCtxAction('insert-after')}>
+                                        在后面插入段落
+                                    </div>
+                                    <div className="editor-context-divider" />
+                                    <div
+                                        className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
+                                        onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('cut')}
+                                    >
+                                        <span>剪切</span>
+                                        <span className="editor-context-shortcut">Ctrl+X</span>
+                                    </div>
+                                    <div
+                                        className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
+                                        onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('copy')}
+                                    >
+                                        <span>复制</span>
+                                        <span className="editor-context-shortcut">Ctrl+C</span>
+                                    </div>
+                                    <div className="editor-context-item" onClick={() => handleEditorCtxAction('paste')}>
+                                        <span>粘贴</span>
+                                        <span className="editor-context-shortcut">Ctrl+V</span>
+                                    </div>
+                                    <div className="editor-context-divider" />
+                                    <div
+                                        className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
+                                        onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('copy-rich')}
+                                    >
+                                        复制为富文本
+                                    </div>
+                                    <div
+                                        className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
+                                        onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('copy-html')}
+                                    >
+                                        复制为 HTML
+                                    </div>
+                                    <div className="editor-context-item" onClick={() => handleEditorCtxAction('paste-plain')}>
+                                        粘贴为纯文本
+                                    </div>
                                 </div>
-                                <div
-                                    className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
-                                    onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('copy')}
-                                >
-                                    <span>复制</span>
-                                    <span className="editor-context-shortcut">Ctrl+C</span>
+                            )}
+                        </div>
+                    ) : projectTree ? (
+                        /* Scenario 2: Empty folder open — compact hint since sidebar shows the tree */
+                        <div className="welcome-view welcome-view-folder">
+                            <div className="welcome-content">
+                                <div className="welcome-folder-hint">
+                                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.2" className="welcome-folder-icon">
+                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                                    </svg>
+                                    <h2 className="welcome-folder-title">{projectTree.name}</h2>
+                                    <p className="welcome-folder-subtitle">从侧边栏选择文件开始编辑</p>
                                 </div>
-                                <div className="editor-context-item" onClick={() => handleEditorCtxAction('paste')}>
-                                    <span>粘贴</span>
-                                    <span className="editor-context-shortcut">Ctrl+V</span>
-                                </div>
-                                <div className="editor-context-divider" />
-                                <div
-                                    className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
-                                    onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('copy-rich')}
-                                >
-                                    复制为富文本
-                                </div>
-                                <div
-                                    className={`editor-context-item${editorCtxMenu.hasSelection ? '' : ' disabled'}`}
-                                    onClick={() => editorCtxMenu.hasSelection && handleEditorCtxAction('copy-html')}
-                                >
-                                    复制为 HTML
-                                </div>
-                                <div className="editor-context-item" onClick={() => handleEditorCtxAction('paste-plain')}>
-                                    粘贴为纯文本
+                                <div className="welcome-actions">
+                                    <button className="welcome-action-btn" onClick={handleNewFile}>
+                                        <span className="welcome-action-icon">📝</span>
+                                        <div className="welcome-action-text">
+                                            <span className="welcome-action-label">新建文件</span>
+                                            <span className="welcome-action-shortcut">Ctrl+N</span>
+                                        </div>
+                                    </button>
+                                    <button className="welcome-action-btn" onClick={handleOpenFile}>
+                                        <span className="welcome-action-icon">📂</span>
+                                        <div className="welcome-action-text">
+                                            <span className="welcome-action-label">打开文件</span>
+                                            <span className="welcome-action-shortcut">Ctrl+O</span>
+                                        </div>
+                                    </button>
                                 </div>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        /* Scenario 1: No file/folder open — full welcome view */
+                        <div className="welcome-view">
+                            <div className="welcome-content">
+                                <img src={logo} alt="Rustype" className="welcome-logo" />
+                                <h1 className="welcome-title">Rustype</h1>
+                                <p className="welcome-subtitle">高性能 Markdown 编辑器</p>
+                                <div className="welcome-actions">
+                                    <button className="welcome-action-btn" onClick={handleNewFile}>
+                                        <span className="welcome-action-icon">📝</span>
+                                        <div className="welcome-action-text">
+                                            <span className="welcome-action-label">新建文件</span>
+                                            <span className="welcome-action-shortcut">Ctrl+N</span>
+                                        </div>
+                                    </button>
+                                    <button className="welcome-action-btn" onClick={handleOpenFile}>
+                                        <span className="welcome-action-icon">📂</span>
+                                        <div className="welcome-action-text">
+                                            <span className="welcome-action-label">打开文件</span>
+                                            <span className="welcome-action-shortcut">Ctrl+O</span>
+                                        </div>
+                                    </button>
+                                    <button className="welcome-action-btn" onClick={handleOpenFolder}>
+                                        <span className="welcome-action-icon">📁</span>
+                                        <div className="welcome-action-text">
+                                            <span className="welcome-action-label">打开文件夹</span>
+                                            <span className="welcome-action-shortcut">Ctrl+Shift+O</span>
+                                        </div>
+                                    </button>
+                                </div>
+                                {recentFiles.length > 0 && (
+                                    <div className="welcome-recent">
+                                        <h3 className="welcome-recent-title">最近使用</h3>
+                                        <ul className="welcome-recent-list">
+                                            {recentFiles.slice(0, 5).map((file, index) => (
+                                                <li
+                                                    key={file.path + index}
+                                                    className="welcome-recent-item"
+                                                    title={file.path}
+                                                    onClick={() => {
+                                                        if (file.isDir) {
+                                                            readDirectoryTree(file.path).then(tree => {
+                                                                setProjectTree(tree);
+                                                                setActiveSidebarPanel('explorer');
+                                                            });
+                                                        } else {
+                                                            handleRecentFileSelect(file);
+                                                        }
+                                                    }}
+                                                >
+                                                    <span className="welcome-recent-icon">{file.isDir ? '📁' : '📄'}</span>
+                                                    <span className="welcome-recent-name">{file.name || file.path.split(/[/\\]/).pop()}</span>
+                                                    <span className="welcome-recent-path">{file.path}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {findReplaceOpen && !sourceMode && (
                         <FindReplace
