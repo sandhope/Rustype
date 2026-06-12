@@ -521,6 +521,11 @@ function FolderTreeNode({
 }
 
 /* ==================== Sidebar 主组件 ==================== */
+const DEFAULT_SIDEBAR_WIDTH = 240;
+const MIN_SIDEBAR_WIDTH = 160;
+const MAX_SIDEBAR_WIDTH = 600;
+const SIDEBAR_WIDTH_STORAGE_KEY = 'rustype_sidebar_width';
+
 export default function Sidebar({
     activePanel,
     onPanelChange,
@@ -543,6 +548,54 @@ export default function Sidebar({
     });
     const [nodeAction, setNodeAction] = useState<NodeAction>({ type: 'none' });
     const [refreshKey, setRefreshKey] = useState(0);
+
+    // 侧边栏宽度（支持拖拽调整）
+    const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
+        try {
+            const stored = localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY);
+            if (stored) {
+                const parsed = parseInt(stored, 10);
+                if (!Number.isNaN(parsed) && parsed >= MIN_SIDEBAR_WIDTH && parsed <= MAX_SIDEBAR_WIDTH) {
+                    return parsed;
+                }
+            }
+        } catch {
+            // 忽略读取错误
+        }
+        return DEFAULT_SIDEBAR_WIDTH;
+    });
+
+    // 拖拽调整宽度
+    const handleResizeStart = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        const startX = e.clientX;
+        const startWidth = sidebarWidth;
+        let currentWidth = startWidth;
+
+        const handleMouseMove = (moveEvent: MouseEvent) => {
+            const delta = moveEvent.clientX - startX;
+            const newWidth = Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, startWidth + delta));
+            currentWidth = newWidth;
+            setSidebarWidth(newWidth);
+        };
+
+        const handleMouseUp = () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            try {
+                localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(currentWidth));
+            } catch {
+                // 忽略写入错误
+            }
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    }, [sidebarWidth]);
 
     const bumpRefresh = useCallback(() => {
         onTreeRefresh();
@@ -769,7 +822,7 @@ export default function Sidebar({
 
             {/* Content Panel */}
             {activePanel && (
-                <div className="sidebar">
+                <div className="sidebar" style={{ width: `${sidebarWidth}px` }}>
                     <div className="sidebar-header">
                         <span className="sidebar-title">{panelTitle}</span>
                     </div>
@@ -893,6 +946,11 @@ export default function Sidebar({
                             </div>
                         )}
                     </div>
+                    <div
+                        className="sidebar-resizer"
+                        onMouseDown={handleResizeStart}
+                        title="拖拽调整宽度"
+                    />
                 </div>
             )}
 

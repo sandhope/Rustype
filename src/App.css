@@ -728,12 +728,31 @@ body,
 }
 
 .sidebar {
-  width: 240px;
   background-color: var(--app-sidebar-bg);
   border-right: 1px solid var(--app-sidebar-border);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  position: relative;
+  min-width: 0;
+}
+
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 10;
+  transition: background-color 0.15s;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer:active {
+  background-color: var(--settings-btn-primary-bg);
+  opacity: 0.6;
 }
 
 .sidebar-header {
