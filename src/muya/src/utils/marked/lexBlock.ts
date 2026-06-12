@@ -12,6 +12,11 @@ export function lexBlock(
     src: string,
     options: ILexOption = DEFAULT_OPTIONS,
 ): TLexedToken[] {
+    // Normalize CRLF to LF — marked's block-level lexer only recognises `\n`
+    // line endings. Windows files using `\r\n` would otherwise fail to parse
+    // headings, lists, and other block-level constructs.
+    src = src.replace(/\r\n/g, '\n');
+
     options = Object.assign({}, DEFAULT_OPTIONS, options);
     const { math, frontMatter, footnote } = options;
     let tokens: (Token | IFrontmatterToken)[] = [];
