@@ -12,7 +12,7 @@ import AboutDialog from './components/AboutDialog';
 import ShortcutsPanel from './components/ShortcutsPanel';
 import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, type FileInfo, type FileTreeNode } from './utils/file';
 import { dirname } from '@tauri-apps/api/path';
-import { getRecentFiles, addRecentFile, removeRecentFile, clearRecentFiles } from './utils/recentFiles';
+import { getRecentFiles, addRecentFile, removeRecentFile, clearRecentlyOpened, getRecentFolders, addRecentFolder } from './utils/recentFiles';
 import { loadSettings, saveSettings, type AppSettings } from './utils/settings';
 import './App.css';
 import './styles/themes.css';
@@ -80,6 +80,7 @@ function App() {
     const [activeSidebarPanel, setActiveSidebarPanel] = useState<SidebarPanel | null>(null);
     const [projectTree, setProjectTree] = useState<FileTreeNode | null>(null);
     const [recentFiles, setRecentFiles] = useState<FileInfo[]>([]);
+    const [recentFolders, setRecentFolders] = useState<FileInfo[]>([]);
     const [promptData, setPromptData] = useState<{ tabId: string; filePath: string } | null>(null);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [aboutOpen, setAboutOpen] = useState(false);
@@ -118,6 +119,7 @@ function App() {
     // Load recent files on mount
     useEffect(() => {
         setRecentFiles(getRecentFiles());
+        setRecentFolders(getRecentFolders());
     }, []);
 
     // Native file drag & drop support
@@ -258,8 +260,9 @@ function App() {
         setActiveSidebarPanel('explorer');
         setActiveMenu(null);
 
-        addRecentFile({ path: dirPath, name: dirPath.split(/[/\\]/).pop() || dirPath, isDir: true });
-        setRecentFiles(getRecentFiles());
+        // Add to recent folders
+        addRecentFolder({ path: dirPath, name: dirPath.split(/[/\\]/).pop() || dirPath });
+        setRecentFolders(getRecentFolders());
     }, []);
 
     const handleTreeRefresh = useCallback(async () => {
@@ -308,7 +311,7 @@ function App() {
             const fileContent = await readFileContent(filePath);
             const fileStat = await getFileStat(filePath);
             addRecentFile(fileInfo);
-            setRecentFiles(getRecentFiles());
+            setRecentFolders(getRecentFolders());
 
             const newTab: Tab = {
                 ...createNewTab(fileInfo, fileContent),
@@ -376,8 +379,6 @@ function App() {
         } else {
             const savedFile = await saveMarkdownFile(markdown);
             if (savedFile) {
-                addRecentFile(savedFile);
-                setRecentFiles(getRecentFiles());
                 const stat = await getFileStat(savedFile.path);
                 setTabs(prev => prev.map(t =>
                     t.id === activeTabId ? { ...t, file: savedFile, content: markdown, dirty: false, lastModified: stat?.mtime, externallyModified: false } : t
@@ -851,39 +852,66 @@ function App() {
                                     <span className="menu-item-arrow">›</span>
                                     {openRecentSubmenu && (
                                         <div className="menu-submenu">
-                                            {recentFiles.length === 0 ? (
+                                            {(recentFolders.length === 0 && recentFiles.length === 0) ? (
                                                 <div className="menu-submenu-item menu-submenu-empty">暂无最近使用</div>
                                             ) : (
                                                 <>
-                                                    {recentFiles.map((file, index) => (
-                                                        <div
-                                                            key={file.path + index}
-                                                            className="menu-submenu-item"
-                                                            title={file.path}
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                setActiveMenu(null);
-                                                                setOpenRecentSubmenu(false);
-                                                                if (file.isDir) {
-                                                                    const tree = await readDirectoryTree(file.path);
-                                                                    setProjectTree(tree);
-                                                                    setActiveSidebarPanel('explorer');
-                                                                } else {
-                                                                    handleRecentFileSelect(file);
-                                                                }
-                                                            }}
-                                                        >
-                                                            <span className="menu-submenu-item-icon">{file.isDir ? '📂' : '📝'}</span>
-                                                            <span className="menu-submenu-item-label">{file.path}</span>
-                                                        </div>
-                                                    ))}
-                                                    <div className="menu-submenu-divider" />
+                                                    {/* Recent Folders Section */}
+                                                    {recentFolders.length > 0 && (
+                                                        <>
+                                                            {recentFolders.map((folder, index) => (
+                                                                <div
+                                                                    key={`folder-${folder.path}-${index}`}
+                                                                    className="menu-submenu-item"
+                                                                    title={folder.path}
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation();
+                                                                        setActiveMenu(null);
+                                                                        setOpenRecentSubmenu(false);
+                                                                        const tree = await readDirectoryTree(folder.path);
+                                                                        setProjectTree(tree);
+                                                                        setActiveSidebarPanel('explorer');
+                                                                    }}
+                                                                >
+                                                                    <span className="menu-submenu-item-icon">📂</span>
+                                                                    <span className="menu-submenu-item-label">{folder.path}</span>
+                                                                </div>
+                                                            ))}
+                                                            <div className="menu-submenu-divider" />
+                                                        </>
+                                                    )}
+
+                                                    {/* Recent Files Section */}
+                                                    {recentFiles.length > 0 && (
+                                                        <>
+                                                            {recentFiles.map((file, index) => (
+                                                                <div
+                                                                    key={`file-${file.path}-${index}`}
+                                                                    className="menu-submenu-item"
+                                                                    title={file.path}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setActiveMenu(null);
+                                                                        setOpenRecentSubmenu(false);
+                                                                        handleRecentFileSelect(file);
+                                                                    }}
+                                                                >
+                                                                    <span className="menu-submenu-item-icon">📝</span>
+                                                                    <span className="menu-submenu-item-label">{file.path}</span>
+                                                                </div>
+                                                            ))}
+                                                            <div className="menu-submenu-divider" />
+                                                        </>
+                                                    )}
+
+                                                    {/* Clear All Button */}
                                                     <div
                                                         className="menu-submenu-item menu-submenu-item-danger"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            clearRecentFiles();
+                                                            clearRecentlyOpened();
                                                             setRecentFiles([]);
+                                                            setRecentFolders([]);
                                                             setActiveMenu(null);
                                                             setOpenRecentSubmenu(false);
                                                         }}

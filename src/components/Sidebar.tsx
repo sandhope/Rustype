@@ -17,6 +17,11 @@ import {
 import { join } from '@tauri-apps/api/path';
 import fileIcons from '../muya/src/ui/utils/fileIcons';
 import '../muya/src/ui/utils/fileIcons'; // side-effect: imports CSS
+import {
+    searchInFolder,
+    type SearchResult as FolderSearchResult,
+    type SearchMatch as FolderSearchMatch,
+} from '../utils/search';
 
 export type SidebarPanel = 'explorer' | 'search' | 'outline';
 
@@ -520,6 +525,23 @@ function FolderTreeNode({
     );
 }
 
+/* ==================== 搜索结果行高亮组件 ==================== */
+function HighlightedLine({ match }: { match: FolderSearchMatch }) {
+    const { range, lineText } = match;
+    const startCh = range[0][1];
+    const endCh = range[1][1];
+    const before = lineText.substring(0, startCh);
+    const middle = lineText.substring(startCh, endCh);
+    const after = lineText.substring(endCh);
+    return (
+        <>
+            <span>{before}</span>
+            <span className="search-highlight">{middle}</span>
+            <span>{after}</span>
+        </>
+    );
+}
+
 /* ==================== Sidebar 主组件 ==================== */
 const DEFAULT_SIDEBAR_WIDTH = 240;
 const MIN_SIDEBAR_WIDTH = 160;
@@ -548,6 +570,138 @@ export default function Sidebar({
     });
     const [nodeAction, setNodeAction] = useState<NodeAction>({ type: 'none' });
     const [refreshKey, setRefreshKey] = useState(0);
+
+    // -----------------------------------------------------------------------
+    // 搜索面板状态
+    // -----------------------------------------------------------------------
+    const [keyword, setKeyword] = useState('');
+    const [searchResults, setSearchResults] = useState<FolderSearchResult[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [isCaseSensitive, setIsCaseSensitive] = useState(false);
+    const [isWholeWord, setIsWholeWord] = useState(false);
+    const [isRegexp, setIsRegexp] = useState(false);
+    const [expandedFiles, setExpandedFiles] = useState<Record<string, boolean>>({});
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const activeSearchSessionRef = useRef<{ cancel: () => void } | null>(null);
+    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // 激活搜索面板时自动聚焦输入框
+    useEffect(() => {
+        if (activePanel === 'search') {
+            searchInputRef.current?.focus();
+        }
+    }, [activePanel]);
+
+    // 切换到搜索面板后，如果项目刚打开且有 keyword，自动搜索一次
+    const handleRequestOpenFolder = useCallback(() => {
+        onOpenFolder();
+    }, [onOpenFolder]);
+
+    const runSearch = useCallback(
+        async (
+            nextKeyword: string,
+            opts: { caseSensitive: boolean; wholeWord: boolean; regexp: boolean },
+        ) => {
+            if (!projectTree || !nextKeyword) {
+                setSearchResults([]);
+                return;
+            }
+
+            // 取消上一次还在运行的搜索
+            if (activeSearchSessionRef.current) {
+                activeSearchSessionRef.current.cancel();
+                activeSearchSessionRef.current = null;
+            }
+
+            setIsSearching(true);
+            const session = searchInFolder(projectTree.path, nextKeyword, {
+                isCaseSensitive: opts.caseSensitive,
+                isWholeWord: opts.wholeWord,
+                isRegexp: opts.regexp,
+            });
+            activeSearchSessionRef.current = session;
+
+            try {
+                const results = await session.promise;
+                setSearchResults(results);
+            } catch (err) {
+                console.error('搜索失败：', err);
+                setSearchResults([]);
+            } finally {
+                setIsSearching(false);
+                if (activeSearchSessionRef.current === session) {
+                    activeSearchSessionRef.current = null;
+                }
+            }
+        },
+        [projectTree],
+    );
+
+    // 关键字变化 → 防抖搜索
+    useEffect(() => {
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+            debounceTimerRef.current = null;
+        }
+
+        if (!keyword) {
+            setSearchResults([]);
+            return;
+        }
+
+        debounceTimerRef.current = setTimeout(() => {
+            runSearch(keyword, {
+                caseSensitive: isCaseSensitive,
+                wholeWord: isWholeWord,
+                regexp: isRegexp,
+            });
+        }, 250);
+
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+                debounceTimerRef.current = null;
+            }
+        };
+    }, [keyword, isCaseSensitive, isWholeWord, isRegexp, runSearch]);
+
+    // 当 projectTree 变化时（例如换了一个打开文件夹），如果当前有 keyword 则重新搜索
+    useEffect(() => {
+        if (!projectTree) {
+            setSearchResults([]);
+            return;
+        }
+        if (keyword) {
+            runSearch(keyword, {
+                caseSensitive: isCaseSensitive,
+                wholeWord: isWholeWord,
+                regexp: isRegexp,
+            });
+        }
+    }, [projectTree?.path]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const toggleFileExpand = useCallback((filePath: string) => {
+        setExpandedFiles((prev) => ({ ...prev, [filePath]: !prev[filePath] }));
+    }, []);
+
+    const handleMatchClick = useCallback(
+        async (filePath: string) => {
+            try {
+                // 让上层组件用 dirname 设置 window.DIRNAME
+                // 这里我们先直接触发 onFolderFileSelect（它会自动处理 dirname）
+                onFolderFileSelect(filePath);
+            } catch (err) {
+                console.error('打开搜索结果失败：', err);
+            }
+        },
+        [onFolderFileSelect],
+    );
+
+    const totalMatches = searchResults.reduce((sum, r) => sum + r.matches.length, 0);
+
+    // -----------------------------------------------------------------------
+    // 结束搜索面板状态
+    // -----------------------------------------------------------------------
 
     // 侧边栏宽度（支持拖拽调整）
     const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
@@ -923,7 +1077,130 @@ export default function Sidebar({
                         )}
 
                         {activePanel === 'search' && (
-                            <div className="sidebar-empty">搜索功能开发中…</div>
+                            <div className="sidebar-section sidebar-search-section">
+                                {/* 搜索输入框 + 控制按钮 */}
+                                <div className="search-wrapper">
+                                    <input
+                                        ref={searchInputRef}
+                                        className="search-input"
+                                        type="text"
+                                        value={keyword}
+                                        placeholder={projectTree ? '在文件夹中搜索…' : '请先打开文件夹…'}
+                                        onChange={(e) => setKeyword(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Escape') setKeyword('');
+                                        }}
+                                    />
+                                    <div className="search-controls">
+                                        <span
+                                            className={`search-toggle ${isCaseSensitive ? 'active' : ''}`}
+                                            title="大小写敏感"
+                                            onClick={() => setIsCaseSensitive((v) => !v)}
+                                        >
+                                            Aa
+                                        </span>
+                                        <span
+                                            className={`search-toggle ${isWholeWord ? 'active' : ''}`}
+                                            title="全字匹配"
+                                            onClick={() => setIsWholeWord((v) => !v)}
+                                        >
+                                            W
+                                        </span>
+                                        <span
+                                            className={`search-toggle ${isRegexp ? 'active' : ''}`}
+                                            title="使用正则表达式"
+                                            onClick={() => setIsRegexp((v) => !v)}
+                                        >
+                                            .*
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* 状态提示 */}
+                                {!projectTree && (
+                                    <div className="search-empty">
+                                        <div className="sidebar-empty-icon">🔍</div>
+                                        <div className="sidebar-empty-text">请先打开一个文件夹</div>
+                                        <button
+                                            className="sidebar-empty-action"
+                                            onClick={handleRequestOpenFolder}
+                                        >
+                                            打开文件夹
+                                        </button>
+                                    </div>
+                                )}
+
+                                {projectTree && keyword && isSearching && (
+                                    <div className="search-status">正在搜索…</div>
+                                )}
+
+                                {projectTree && keyword && !isSearching && searchResults.length === 0 && (
+                                    <div className="search-empty">
+                                        <div className="sidebar-empty-icon">🔍</div>
+                                        <div className="sidebar-empty-text">没有找到 "{keyword}"</div>
+                                    </div>
+                                )}
+
+                                {/* 结果信息 */}
+                                {projectTree && searchResults.length > 0 && (
+                                    <div className="search-result-info">
+                                        在 {searchResults.length} 个文件中找到 {totalMatches} 处匹配
+                                    </div>
+                                )}
+
+                                {/* 结果列表 */}
+                                <div className="search-result-list">
+                                    {searchResults.map((result) => {
+                                        const filename = result.filePath.split(/[/\\]/).pop() || result.filePath;
+                                        const isExpanded = expandedFiles[result.filePath] !== false; // 默认展开
+                                        const matchCount = result.matches.length;
+                                        return (
+                                            <div className="search-result-file" key={result.filePath}>
+                                                <div
+                                                    className="search-result-file-header"
+                                                    onClick={() => toggleFileExpand(result.filePath)}
+                                                    title={result.filePath}
+                                                >
+                                                    <span className={`search-expand-arrow ${isExpanded ? 'expanded' : ''}`}>
+                                                        <svg viewBox="0 0 1024 1024" width="10" height="10" fill="currentColor">
+                                                            <path d="M340.864 149.312a30.59 30.59 0 0 0 0 42.752L652.736 512 340.864 831.872a30.59 30.59 0 0 0 0 42.752 29.12 29.12 0 0 0 41.728 0L714.24 534.336a32 32 0 0 0 0-44.672L382.592 149.376a29.12 29.12 0 0 0-41.728 0z" />
+                                                        </svg>
+                                                    </span>
+                                                    <span className={`search-file-icon ${(fileIcons.getClassByName(filename) || '').split(/\s/).join(' ')}`.trim()} />
+                                                    <span className="search-file-name">{filename}</span>
+                                                    <span className="search-match-count">{matchCount}</span>
+                                                </div>
+
+                                                {isExpanded && (
+                                                    <div className="search-matches">
+                                                        {result.matches.slice(0, 20).map((match, idx) => {
+                                                            const [start] = match.range;
+                                                            return (
+                                                                <div
+                                                                    key={idx}
+                                                                    className="search-match-line"
+                                                                    title={match.lineText}
+                                                                    onClick={() => handleMatchClick(result.filePath)}
+                                                                >
+                                                                    <span className="search-match-line-num">{start[0] + 1}</span>
+                                                                    <span className="search-match-text">
+                                                                        <HighlightedLine match={match} />
+                                                                    </span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                        {matchCount > 20 && (
+                                                            <div className="search-more-hint">
+                                                                还有 {matchCount - 20} 处匹配…
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         )}
 
                         {activePanel === 'outline' && (
