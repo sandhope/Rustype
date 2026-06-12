@@ -22,6 +22,7 @@ import {
     type SearchResult as FolderSearchResult,
     type SearchMatch as FolderSearchMatch,
 } from '../utils/search';
+import { loadSidebarWidth, saveSidebarWidth, getDefaultSidebarWidth } from '../utils/uiState';
 
 export type SidebarPanel = 'explorer' | 'search' | 'outline';
 
@@ -543,10 +544,8 @@ function HighlightedLine({ match }: { match: FolderSearchMatch }) {
 }
 
 /* ==================== Sidebar 主组件 ==================== */
-const DEFAULT_SIDEBAR_WIDTH = 240;
 const MIN_SIDEBAR_WIDTH = 160;
 const MAX_SIDEBAR_WIDTH = 600;
-const SIDEBAR_WIDTH_STORAGE_KEY = 'rustype_sidebar_width';
 
 export default function Sidebar({
     activePanel,
@@ -704,20 +703,20 @@ export default function Sidebar({
     // -----------------------------------------------------------------------
 
     // 侧边栏宽度（支持拖拽调整）
-    const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
-        try {
-            const stored = localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY);
-            if (stored) {
-                const parsed = parseInt(stored, 10);
-                if (!Number.isNaN(parsed) && parsed >= MIN_SIDEBAR_WIDTH && parsed <= MAX_SIDEBAR_WIDTH) {
-                    return parsed;
-                }
-            }
-        } catch {
-            // 忽略读取错误
-        }
-        return DEFAULT_SIDEBAR_WIDTH;
-    });
+    const [sidebarWidth, setSidebarWidth] = useState<number>(getDefaultSidebarWidth());
+
+    // 启动时从 store 异步加载宽度
+    useEffect(() => {
+        let cancelled = false;
+        loadSidebarWidth().then((width) => {
+            if (!cancelled) setSidebarWidth(width);
+        }).catch(() => {
+            /* ignore */
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     // 拖拽调整宽度
     const handleResizeStart = useCallback((e: React.MouseEvent) => {
@@ -738,11 +737,9 @@ export default function Sidebar({
             document.removeEventListener('mouseup', handleMouseUp);
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
-            try {
-                localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(currentWidth));
-            } catch {
-                // 忽略写入错误
-            }
+            saveSidebarWidth(currentWidth).catch((err) => {
+                console.error('Failed to persist sidebar width:', err);
+            });
         };
 
         document.addEventListener('mousemove', handleMouseMove);

@@ -13,7 +13,7 @@ import ShortcutsPanel from './components/ShortcutsPanel';
 import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, grantDirectoryAccess, type FileInfo, type FileTreeNode } from './utils/file';
 import { dirname } from '@tauri-apps/api/path';
 import { getRecentFiles, addRecentFile, removeRecentFile, clearRecentlyOpened, getRecentFolders, addRecentFolder } from './utils/recentFiles';
-import { loadSettings, saveSettings, type AppSettings } from './utils/settings';
+import { loadSettings, saveSettings, type AppSettings, DEFAULT_SETTINGS } from './utils/settings';
 import { loadSession, saveSession } from './utils/session';
 import './App.css';
 import './styles/themes.css';
@@ -86,7 +86,7 @@ function App() {
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [aboutOpen, setAboutOpen] = useState(false);
     const [shortcutsOpen, setShortcutsOpen] = useState(false);
-    const [settings, setSettings] = useState<AppSettings>(loadSettings());
+    const [settings, setSettings] = useState<AppSettings>({ ...DEFAULT_SETTINGS });
 
     // Feature flags for current tab
     const [findReplaceOpen, setFindReplaceOpen] = useState(false);
@@ -120,40 +120,67 @@ function App() {
     const activeTab = tabs.find(t => t.id === activeTabId) || null;
     const hasOpenFile = tabs.length > 0 && activeTab !== null;
 
+    // Load settings on mount
+    useEffect(() => {
+        let cancelled = false;
+        loadSettings().then((loaded) => {
+            if (!cancelled) setSettings(loaded);
+        }).catch((err) => {
+            console.error('Failed to load settings:', err);
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
     // Load recent files on mount
     useEffect(() => {
-        setRecentFiles(getRecentFiles());
-        setRecentFolders(getRecentFolders());
+        let cancelled = false;
+        (async () => {
+            const [files, folders] = await Promise.all([getRecentFiles(), getRecentFolders()]);
+            if (!cancelled) {
+                setRecentFiles(files);
+                setRecentFolders(folders);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     // Restore session on mount: restore folder + tabs + active tab
     useEffect(() => {
-        const session = loadSession();
-        if (!session) return;
-
-        isRestoringRef.current = true;
+        let cancelled = false;
 
         const restore = async () => {
+            const session = await loadSession();
+            if (!session || cancelled) return;
+
+            isRestoringRef.current = true;
+
             // Restore folder
             if (session.folderPath) {
                 try {
                     // Grant filesystem permissions for this directory
                     await grantDirectoryAccess(session.folderPath);
-                    
+
                     const tree = await readDirectoryTree(session.folderPath);
-                    setProjectTree(tree);
-                    setActiveSidebarPanel('explorer');
+                    if (!cancelled) {
+                        setProjectTree(tree);
+                        setActiveSidebarPanel('explorer');
+                    }
                 } catch {
                     // Folder no longer accessible, skip
                 }
             }
 
             // Restore tabs (only those whose files still exist)
-            if (session.tabs.length > 0) {
+            if (session.tabs.length > 0 && !cancelled) {
                 const restoredTabs: Tab[] = [];
                 for (const savedTab of session.tabs) {
                     if (savedTab.file?.path) {
                         try {
+                            await grantDirectoryAccess(savedTab.file.path);
                             const content = await readFileContent(savedTab.file.path);
                             const stat = await getFileStat(savedTab.file.path);
                             const tabId = getNextTabId();
@@ -181,7 +208,7 @@ function App() {
                     }
                 }
 
-                if (restoredTabs.length > 0) {
+                if (restoredTabs.length > 0 && !cancelled) {
                     setTabs(restoredTabs);
                     // Restore active tab by position (fall back to first tab)
                     const activeIdx = session.activeTabId
@@ -196,6 +223,9 @@ function App() {
         };
 
         restore();
+        return () => {
+            cancelled = true;
+        };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Session persistence: save on folder change
@@ -365,9 +395,9 @@ function App() {
         setActiveSidebarPanel('explorer');
         setActiveMenu(null);
 
-        // Add to recent folders
-        addRecentFolder({ path: dirPath, name: dirPath.split(/[/\\]/).pop() || dirPath });
-        setRecentFolders(getRecentFolders());
+        // Add to recent folders and reload
+        await addRecentFolder({ path: dirPath, name: dirPath.split(/[/\\]/).pop() || dirPath });
+        setRecentFolders(await getRecentFolders());
     }, []);
 
     const handleTreeRefresh = useCallback(async () => {
@@ -415,8 +445,8 @@ function App() {
 
             const fileContent = await readFileContent(filePath);
             const fileStat = await getFileStat(filePath);
-            addRecentFile(fileInfo);
-            setRecentFolders(getRecentFolders());
+            await addRecentFile(fileInfo);
+            setRecentFolders(await getRecentFolders());
 
             const newTab: Tab = {
                 ...createNewTab(fileInfo, fileContent),
@@ -442,8 +472,8 @@ function App() {
 
                 const fileContent = await readFileContent(fileInfo.path);
                 const stat = await getFileStat(fileInfo.path);
-                addRecentFile(fileInfo);
-                setRecentFiles(getRecentFiles());
+                await addRecentFile(fileInfo);
+                setRecentFiles(await getRecentFiles());
 
                 const existingTab = tabs.find(t => t.file?.path === fileInfo.path);
                 if (existingTab) {
@@ -488,6 +518,8 @@ function App() {
                 setTabs(prev => prev.map(t =>
                     t.id === activeTabId ? { ...t, file: savedFile, content: markdown, dirty: false, lastModified: stat?.mtime, externallyModified: false } : t
                 ));
+                await addRecentFile(savedFile);
+                setRecentFiles(await getRecentFiles());
             }
         }
         setActiveMenu(null);
@@ -500,8 +532,8 @@ function App() {
             : (editorRef.current?.getMarkdown() || activeTab.content);
         const savedFile = await saveMarkdownFile(markdown);
         if (savedFile) {
-            addRecentFile(savedFile);
-            setRecentFiles(getRecentFiles());
+            await addRecentFile(savedFile);
+            setRecentFiles(await getRecentFiles());
             const stat = await getFileStat(savedFile.path);
             setTabs(prev => prev.map(t =>
                 t.id === activeTabId ? { ...t, file: savedFile, content: markdown, dirty: false, lastModified: stat?.mtime, externallyModified: false } : t
@@ -619,8 +651,8 @@ function App() {
             setActiveSidebarPanel(null);
         } catch (error) {
             console.error('Failed to open recent file:', error);
-            removeRecentFile(file.path);
-            setRecentFiles(getRecentFiles());
+            await removeRecentFile(file.path);
+            setRecentFiles(await getRecentFiles());
             alert('文件已不存在或无法读取');
         }
     }, [tabs]);
@@ -697,9 +729,9 @@ function App() {
         }
     }, [handleNewFile, handleOpenFile, handleOpenFolder, handleSaveFile, handleSaveAs, sourceMode, focusMode, activeTabId]);
 
-    const handleSettingsUpdate = useCallback((newSettings: AppSettings) => {
+    const handleSettingsUpdate = useCallback(async (newSettings: AppSettings) => {
         setSettings(newSettings);
-        saveSettings(newSettings);
+        await saveSettings(newSettings);
     }, []);
 
     const handleSettingsClose = useCallback(() => {
@@ -973,6 +1005,7 @@ function App() {
                                                                         e.stopPropagation();
                                                                         setActiveMenu(null);
                                                                         setOpenRecentSubmenu(false);
+                                                                        await grantDirectoryAccess(folder.path);
                                                                         const tree = await readDirectoryTree(folder.path);
                                                                         setProjectTree(tree);
                                                                         setActiveSidebarPanel('explorer');
@@ -994,10 +1027,11 @@ function App() {
                                                                     key={`file-${file.path}-${index}`}
                                                                     className="menu-submenu-item"
                                                                     title={file.path}
-                                                                    onClick={(e) => {
+                                                                    onClick={async (e) => {
                                                                         e.stopPropagation();
                                                                         setActiveMenu(null);
                                                                         setOpenRecentSubmenu(false);
+                                                                        await grantDirectoryAccess(file.path);
                                                                         handleRecentFileSelect(file);
                                                                     }}
                                                                 >
@@ -1012,9 +1046,9 @@ function App() {
                                                     {/* Clear All Button */}
                                                     <div
                                                         className="menu-submenu-item menu-submenu-item-danger"
-                                                        onClick={(e) => {
+                                                        onClick={async (e) => {
                                                             e.stopPropagation();
-                                                            clearRecentlyOpened();
+                                                            await clearRecentlyOpened();
                                                             setRecentFiles([]);
                                                             setRecentFolders([]);
                                                             setActiveMenu(null);

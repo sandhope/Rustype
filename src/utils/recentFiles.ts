@@ -1,14 +1,17 @@
+import { LazyStore } from '@tauri-apps/plugin-store';
 import type { FileInfo } from './file';
 
-const RECENT_FILES_KEY = 'rustype_recent_files';
-const RECENT_FOLDERS_KEY = 'rustype_recent_folders';
+const RECENT_FILES_KEY = 'recentFiles';
+const RECENT_FOLDERS_KEY = 'recentFolders';
 const MAX_RECENT_ITEMS = 10;
 
-export function getRecentFiles(): FileInfo[] {
+const recentStore = new LazyStore('recent.bin');
+
+export async function getRecentFiles(): Promise<FileInfo[]> {
     try {
-        const stored = localStorage.getItem(RECENT_FILES_KEY);
+        const stored = await recentStore.get<FileInfo[]>(RECENT_FILES_KEY);
         if (stored) {
-            return JSON.parse(stored);
+            return stored;
         }
     } catch (e) {
         console.error('Failed to get recent files:', e);
@@ -16,11 +19,11 @@ export function getRecentFiles(): FileInfo[] {
     return [];
 }
 
-export function getRecentFolders(): FileInfo[] {
+export async function getRecentFolders(): Promise<FileInfo[]> {
     try {
-        const stored = localStorage.getItem(RECENT_FOLDERS_KEY);
+        const stored = await recentStore.get<FileInfo[]>(RECENT_FOLDERS_KEY);
         if (stored) {
-            return JSON.parse(stored);
+            return stored;
         }
     } catch (e) {
         console.error('Failed to get recent folders:', e);
@@ -28,50 +31,48 @@ export function getRecentFolders(): FileInfo[] {
     return [];
 }
 
-export function addRecentFile(file: FileInfo): void {
+export async function addRecentFile(file: FileInfo): Promise<void> {
     try {
-        const recentFiles = getRecentFiles();
-        // Remove if already exists
+        const recentFiles = await getRecentFiles();
         const filtered = recentFiles.filter(f => f.path !== file.path);
-        // Add to front
         filtered.unshift(file);
-        // Limit size
         const limited = filtered.slice(0, MAX_RECENT_ITEMS);
-        localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(limited));
+        await recentStore.set(RECENT_FILES_KEY, limited);
+        await recentStore.save();
     } catch (e) {
         console.error('Failed to add recent file:', e);
     }
 }
 
-export function addRecentFolder(folder: FileInfo): void {
+export async function addRecentFolder(folder: FileInfo): Promise<void> {
     try {
-        const recentFolders = getRecentFolders();
-        // Remove if already exists
+        const recentFolders = await getRecentFolders();
         const filtered = recentFolders.filter(f => f.path !== folder.path);
-        // Add to front
         filtered.unshift(folder);
-        // Limit size
         const limited = filtered.slice(0, MAX_RECENT_ITEMS);
-        localStorage.setItem(RECENT_FOLDERS_KEY, JSON.stringify(limited));
+        await recentStore.set(RECENT_FOLDERS_KEY, limited);
+        await recentStore.save();
     } catch (e) {
         console.error('Failed to add recent folder:', e);
     }
 }
 
-export function removeRecentFile(filePath: string): void {
+export async function removeRecentFile(filePath: string): Promise<void> {
     try {
-        const recentFiles = getRecentFiles();
+        const recentFiles = await getRecentFiles();
         const filtered = recentFiles.filter(f => f.path !== filePath);
-        localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(filtered));
+        await recentStore.set(RECENT_FILES_KEY, filtered);
+        await recentStore.save();
     } catch (e) {
         console.error('Failed to remove recent file:', e);
     }
 }
 
-export function clearRecentlyOpened(): void {
+export async function clearRecentlyOpened(): Promise<void> {
     try {
-        localStorage.removeItem(RECENT_FILES_KEY);
-        localStorage.removeItem(RECENT_FOLDERS_KEY);
+        await recentStore.delete(RECENT_FILES_KEY);
+        await recentStore.delete(RECENT_FOLDERS_KEY);
+        await recentStore.save();
     } catch (e) {
         console.error('Failed to clear recently opened:', e);
     }

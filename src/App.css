@@ -45,7 +45,7 @@ body,
   flex-shrink: 0;
   user-select: none;
   -webkit-app-region: drag;
-  /* z-index: 2000; */
+  z-index: 2000;
 }
 
 .title-bar {
