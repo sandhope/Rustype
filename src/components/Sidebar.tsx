@@ -24,6 +24,7 @@ interface SidebarProps {
     onFolderFileSelect: (filePath: string) => void;
     activeFilePath: string | null;
     onOpenSettings: () => void;
+    onOpenFolder: () => void;
     tocItems: { content: string; lvl: number; slug: string; githubSlug: string }[];
     onTocItemClick: (item: { content: string; lvl: number; slug: string; githubSlug: string }) => void;
     onTreeRefresh: () => void;
@@ -525,6 +526,7 @@ export default function Sidebar({
     onFolderFileSelect,
     activeFilePath,
     onOpenSettings,
+    onOpenFolder,
     tocItems,
     onTocItemClick,
     onTreeRefresh,
@@ -781,7 +783,7 @@ export default function Sidebar({
                         {activePanel === 'explorer' && (
                             projectTree ? (
                                 <div className="sidebar-section">
-                                    <div className="sidebar-section-title">{projectTree.name}</div>
+                                    <span className="sidebar-section-title">{projectTree.name}</span>
                                     <div className="project-tree">
                                         {/* 根目录层级的新建输入框 */}
                                         {nodeAction.type === 'newFile' && nodeAction.parentPath === projectTree.path && (
@@ -849,12 +851,19 @@ export default function Sidebar({
                                                 />
                                             ))
                                         ) : (
-                                            <div className="sidebar-empty">空项目</div>
+                                            <div className="sidebar-empty">
+                                                <div className="sidebar-empty-icon">📋</div>
+                                                <div className="sidebar-empty-text">空项目</div>
+                                                <button className="sidebar-empty-action" onClick={handleContextNewFile}>新建文件</button>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
                             ) : (
-                                <div className="sidebar-empty">尚未打开文件夹</div>
+                                <div className="sidebar-empty">
+                                    <div className="sidebar-empty-icon">📂</div>
+                                    <button className="sidebar-empty-action" onClick={onOpenFolder}>打开文件夹</button>
+                                </div>
                             )
                         )}
 

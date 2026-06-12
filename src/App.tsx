@@ -994,6 +994,7 @@ function App() {
                     onFolderFileSelect={handleFolderFileSelect}
                     activeFilePath={activeTab?.file?.path ?? null}
                     onOpenSettings={() => setSettingsOpen(true)}
+                    onOpenFolder={handleOpenFolder}
                     tocItems={tocItems}
                     onTocItemClick={handleOutlineItemClick}
                     onTreeRefresh={handleTreeRefresh}
