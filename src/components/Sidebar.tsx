@@ -364,7 +364,9 @@ function FolderTreeNode({
     const handleNewFile = async (name: string) => {
         onActionDone();
         try {
-            const newPath = await join(node.path, name);
+            // 确保文件名以 .md 结尾
+            const fileName = name.endsWith('.md') ? name : `${name}.md`;
+            const newPath = await join(node.path, fileName);
             await fsCreateFile(newPath);
             if (!expanded) setExpanded(true);
             const loadedChildren = await onLoadChildren(node.path);
@@ -795,7 +797,9 @@ export default function Sidebar({
                                                     placeholder="新文件名"
                                                     onConfirm={async (name: string) => {
                                                         try {
-                                                            const newPath = await join(projectTree.path, name);
+                                                            // 确保文件名以 .md 结尾
+                                                            const fileName = name.endsWith('.md') ? name : `${name}.md`;
+                                                            const newPath = await join(projectTree.path, fileName);
                                                             await fsCreateFile(newPath);
                                                             onTreeRefresh();
                                                         } catch (error) {
