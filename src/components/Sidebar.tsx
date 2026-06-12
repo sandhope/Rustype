@@ -1,6 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { FileTreeNode } from '../utils/file';
 import { watch } from '@tauri-apps/plugin-fs';
+import folderIcon from '../assets/folder.svg';
+import folderOpenIcon from '../assets/folder_open.svg';
+
 import {
     loadChildren,
     fsCreateFile,
@@ -412,12 +415,11 @@ function FolderTreeNode({
                         </svg>
                     </span>
                     <span className="tree-folder-icon">
-                        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                            <path d={expanded
-                                ? "M1.5 2A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5V5.5A1.5 1.5 0 0 0 14.5 4H7.7l-1.15-1.15A1.5 1.5 0 0 0 5.5 2H1.5z"
-                                : "M1.5 2A1.5 1.5 0 0 0 0 3.5v2A1.5 1.5 0 0 0 1.5 7h13A1.5 1.5 0 0 0 16 5.5V5a1.5 1.5 0 0 0-1.5-1.5H7.7L6.56 2.35A1.5 1.5 0 0 0 5.5 2h-4zM1.5 8A1.5 1.5 0 0 0 0 9.5v3A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-3A1.5 1.5 0 0 0 14.5 8h-13z"
-                            }/>
-                        </svg>
+                        {expanded ? (
+                            <img src={folderOpenIcon} width="16" height="16" alt="Open Folder" />
+                        ) : (
+                            <img src={folderIcon} width="16" height="16" alt="Folder" />
+                        )}
                     </span>
                     {isRenaming ? (
                         <InlineRename
@@ -458,9 +460,7 @@ function FolderTreeNode({
                             >
                                 <span className="tree-arrow" />
                                 <span className="tree-folder-icon">
-                                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                                        <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v2A1.5 1.5 0 0 0 1.5 7h13A1.5 1.5 0 0 0 16 5.5V5a1.5 1.5 0 0 0-1.5-1.5H7.7L6.56 2.35A1.5 1.5 0 0 0 5.5 2h-4zM1.5 8A1.5 1.5 0 0 0 0 9.5v3A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-3A1.5 1.5 0 0 0 14.5 8h-13z"/>
-                                    </svg>
+                                    <img src={folderIcon} width="16" height="16" alt="Folder" />
                                 </span>
                                 <InlineCreate
                                     placeholder="新目录名"
@@ -814,9 +814,7 @@ export default function Sidebar({
                                             >
                                                 <span className="tree-arrow" />
                                                 <span className="tree-folder-icon">
-                                                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                                                        <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v2A1.5 1.5 0 0 0 1.5 7h13A1.5 1.5 0 0 0 16 5.5V5a1.5 1.5 0 0 0-1.5-1.5H7.7L6.56 2.35A1.5 1.5 0 0 0 5.5 2h-4zM1.5 8A1.5 1.5 0 0 0 0 9.5v3A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-3A1.5 1.5 0 0 0 14.5 8h-13z"/>
-                                                    </svg>
+                                                    <img src={folderIcon} width="16" height="16" alt="Folder" />
                                                 </span>
                                                 <InlineCreate
                                                     placeholder="新目录名"
