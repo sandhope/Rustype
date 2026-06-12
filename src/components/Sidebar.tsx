@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { FileTreeNode } from '../utils/file';
+import { watch } from '@tauri-apps/plugin-fs';
 import {
     loadChildren,
     fsCreateFile,
@@ -543,6 +544,35 @@ export default function Sidebar({
         onTreeRefresh();
         setRefreshKey((k) => k + 1);
     }, [onTreeRefresh]);
+
+    // 监听项目目录的文件系统变更
+    useEffect(() => {
+        if (!projectTree?.path) return;
+
+        let stopWatch: (() => void) | null = null;
+        let cancelled = false;
+
+        const startWatching = async () => {
+            try {
+                stopWatch = await watch(
+                    projectTree.path,
+                    () => {
+                        if (!cancelled) bumpRefresh();
+                    },
+                    { recursive: true, delayMs: 1000 }
+                );
+            } catch (error) {
+                console.error('Failed to watch project directory:', error);
+            }
+        };
+
+        startWatching();
+
+        return () => {
+            cancelled = true;
+            stopWatch?.();
+        };
+    }, [projectTree?.path, bumpRefresh]);
 
     const handleLoadChildren = useCallback(async (dirPath: string): Promise<FileTreeNode[]> => {
         return await loadChildren(dirPath);
