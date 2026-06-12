@@ -35,11 +35,6 @@ export default function loadImageAsync(
                     img.alt = attrs.alt.replace(/[`*{}[\]()#+\-.!_>~:|<$]/g, '');
                 if (attrs.title)
                     img.setAttribute('title', attrs.title);
-                if (attrs.width && typeof attrs.width === 'number')
-                    img.setAttribute('width', attrs.width);
-
-                if (attrs.height && typeof attrs.height === 'number')
-                    img.setAttribute('height', attrs.height);
 
                 if (imageClass)
                     img.classList.add(imageClass);
@@ -52,6 +47,14 @@ export default function loadImageAsync(
                         const oldImage = imageContainer!.querySelector('img');
                         if (oldImage)
                             oldImage.remove();
+
+                        // Apply width and height attributes from markdown if present
+                        if (attrs.width) {
+                            img.setAttribute('width', String(attrs.width));
+                        }
+                        if (attrs.height) {
+                            img.setAttribute('height', String(attrs.height));
+                        }
 
                         imageContainer!.appendChild(img);
                         imageText.classList.remove('mu-image-loading');

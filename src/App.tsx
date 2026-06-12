@@ -11,6 +11,7 @@ import SettingsPanel from './components/SettingsPanel';
 import AboutDialog from './components/AboutDialog';
 import ShortcutsPanel from './components/ShortcutsPanel';
 import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, type FileInfo, type FileTreeNode } from './utils/file';
+import { dirname } from '@tauri-apps/api/path';
 import { getRecentFiles, addRecentFile, removeRecentFile, clearRecentFiles } from './utils/recentFiles';
 import { loadSettings, saveSettings, type AppSettings } from './utils/settings';
 import './App.css';
@@ -288,6 +289,12 @@ function App() {
 
     const handleFolderFileSelect = useCallback(async (filePath: string) => {
         try {
+            // Set window.DIRNAME for relative image path resolution
+            const fileDir = await dirname(filePath);
+            if (typeof window !== 'undefined') {
+                window.DIRNAME = fileDir;
+            }
+
             const fileName = filePath.split(/[/\\]/).pop() || '';
             const fileInfo: FileInfo = { path: filePath, name: fileName };
 
@@ -319,6 +326,12 @@ function App() {
         const fileInfo = await openMarkdownFile();
         if (fileInfo) {
             try {
+                // Set window.DIRNAME for relative image path resolution
+                const fileDir = await dirname(fileInfo.path);
+                if (typeof window !== 'undefined') {
+                    window.DIRNAME = fileDir;
+                }
+
                 const fileContent = await readFileContent(fileInfo.path);
                 const stat = await getFileStat(fileInfo.path);
                 addRecentFile(fileInfo);
@@ -471,6 +484,12 @@ function App() {
 
     const handleRecentFileSelect = useCallback(async (file: FileInfo) => {
         try {
+            // Set window.DIRNAME for relative image path resolution
+            const fileDir = await dirname(file.path);
+            if (typeof window !== 'undefined') {
+                window.DIRNAME = fileDir;
+            }
+
             const fileContent = await readFileContent(file.path);
             const stat = await getFileStat(file.path);
 

@@ -2,6 +2,7 @@ import type { ImageToken } from '../inlineRenderer/types';
 import { isWin } from '../config/index';
 import { tokenizer } from '../inlineRenderer/lexer';
 import { findContentDOM, getOffsetOfParagraph } from '../selection/dom';
+import { convertFileSrc } from '@tauri-apps/api/core';
 
 export interface IImageInfo {
     token: ImageToken;
@@ -95,15 +96,38 @@ export function getImageSrc(src: string) {
             };
         }
         else if (!isAbsoluteLocal && baseUrl) {
+            const resolvedPath = resolveRelativePath(baseUrl, src);
+            // Ensure we have an absolute path before converting
+            const absolutePath = resolvedPath.startsWith('/') || /^[a-zA-Z]:/.test(resolvedPath)
+                ? resolvedPath
+                : `${baseUrl}/${resolvedPath}`;
+            console.log('[getImageSrc] Relative path:', { src, baseUrl, resolvedPath, absolutePath });
+            // Use Tauri's convertFileSrc to properly handle local file URLs
+            const assetUrl = convertFileSrc(absolutePath);
+            console.log('[getImageSrc] Asset URL:', assetUrl);
             return {
                 isUnknownType: false,
-                src: `file://${resolveRelativePath(baseUrl, src)}`,
+                src: assetUrl,
             };
         }
         else {
+            // For absolute paths, use convertFileSrc
+            // For relative paths without baseUrl, we can't load them
+            const absolutePath = isAbsoluteLocal ? src : (baseUrl ? `${baseUrl}/${src}` : '');
+            if (!absolutePath) {
+                console.log('[getImageSrc] No absolute path available for:', src);
+                return {
+                    isUnknownType: false,
+                    src: '',
+                };
+            }
+            console.log('[getImageSrc] Absolute path:', { src, absolutePath });
+            // Use Tauri's convertFileSrc to properly handle local file URLs
+            const assetUrl = convertFileSrc(absolutePath);
+            console.log('[getImageSrc] Asset URL:', assetUrl);
             return {
                 isUnknownType: false,
-                src: `file://${src}`,
+                src: assetUrl,
             };
         }
     }
