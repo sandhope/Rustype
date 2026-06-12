@@ -461,7 +461,14 @@ html, body, #root {
   min-height: calc(100% - 0px);
   height: 100%;
   margin: 0 auto;
-  padding: 0 50px 100px;
+  padding: 0 50px;
+}
+
+/* Add bottom breathing room after the last block */
+.mu-container::after {
+  content: '';
+  display: block;
+  height: 50vh;
 }
 
 /* ============ Sidebar ============ */
