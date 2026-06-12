@@ -551,29 +551,7 @@ function App() {
     }, [activeTabId]);
 
     const handleOutlineItemClick = useCallback((item: TocItem) => {
-        // Find the heading block and scroll to it
-        try {
-            const muya = (editorRef.current as any);
-            if (muya?.muya?.editor?.scrollPage) {
-                const scrollPage = muya.muya.editor.scrollPage;
-                for (const node of scrollPage.children.iterator()) {
-                    const blockName = node.blockName;
-                    if (blockName === 'atx-heading' || blockName === 'setext-heading') {
-                        const head = node.children.head;
-                        const text = head?.text ?? '';
-                        const content = blockName === 'setext-heading'
-                            ? text.trim()
-                            : text.replace(/^\s*#{1,6}\s+/, '').trim();
-                        if (content === item.content && node.domNode) {
-                            node.domNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            return;
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            // ignore
-        }
+        editorRef.current?.scrollToHeading(item.slug);
     }, []);
 
     // Keyboard shortcuts - placed after all callbacks are defined

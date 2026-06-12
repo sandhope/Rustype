@@ -3,6 +3,7 @@ export { de, en, es, fr, ja, ko, pt, zhCN, zhTW } from './locales';
 
 export { Muya } from './muya';
 export type { ITocItem } from './state/getTOC';
+export { stableSlug } from './state/getTOC';
 export { MarkdownToHtml } from './state/markdownToHtml';
 export { renderToStaticHTML } from './state/renderToStaticHTML';
 export type { IRenderToStaticHTMLOptions } from './state/renderToStaticHTML';

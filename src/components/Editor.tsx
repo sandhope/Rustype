@@ -18,6 +18,7 @@ import {
     TableDragBar,
     TableRowColumMenu,
     PreviewToolBar,
+    stableSlug,
 } from '@muyajs/core';
 import type { IMuyaOptions } from '@muyajs/core';
 import '@muyajs/core/assets/styles/index.css';
@@ -37,6 +38,7 @@ export interface EditorHandle {
     find: (action: 'previous' | 'next') => void;
     replace: (replaceValue: string, opts?: Record<string, unknown>) => void;
     getTOC: () => Array<{ content: string; lvl: number; slug: string; githubSlug: string }>;
+    scrollToHeading: (slug: string) => void;
     setFocusMode: (focusMode: boolean) => void;
     setOptions: (options: Record<string, unknown>, forceRender?: boolean) => void;
 }
@@ -224,6 +226,22 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             },
             getTOC: () => {
                 return (muyaRef.current?.getTOC?.() as any) ?? [];
+            },
+            scrollToHeading: (slug: string) => {
+                const muya = muyaRef.current as any;
+                if (!muya?.editor?.scrollPage) return;
+                const { scrollPage } = muya.editor;
+                for (const node of scrollPage.children.iterator()) {
+                    const { blockName } = node;
+                    if (blockName !== 'atx-heading' && blockName !== 'setext-heading')
+                        continue;
+                    if (stableSlug(node) === slug) {
+                        node.domNode?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        const content = node.firstContentInDescendant?.();
+                        content?.setCursor(0, 0, true);
+                        return;
+                    }
+                }
             },
             setFocusMode: (focusMode: boolean) => {
                 muyaRef.current?.setOptions({ focusMode });
