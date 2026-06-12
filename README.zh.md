@@ -1,10 +1,15 @@
 # Rustype
+
+<img src="src-tauri/icons/128x128@2x.png" alt="Logo" width="128" height="128">
+
 轻量化高性能 Markdown 桌面编辑器
 
 ## 项目背景
+
 marktext 拥有业界优秀的 Markdown 实时编辑体验。本项目借鉴 marktext 成熟完善的 Markdown 交互逻辑与编辑能力，以其完善的编辑能力作为功能基准，完成全栈技术架构重构，同时对整体用户体验进行全新独立设计。
 
 ## 技术栈
+
 - Tauri
 - React
 
@@ -13,6 +18,7 @@ marktext 拥有业界优秀的 Markdown 实时编辑体验。本项目借鉴 mar
 欢迎提交 Pull Request！
 
 ## 致谢
+
 由衷感谢 [marktext](https://github.com/marktext/marktext) 开源项目提供成熟完善的 Markdown 编辑参考方案，为本项目的功能设计与落地提供了宝贵的思路与启发。
 
 ## 许可证

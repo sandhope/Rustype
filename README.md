@@ -1,10 +1,15 @@
 # Rustype
+
+<img src="src-tauri/icons/128x128@2x.png" alt="Logo" width="128" height="128">
+
 Lightweight & High-performance Markdown Desktop Editor
 
 ## Background
+
 marktext delivers an outstanding real-time Markdown editing experience in the industry. Drawing on its well-polished Markdown interaction logic and editing capabilities as our functional baseline, this project features a full-stack technical architecture refactor, alongside a brand-new, independently redesigned overall user experience.
 
 ## Tech Stack
+
 - Tauri
 - React
 
@@ -13,6 +18,7 @@ marktext delivers an outstanding real-time Markdown editing experience in the in
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Acknowledgements
+
 Sincere gratitude to the open-source project [marktext](https://github.com/marktext/marktext). Its mature and complete Markdown editing implementation has offered invaluable ideas and inspiration for the design and development of this project.
 
 ## License
