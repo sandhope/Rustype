@@ -629,6 +629,19 @@ html, body, #root {
   white-space: nowrap;
 }
 
+.tree-loading {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  color: var(--text-secondary, #888);
+  animation: tree-spin 1s linear infinite;
+}
+
+@keyframes tree-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .tree-folder-children {
   display: flex;
   flex-direction: column;

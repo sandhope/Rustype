@@ -428,7 +428,11 @@ function FolderTreeNode({
                             {node.name}
                         </span>
                     )}
-                    {loading && <span className="tree-loading">加载中...</span>}
+                    {loading && <span className="tree-loading">
+                        <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                            <path d="M8 1.5a6.5 6.5 0 1 0 6.5 6.5.75.75 0 0 1 1.5 0 8 8 0 1 1-8-8 .75.75 0 0 1 0 1.5z"/>
+                        </svg>
+                    </span>}
                 </div>
 
                 {expanded && (
