@@ -10,7 +10,7 @@ import SourceMode from './components/SourceMode';
 import SettingsPanel from './components/SettingsPanel';
 import AboutDialog from './components/AboutDialog';
 import ShortcutsPanel from './components/ShortcutsPanel';
-import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, grantDirectoryAccess, type FileInfo, type FileTreeNode } from './utils/file';
+import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, grantDirectoryAccess, grantFileAccess, type FileInfo, type FileTreeNode } from './utils/file';
 import { dirname } from '@tauri-apps/api/path';
 import { getRecentFiles, addRecentFile, removeRecentFile, clearRecentlyOpened, getRecentFolders, addRecentFolder } from './utils/recentFiles';
 import { loadSettings, saveSettings, type AppSettings, DEFAULT_SETTINGS } from './utils/settings';
@@ -180,7 +180,7 @@ function App() {
                 for (const savedTab of session.tabs) {
                     if (savedTab.file?.path) {
                         try {
-                            await grantDirectoryAccess(savedTab.file.path);
+                            await grantFileAccess(savedTab.file.path); 
                             const content = await readFileContent(savedTab.file.path);
                             const stat = await getFileStat(savedTab.file.path);
                             const tabId = getNextTabId();
@@ -215,7 +215,13 @@ function App() {
                         ? parseInt(session.activeTabId.split('-').pop() || '0', 10) - 1
                         : 0;
                     const safeIdx = Math.min(activeIdx, restoredTabs.length - 1);
-                    setActiveTabId(restoredTabs[safeIdx >= 0 ? safeIdx : 0].id);
+                    const activeTab = restoredTabs[safeIdx >= 0 ? safeIdx : 0];
+                    // fix restore active tab file image load failed
+                    if (typeof window !== 'undefined') {
+                        const fileDir = await dirname(activeTab.file.path);
+                        window.DIRNAME = fileDir;
+                    }
+                    setActiveTabId(activeTab.id);
                 }
             }
 
@@ -648,7 +654,8 @@ function App() {
                 editorRef.current?.setContent(fileContent);
             }
 
-            setActiveSidebarPanel(null);
+            // Close the sidebar panel if it's open
+            // setActiveSidebarPanel(null);
         } catch (error) {
             console.error('Failed to open recent file:', error);
             await removeRecentFile(file.path);
@@ -1031,7 +1038,7 @@ function App() {
                                                                         e.stopPropagation();
                                                                         setActiveMenu(null);
                                                                         setOpenRecentSubmenu(false);
-                                                                        await grantDirectoryAccess(file.path);
+                                                                        await grantFileAccess(file.path);
                                                                         handleRecentFileSelect(file);
                                                                     }}
                                                                 >

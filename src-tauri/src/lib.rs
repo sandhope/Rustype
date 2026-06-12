@@ -105,6 +105,18 @@ fn grant_directory_access(app_handle: tauri::AppHandle, path: String) -> Result<
     Ok(())
 }
 
+#[tauri::command]
+fn grant_file_access(app_handle: tauri::AppHandle, path: String) -> Result<(), String> {
+    use tauri_plugin_fs::FsExt;
+    
+    let fs_scope = app_handle.fs_scope();
+    
+    // Grant access to the file
+    fs_scope.allow_file(&path).map_err(|e| e.to_string())?;
+    
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -123,6 +135,7 @@ pub fn run() {
             remove_file_or_dir,
             reveal_in_folder,
             grant_directory_access,
+            grant_file_access,
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();

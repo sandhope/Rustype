@@ -204,3 +204,7 @@ export async function fsExists(filePath: string): Promise<boolean> {
 export async function grantDirectoryAccess(dirPath: string): Promise<void> {
     await invoke('grant_directory_access', { path: dirPath });
 }
+
+export async function grantFileAccess(filePath: string): Promise<void> {
+    await invoke('grant_file_access', { path: filePath });
+}

@@ -101,10 +101,8 @@ export function getImageSrc(src: string) {
             const absolutePath = resolvedPath.startsWith('/') || /^[a-zA-Z]:/.test(resolvedPath)
                 ? resolvedPath
                 : `${baseUrl}/${resolvedPath}`;
-            console.log('[getImageSrc] Relative path:', { src, baseUrl, resolvedPath, absolutePath });
             // Use Tauri's convertFileSrc to properly handle local file URLs
             const assetUrl = convertFileSrc(absolutePath);
-            console.log('[getImageSrc] Asset URL:', assetUrl);
             return {
                 isUnknownType: false,
                 src: assetUrl,
@@ -121,10 +119,8 @@ export function getImageSrc(src: string) {
                     src: '',
                 };
             }
-            console.log('[getImageSrc] Absolute path:', { src, absolutePath });
             // Use Tauri's convertFileSrc to properly handle local file URLs
             const assetUrl = convertFileSrc(absolutePath);
-            console.log('[getImageSrc] Asset URL:', assetUrl);
             return {
                 isUnknownType: false,
                 src: assetUrl,
