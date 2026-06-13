@@ -13,6 +13,16 @@ marktext delivers an outstanding real-time Markdown editing experience in the in
 - Tauri
 - React
 
+## Features
+
+### Lazy-loading Directory Tree
+- Initially loads and displays only the root directory to avoid performance issues caused by loading deeply nested directories
+- Child directory contents are loaded dynamically only when the user expands a directory
+- Ideal for large projects or file structures with deep nesting
+
+### OpenRecent
+- Files and folders displayed in separate sections
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
