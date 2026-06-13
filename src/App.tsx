@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { readText as readClipboardText } from '@tauri-apps/plugin-clipboard-manager';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import logo from '../src-tauri/icons/128x128.png';
 import Editor, { type EditorHandle } from './components/Editor';
 import TabBar, { type Tab } from './components/TabBar';
@@ -733,6 +734,26 @@ function App() {
                 setShortcutsOpen(true);
                 setActiveMenu(null);
                 break;
+            case 'releaseNotes':
+                openUrl('https://github.com/sandhope/Rustype/releases');
+                setActiveMenu(null);
+                break;
+            case 'support':
+                openUrl('https://opencollective.com/sandhope');
+                setActiveMenu(null);
+                break;
+            case 'viewSource':
+                openUrl('https://github.com/sandhope/Rustype');
+                setActiveMenu(null);
+                break;
+            case 'reportIssue':
+                openUrl('https://github.com/sandhope/Rustype/issues');
+                setActiveMenu(null);
+                break;
+            case 'license':
+                openUrl('https://github.com/sandhope/Rustype/blob/main/LICENSE');
+                setActiveMenu(null);
+                break;
         }
     }, [handleNewFile, handleOpenFile, handleOpenFolder, handleSaveFile, handleSaveAs, sourceMode, focusMode, activeTabId]);
 
@@ -1149,6 +1170,29 @@ function App() {
                                 帮助
                             </div>
                             <div className={`menu-dropdown-content ${activeMenu === 'help' ? 'is-open' : ''}`}>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('releaseNotes')}>
+                                    <span className="menu-item-label">更新日志</span>
+                                </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item" onClick={() => handleMenuItemClick('support')}>
+                                    <span className="menu-item-label">支持 Rustype</span>
+                                </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item" onClick={() => handleMenuItemClick('viewSource')}>
+                                    <span className="menu-item-label">查看源码</span>
+                                </div>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('reportIssue')}>
+                                    <span className="menu-item-label">报告错误</span>
+                                </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item" onClick={() => handleMenuItemClick('license')}>
+                                    <span className="menu-item-label">许可证</span>
+                                </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item menu-item-disabled">
+                                    <span className="menu-item-label">检查更新（未完成）</span>
+                                </div>
+                                <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('shortcuts')}>
                                     <span className="menu-item-label">键盘快捷键</span>
                                 </div>
