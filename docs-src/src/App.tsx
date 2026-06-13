@@ -1,4 +1,8 @@
 import './App.css'
+import macIcon from './assets/mac.svg'
+import windowsIcon from './assets/windows.svg'
+import linuxIcon from './assets/linux.svg'
+import heartIcon from './assets/heart.svg'
 
 function App() {
   return (
@@ -6,6 +10,7 @@ function App() {
       <Header />
       <Hero />
       <Features />
+      <Support />
       <Download />
       <Footer />
     </div>
@@ -122,36 +127,56 @@ function Features() {
   )
 }
 
+function Support() {
+  return (
+    <section id="support" className="support">
+      <div className="container">
+        <div className="support-content">
+          <span className="support-label">SUPPORT</span>
+          <h2>Keep Rustype free.</h2>
+          <a href="https://opencollective.com/sandhope" target="_blank" rel="noopener noreferrer" className="support-btn">
+            <img src={heartIcon} alt="" className="heart-icon" />
+            Become a Sponsor
+          </a>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function Download() {
   return (
     <section id="download" className="download">
       <div className="container">
-        <h2>Download</h2>
-        <p className="download-subtitle">Available for macOS, Windows and Linux.</p>
-        <div className="download-buttons">
-          <a href="https://github.com/sandhope/rustype/releases/latest" className="download-btn mac">
-            <span className="os-icon">🍎</span>
-            <div className="os-info">
+        <div className="download-header">
+          <span className="download-label">FREE DOWNLOAD</span>
+          <h2>Start writing in <span className="highlight">two minutes.</span></h2>
+          <p className="download-subtitle">One download. No account, no subscription. Every desktop you write on.</p>
+        </div>
+        <div className="download-cards">
+          <a href="https://github.com/sandhope/rustype/releases/latest" className="download-card mac">
+            <img src={macIcon} alt="macOS" className="os-icon" />
+            <div className="card-info">
               <span className="os-name">macOS</span>
-              <span className="os-version">Intel & Apple Silicon</span>
+              <span className="os-version">.dmg · Apple Silicon & Intel</span>
             </div>
           </a>
-          <a href="https://github.com/sandhope/rustype/releases/latest" className="download-btn windows">
-            <span className="os-icon">🪟</span>
-            <div className="os-info">
+          <a href="https://github.com/sandhope/rustype/releases/latest" className="download-card windows">
+            <img src={windowsIcon} alt="Windows" className="os-icon" />
+            <div className="card-info">
               <span className="os-name">Windows</span>
-              <span className="os-version">64-bit</span>
+              <span className="os-version">.exe · x64 & ARM64</span>
             </div>
           </a>
-          <a href="https://github.com/sandhope/rustype/releases/latest" className="download-btn linux">
-            <span className="os-icon">🐧</span>
-            <div className="os-info">
+          <a href="https://github.com/sandhope/rustype/releases/latest" className="download-card linux">
+            <img src={linuxIcon} alt="Linux" className="os-icon" />
+            <div className="card-info">
               <span className="os-name">Linux</span>
-              <span className="os-version">AppImage</span>
+              <span className="os-version">.AppImage · .deb · .rpm</span>
             </div>
           </a>
         </div>
-        <p className="download-footer">Or download on <a href="https://github.com/sandhope/rustype/releases" target="_blank" rel="noopener noreferrer">GitHub Releases</a></p>
+        <p className="download-footer">Or install via Homebrew: <code>brew install --cask mark-text</code></p>
       </div>
     </section>
   )

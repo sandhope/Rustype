@@ -226,77 +226,178 @@
   line-height: 1.6;
 }
 
-/* Download */
-.download {
+/* Support */
+.support {
+  background: #ffffff;
   padding: 80px 0;
   text-align: center;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.support-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.support-label {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: #667eea;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.support h2 {
+  font-size: 48px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 32px;
+}
+
+.support-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.heart-icon {
+  width: 18px;
+  height: 18px;
+  fill: white;
+}
+
+.support-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* Download */
+.download {
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 50%, #f5f7ff 100%);
+  padding: 80px 0;
+}
+
+.download-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.download-label {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: #667eea;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.download-label::before {
+  content: '—';
+  margin-right: 8px;
 }
 
 .download h2 {
-  font-size: 36px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-size: 48px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.download .highlight {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .download-subtitle {
   font-size: 18px;
   color: #666;
-  margin-bottom: 40px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.download-buttons {
+.download-cards {
   display: flex;
   justify-content: center;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
 }
 
-.download-btn {
+.download-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 24px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 12px;
+  gap: 16px;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(102, 126, 234, 0.15);
+  border-radius: 16px;
   text-decoration: none;
-  color: #333;
-  transition: all 0.2s;
+  color: #1a1a1a;
+  transition: all 0.3s ease;
+  min-width: 240px;
+  backdrop-filter: blur(10px);
 }
 
-.download-btn:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+.download-card:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
 }
 
 .os-icon {
-  font-size: 28px;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  opacity: 0.85;
 }
 
-.os-info {
+.card-info {
   text-align: left;
 }
 
 .os-name {
   display: block;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
 }
 
 .os-version {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   color: #666;
 }
 
 .download-footer {
+  text-align: center;
   font-size: 14px;
   color: #666;
 }
 
-.download-footer a {
-  color: #667eea;
-  text-decoration: none;
+.download-footer code {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #333;
 }
 
 /* Footer */
@@ -365,12 +466,25 @@
     grid-template-columns: 1fr;
   }
 
-  .download-buttons {
+  .support-label {
+    font-size: 11px;
+  }
+
+  .support h2 {
+    font-size: 36px;
+  }
+
+  .support-btn {
+    padding: 14px 32px;
+    font-size: 15px;
+  }
+
+  .download-cards {
     flex-direction: column;
     align-items: center;
   }
 
-  .download-btn {
+  .download-card {
     width: 100%;
     max-width: 300px;
     justify-content: center;
