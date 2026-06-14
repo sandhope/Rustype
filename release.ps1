@@ -57,7 +57,8 @@ if ($LASTEXITCODE -ne 0) {
     git checkout -b release
 }
 
-git merge $CURRENT_BRANCH --no-ff -m "Merge $CURRENT_BRANCH into release for v$VERSION"
+# git merge $CURRENT_BRANCH --no-ff -m "Merge $CURRENT_BRANCH into release for v$VERSION"
+git merge $CURRENT_BRANCH
 git push origin release
 
 # Switch back

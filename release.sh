@@ -93,7 +93,8 @@ echo "✅ Committed and pushed to branch $CURRENT_BRANCH successfully"
 # Switch to and merge release branch
 echo "🔄 Switching to release branch..."
 git checkout release || git checkout -b release
-git merge "$CURRENT_BRANCH" --no-ff -m "Merge $CURRENT_BRANCH into release for v$VERSION"
+# git merge "$CURRENT_BRANCH" --no-ff -m "Merge $CURRENT_BRANCH into release for v$VERSION"
+git merge "$CURRENT_BRANCH"
 git push origin release
 
 # Switch back to current branch

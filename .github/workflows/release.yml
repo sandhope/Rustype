@@ -33,7 +33,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04' || matrix.platform == 'ubuntu-22.04-arm' # This must match the platform value defined above.
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils
 
       - name: setup node
         uses: actions/setup-node@v4
@@ -68,7 +68,7 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
-          projectPath: 'src-tauri'
+          # projectPath: 'src-tauri'
           assetNamePattern: '[name]_[platform]_[version]_[arch][setup].[ext]'
           # 下面是v1版本，但是尚未发布
           # releaseAssetNamePattern: '[name]_[platform]_[version]_[arch][setup].[ext]'
