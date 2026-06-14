@@ -4,6 +4,8 @@
 
 Lightweight & High-performance Markdown Desktop Editor
 
+[中文 README](README.zh.md)
+
 ## Background
 
 marktext delivers an outstanding real-time Markdown editing experience in the industry. Drawing on its well-polished Markdown interaction logic and editing capabilities as our functional baseline, this project features a full-stack technical architecture refactor, alongside a brand-new, independently redesigned overall user experience.

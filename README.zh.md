@@ -45,3 +45,19 @@ marktext 拥有业界优秀的 Markdown 实时编辑体验。本项目借鉴 mar
 完整条款请参阅：[LICENSE](LICENSE)
 
 商业授权请联系：`fuxing.zhang@qq.com`
+
+## 支持项目
+
+如果这个项目对你有帮助，欢迎请我喝杯咖啡 ☕
+
+<table>
+  <tr>
+    <td>
+      <img src="sponsor/weixin.jpg" width="200"/>
+    </td>
+    <td width="100" align="center" > 🙏 </td>
+    <td>
+      <img src="sponsor/alipay.jpg" width="200"/>
+    </td>
+  </tr>
+</table>
