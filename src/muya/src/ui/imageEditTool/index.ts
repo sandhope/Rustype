@@ -63,8 +63,7 @@ const FILE_PROTOCOL_LENGTH = 7;
  * Image edit tool for editing image source, alt text and title
  * Provides a float UI to edit image properties with optional file picker and upload support
  */
-export class ImageEditTool extends BaseFloat {
-    public override options: Options;
+export class ImageEditTool extends BaseFloat<Options> {
     static pluginName = 'imageSelector';
 
     /** Previous virtual node for patching */

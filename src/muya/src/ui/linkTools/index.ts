@@ -38,10 +38,9 @@ const defaultOptions = {
     showArrow: false,
 };
 
-class LinkTools extends BaseFloat {
+class LinkTools extends BaseFloat<ILinkToolsOptions> {
     static pluginName = 'linkTools';
 
-    public override options: ILinkToolsOptions;
     public oldVNode: VNode | null = null;
     public linkInfo: ILinkInfo | null = null;
     public linkBlock: Format | null = null;

@@ -92,4 +92,4 @@ export interface IImageActionState {
     title: string;
 }
 
-export type Nullable<T> = T | null | undefined | void;
+export type Nullable<T> = T | null | undefined;

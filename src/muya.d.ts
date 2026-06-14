@@ -114,6 +114,7 @@ declare module '@muyajs/core' {
     export function sanitize(str: string): string;
     export function wordCount(str: string): { word: number; char: number };
     export function generateGithubSlug(str: string): string;
+    export function stableSlug(block: any): string;
 }
 
 declare module '@muyajs/core/assets/styles/*.css' {}

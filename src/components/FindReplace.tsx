@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { EditorHandle } from './Editor';
 
 interface FindReplaceProps {
-    editorRef: React.RefObject<EditorHandle>;
+    editorRef: React.RefObject<EditorHandle | null>;
     onClose: () => void;
 }
 

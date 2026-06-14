@@ -97,7 +97,6 @@ function App() {
     const [focusMode, setFocusMode] = useState(false);
     const [typewriterMode, setTypewriterMode] = useState(false);
     const [tocItems, setTocItems] = useState<TocItem[]>([]);
-    const [updateInfo, setUpdateInfo] = useState<Update | null>(null);
     const [checkingUpdate, setCheckingUpdate] = useState(false);
 
     // Editor context menu state
@@ -222,7 +221,7 @@ function App() {
                     const safeIdx = Math.min(activeIdx, restoredTabs.length - 1);
                     const activeTab = restoredTabs[safeIdx >= 0 ? safeIdx : 0];
                     // fix restore active tab file image load failed
-                    if (typeof window !== 'undefined') {
+                    if (typeof window !== 'undefined' && activeTab.file) {
                         const fileDir = await dirname(activeTab.file.path);
                         window.DIRNAME = fileDir;
                     }
@@ -360,7 +359,7 @@ function App() {
             for (const tab of tabs) {
                 if (!tab.file) continue;
                 const stat = await getFileStat(tab.file.path);
-                if (stat && tab.lastModified && stat.mtime > tab.lastModified) {
+                if (stat && tab.lastModified && stat.mtime != null && stat.mtime > tab.lastModified) {
                     setTabs(prev => prev.map(t =>
                         t.id === tab.id ? { ...t, externallyModified: true } : t
                     ));
@@ -693,7 +692,7 @@ function App() {
                         await update.downloadAndInstall((event) => {
                             switch (event.event) {
                                 case 'Started':
-                                    contentLength = event.data.contentLength;
+                                    contentLength = event.data.contentLength ?? 0;
                                     console.log(`开始下载 ${contentLength} bytes`);
                                     break;
                                 case 'Progress':

@@ -1,7 +1,6 @@
 import type { VNode } from 'snabbdom';
 import type { Muya } from '../../index';
 import type { Token } from '../../inlineRenderer/types';
-import type { IBaseOptions } from '../types';
 
 import type { FormatToolIcon } from './config';
 import Format from '../../block/base/format';
@@ -65,9 +64,6 @@ export class InlineFormatToolbar extends BaseFloat {
 
     /** Currently applied formats in the selection */
     private _formats: Token[] = [];
-
-    /** Toolbar configuration options */
-    public override options: IBaseOptions;
 
     /** Format tool icons configuration */
     private _icons: FormatToolIcon[] = icons;

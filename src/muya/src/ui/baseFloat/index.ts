@@ -22,8 +22,8 @@ function defaultOptions() {
 
 const BUTTON_GROUP = ['mu-table-drag-bar', 'mu-front-button'];
 
-abstract class BaseFloat {
-    public options: IBaseOptions;
+abstract class BaseFloat<T extends IBaseOptions = IBaseOptions> {
+    public options: T;
     public status: boolean = false;
     public floatBox: HTMLElement | null = null;
     public container: HTMLElement | null = null;
@@ -36,9 +36,9 @@ abstract class BaseFloat {
     constructor(
         public muya: Muya,
         public name: string,
-        options = {},
+        options: Partial<T> = {} as Partial<T>,
     ) {
-        this.options = Object.assign({}, defaultOptions(), options);
+        this.options = Object.assign({}, defaultOptions(), options) as T;
         this.init();
     }
 

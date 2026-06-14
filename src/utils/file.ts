@@ -128,7 +128,7 @@ export async function readFileContent(filePath: string): Promise<string> {
 }
 
 export async function saveMarkdownFile(content: string, filePath?: string): Promise<FileInfo | null> {
-    let targetPath = filePath;
+    let targetPath: string | undefined = filePath;
 
     if (!targetPath) {
         targetPath = await save({
@@ -136,7 +136,7 @@ export async function saveMarkdownFile(content: string, filePath?: string): Prom
                 { name: 'Markdown Files', extensions: ['md', 'markdown'] },
                 { name: 'All Files', extensions: ['*'] },
             ],
-        });
+        }) ?? undefined;
     }
 
     if (typeof targetPath === 'string') {

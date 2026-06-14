@@ -89,15 +89,17 @@ const COMMONJS_DEPS = [
 export default defineConfig({
   plugins: [react(), muyaInlineCssPlugin()],
 
-  esbuild: {
-    tsconfigRaw: JSON.stringify({
-      compilerOptions: {
-        useDefineForClassFields: true,
-        experimentalDecorators: true,
-        target: "es2022",
-      },
-    }),
-  },
+  // Note: Vite 7+ uses oxc by default. esbuild config below is ignored.
+  // TypeScript compiler options are defined in tsconfig.json instead.
+  // esbuild: {
+  //   tsconfigRaw: JSON.stringify({
+  //     compilerOptions: {
+  //       useDefineForClassFields: true,
+  //       experimentalDecorators: true,
+  //       target: "es2022",
+  //     },
+  //   }),
+  // },
 
   resolve: {
     alias: {
