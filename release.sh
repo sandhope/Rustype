@@ -26,14 +26,14 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   python3 -c "
 import json
 
-# 更新 package.json
+# Update package.json
 with open('package.json', 'r') as f:
     pkg = json.load(f)
 pkg['version'] = '$VERSION'
 with open('package.json', 'w') as f:
     json.dump(pkg, f, indent=2)
 
-# 更新 tauri.conf.json
+# Update tauri.conf.json
 with open('src-tauri/tauri.conf.json', 'r') as f:
     tauri = json.load(f)
 tauri['version'] = '$VERSION'
@@ -65,7 +65,7 @@ elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" || 
   echo "✅ Version updated to $VERSION successfully"
   
 else
-  # Linux 及 other systems use jq
+  # Linux and other systems use jq
   echo "🐧 Detected Linux, using jq to update version"
   jq --arg version "$VERSION" '.version = $version' package.json > tmp.json && mv tmp.json package.json
   jq --arg version "$VERSION" '.version = $version' src-tauri/tauri.conf.json > tmp.json && mv tmp.json src-tauri/tauri.conf.json
@@ -101,13 +101,13 @@ git checkout "$CURRENT_BRANCH"
 echo "✅ Switched to branch $CURRENT_BRANCH successfully"
 
 echo ""
-echo "🎉 Release process completed！"
+echo "🎉 Release process completed!"
 echo ""
-echo "Next steps："
-echo "1. Go to GitHub Actions to check build progress："
+echo "Next steps:"
+echo "1. Go to GitHub Actions to check build progress:"
 echo "   https://github.com/sandhope/Rustype/actions"
-echo "2. Go to Releases page after build is done："
+echo "2. Go to Releases page after build is done:"
 echo "   https://github.com/sandhope/Rustype/releases"
 echo "3. Find Draft Release 'Rustype v$VERSION' and Publish"
 echo ""
-echo "Current branch：$(git branch --show-current)"
+echo "Current branch: $(git branch --show-current)"

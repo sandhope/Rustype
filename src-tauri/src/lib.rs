@@ -1,7 +1,7 @@
-use tauri::Manager;
-use tauri_plugin_window_state::{StateFlags};
 use std::fs;
 use std::path::Path;
+use tauri::Manager;
+use tauri_plugin_window_state::StateFlags;
 
 #[tauri::command]
 fn create_file(path: String) -> Result<(), String> {
@@ -96,36 +96,44 @@ fn reveal_in_folder(path: String) -> Result<(), String> {
 #[tauri::command]
 fn grant_directory_access(app_handle: tauri::AppHandle, path: String) -> Result<(), String> {
     use tauri_plugin_fs::FsExt;
-    
+
     let fs_scope = app_handle.fs_scope();
-    
+
     // Grant access to the directory and all its subdirectories recursively
-    fs_scope.allow_directory(&path, true).map_err(|e| e.to_string())?;
-    
+    fs_scope
+        .allow_directory(&path, true)
+        .map_err(|e| e.to_string())?;
+
     Ok(())
 }
 
 #[tauri::command]
 fn grant_file_access(app_handle: tauri::AppHandle, path: String) -> Result<(), String> {
     use tauri_plugin_fs::FsExt;
-    
+
     let fs_scope = app_handle.fs_scope();
-    
+
     // Grant access to the file
     fs_scope.allow_file(&path).map_err(|e| e.to_string())?;
-    
+
     Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_window_state::Builder::default().with_state_flags(StateFlags::all().difference(StateFlags::DECORATIONS)).build())
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .with_state_flags(StateFlags::all().difference(StateFlags::DECORATIONS))
+                .build(),
+        )
         .plugin(tauri_plugin_clipboard_manager::init())
         .invoke_handler(tauri::generate_handler![
             create_file,

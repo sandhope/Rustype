@@ -2,6 +2,8 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { readText as readClipboardText } from '@tauri-apps/plugin-clipboard-manager';
 import { openUrl } from '@tauri-apps/plugin-opener';
+import { check } from '@tauri-apps/plugin-updater';
+import { relaunch } from '@tauri-apps/plugin-process';
 import logo from '../src-tauri/icons/128x128.png';
 import Editor, { type EditorHandle } from './components/Editor';
 import TabBar, { type Tab } from './components/TabBar';
@@ -95,6 +97,8 @@ function App() {
     const [focusMode, setFocusMode] = useState(false);
     const [typewriterMode, setTypewriterMode] = useState(false);
     const [tocItems, setTocItems] = useState<TocItem[]>([]);
+    const [updateInfo, setUpdateInfo] = useState<Update | null>(null);
+    const [checkingUpdate, setCheckingUpdate] = useState(false);
 
     // Editor context menu state
     const [editorCtxMenu, setEditorCtxMenu] = useState<{
@@ -669,6 +673,57 @@ function App() {
         setActiveMenu(prev => prev === menu ? null : menu);
     }, []);
 
+    const handleCheckUpdate = useCallback(async () => {
+        setActiveMenu(null);
+        setCheckingUpdate(true);
+        
+        try {
+            const update = await check();
+            
+            if (update) {
+                console.log(`发现更新 ${update.version} 发布于 ${update.date} 更新日志: ${update.body}`);
+                
+                const shouldInstall = confirm(`发现新版本 ${update.version}！\n\n发布日期：${update.date}\n\n更新日志：\n${update.body || '暂无更新日志'}\n\n是否立即安装？`);
+                
+                if (shouldInstall) {
+                    let downloaded = 0;
+                    let contentLength = 0;
+                    
+                    try {
+                        await update.downloadAndInstall((event) => {
+                            switch (event.event) {
+                                case 'Started':
+                                    contentLength = event.data.contentLength;
+                                    console.log(`开始下载 ${contentLength} bytes`);
+                                    break;
+                                case 'Progress':
+                                    downloaded += event.data.chunkLength;
+                                    console.log(`已下载 ${downloaded} / ${contentLength}`);
+                                    break;
+                                case 'Finished':
+                                    console.log('下载完成');
+                                    break;
+                            }
+                        });
+                        
+                        console.log('更新安装完成');
+                        await relaunch();
+                    } catch (installError) {
+                        console.error('Failed to install update:', installError);
+                        alert('更新安装失败，请手动前往 GitHub 下载最新版本');
+                    }
+                }
+            } else {
+                alert('当前已是最新版本');
+            }
+        } catch (error) {
+            console.error('Failed to check for updates:', error);
+            alert('检查更新失败，请稍后重试');
+        } finally {
+            setCheckingUpdate(false);
+        }
+    }, []);
+
     const handleMenuItemClick = useCallback((action: string) => {
         switch (action) {
             case 'new':
@@ -753,6 +808,9 @@ function App() {
             case 'license':
                 openUrl('https://github.com/sandhope/Rustype/blob/main/LICENSE');
                 setActiveMenu(null);
+                break;
+            case 'checkUpdate':
+                handleCheckUpdate();
                 break;
         }
     }, [handleNewFile, handleOpenFile, handleOpenFolder, handleSaveFile, handleSaveAs, sourceMode, focusMode, activeTabId]);
@@ -1189,8 +1247,8 @@ function App() {
                                     <span className="menu-item-label">许可证</span>
                                 </div>
                                 <div className="menu-divider" />
-                                <div className="menu-item menu-item-disabled">
-                                    <span className="menu-item-label">检查更新（未完成）</span>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('checkUpdate')}>
+                                    <span className="menu-item-label">{checkingUpdate ? '检查中...' : '检查更新'}</span>
                                 </div>
                                 <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('shortcuts')}>

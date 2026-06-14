@@ -69,4 +69,6 @@ jobs:
           prerelease: false
           args: ${{ matrix.args }}
           projectPath: 'src-tauri'
-          releaseAssetNamePattern: '[name]_[platform]_[version]_[arch][setup].[ext]'
+          assetNamePattern: '[name]_[platform]_[version]_[arch][setup].[ext]'
+          # 下面是v1版本，但是尚未发布
+          # releaseAssetNamePattern: '[name]_[platform]_[version]_[arch][setup].[ext]'
