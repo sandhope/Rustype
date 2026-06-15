@@ -41,6 +41,7 @@ export interface EditorHandle {
     scrollToHeading: (slug: string) => void;
     scrollToCursor: () => void;
     setFocusMode: (focusMode: boolean) => void;
+    reloadImages: () => void;
     setOptions: (options: Record<string, unknown>, forceRender?: boolean) => void;
     insertParagraph: (location: 'before' | 'after') => void;
     copyAsRich: () => void;
@@ -291,6 +292,9 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             },
             setFocusMode: (focusMode: boolean) => {
                 muyaRef.current?.setOptions({ focusMode });
+            },
+            reloadImages: () => {
+                muyaRef.current?.invalidateImageCache();
             },
             scrollToCursor: () => {
                 const muya = muyaRef.current as any;

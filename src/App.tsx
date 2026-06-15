@@ -785,6 +785,10 @@ function App() {
                 setActiveSidebarPanel(prev => prev === 'outline' ? null : 'outline');
                 setActiveMenu(null);
                 break;
+            case 'reloadImages':
+                editorRef.current?.reloadImages();
+                setActiveMenu(null);
+                break;
             case 'settings':
                 setSettingsOpen(true);
                 setActiveMenu(null);
@@ -1246,9 +1250,9 @@ function App() {
                                     <span className="menu-item-label">显示大纲</span>
                                     <span className="menu-item-shortcut"></span>
                                 </div>
-                                <div className="menu-item" onClick={() => handleMenuItemClick('outline')}>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('reloadImages')}>
                                     <span className="menu-item-status"></span>
-                                    <span className="menu-item-label">重新加载图片- 未完成</span>
+                                    <span className="menu-item-label">重新加载图片</span>
                                     <span className="menu-item-shortcut">F5</span>
                                 </div>
                                 <div className="menu-divider" />
