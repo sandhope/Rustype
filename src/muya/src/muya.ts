@@ -313,6 +313,10 @@ export class Muya {
             );
         }
 
+        if ('focusMode' in options) {
+            this.setFocusMode(options.focusMode!);
+        }
+
         if (!forceRender)
             return;
 
@@ -373,10 +377,11 @@ export class Muya {
      * the stylesheet (`.mu-focus-mode .mu-container > * { opacity }`).
      */
     setFocusMode(focusMode: boolean) {
-        if (focusMode)
+        if (focusMode) {
             this.domNode.classList.add(CLASS_NAMES.MU_FOCUS_MODE);
-        else
+        } else {
             this.domNode.classList.remove(CLASS_NAMES.MU_FOCUS_MODE);
+        }
 
         this.options.focusMode = focusMode;
     }

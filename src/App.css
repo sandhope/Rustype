@@ -134,8 +134,9 @@ body,
 .menu-item {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 6px 12px;
+  gap: 8px;
   font-size: 13px;
   color: var(--app-text-color);
   cursor: pointer;
@@ -160,22 +161,40 @@ body,
   pointer-events: none;
 }
 
+/* 状态标记列（✓）*/
+.menu-item-status {
+  font-size: 13px;
+  color: var(--app-text-color);
+  width: 14px; 
+  flex-shrink: 0;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 标签列 */
 .menu-item-label {
   flex: 1;
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* 快捷键列 */
 .menu-item-shortcut {
   font-size: 12px;
   color: var(--app-text-secondary);
   margin-left: 24px;
+  margin-right: 22px;
   text-align: right;
 }
 
 .menu-divider {
   height: 1px;
   background-color: var(--float-border-color);
-  margin: 4px 8px;
+  margin: 4px 0px;
 }
 
 /* Submenu */
@@ -184,10 +203,10 @@ body,
 }
 
 .menu-item-arrow {
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
   color: var(--app-text-secondary);
-  margin-left: 8px;
+  margin-right: 10px;
 }
 
 .menu-submenu {

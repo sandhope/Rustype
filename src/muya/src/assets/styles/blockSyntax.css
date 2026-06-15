@@ -384,24 +384,53 @@ ol.mu-order-list:last-child {
 }
 
 /* Focus mode (mirrors marktext muyajs `.ag-focus-mode`): when the editor
-   container carries `mu-focus-mode`, dim every top-level block and restore full
+   container carries `mu-focus-mode`, dim every paragraph-level block and restore full
    opacity on the active one. `mu-active` is applied to the whole ancestor chain
-   of the focused content block, so the top-level block containing the cursor
+   of the focused content block, so the paragraph containing the cursor
    keeps `opacity: 1`. The class is toggled by `Muya#setFocusMode`.
 
    Placed ahead of the task-list rules so the low-specificity
-   `.mu-focus-mode .mu-container > *` selector precedes the higher-specificity
-   `li.mu-task-list-item > … ~ *` rule below (stylelint no-descending-specificity).
-   They target disjoint elements and set different properties, so order has
-   no visual effect. */
-.mu-focus-mode .mu-container > * {
+   selector precedes higher-specificity rules below. */
+.mu-focus-mode p.mu-paragraph,
+.mu-focus-mode div.mu-paragraph,
+.mu-focus-mode h1.mu-atx-heading,
+.mu-focus-mode h2.mu-atx-heading,
+.mu-focus-mode h3.mu-atx-heading,
+.mu-focus-mode h4.mu-atx-heading,
+.mu-focus-mode h5.mu-atx-heading,
+.mu-focus-mode h6.mu-atx-heading,
+.mu-focus-mode figure.mu-table,
+.mu-focus-mode figure.mu-html-block,
+.mu-focus-mode pre.mu-code-block,
+.mu-focus-mode li.mu-list-item {
     opacity: 0.25;
-
     transition: opacity 0.2s ease-in-out;
 }
 
-.mu-focus-mode .mu-container > .mu-active {
+.mu-focus-mode .mu-table:not(.mu-active) img,
+.mu-focus-mode .mu-table:not(.mu-active) svg,
+.mu-focus-mode .mu-html-block:not(.mu-active) img,
+.mu-focus-mode .mu-html-block:not(.mu-active) svg {
+    filter: opacity(0.25);
+}
+
+.mu-focus-mode p.mu-active,
+.mu-focus-mode div.mu-active,
+.mu-focus-mode h1.mu-active,
+.mu-focus-mode h2.mu-active,
+.mu-focus-mode h3.mu-active,
+.mu-focus-mode h4.mu-active,
+.mu-focus-mode h5.mu-active,
+.mu-focus-mode h6.mu-active,
+.mu-focus-mode figure.mu-active,
+.mu-focus-mode pre.mu-active,
+.mu-focus-mode li.mu-active {
     opacity: 1;
+}
+
+.mu-focus-mode figure.mu-active img,
+.mu-focus-mode figure.mu-active svg {
+    filter: none;
 }
 
 /* task list */
