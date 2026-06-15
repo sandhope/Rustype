@@ -132,6 +132,22 @@ fn open_devtools(app_handle: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn toggle_fullscreen(app_handle: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app_handle.get_webview_window("main") {
+        let is_fullscreen = window.is_fullscreen().unwrap_or(false);
+        if is_fullscreen {
+            window.set_fullscreen(false).map_err(|e| e.to_string())?;
+        } else {
+            window.set_fullscreen(true).map_err(|e| e.to_string())?;
+        }
+    } else {
+        return Err("Main window not found".to_string());
+    }
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -158,6 +174,7 @@ pub fn run() {
             grant_directory_access,
             grant_file_access,
             open_devtools,
+            toggle_fullscreen,
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();

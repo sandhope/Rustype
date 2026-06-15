@@ -38,18 +38,26 @@ const shortcutsData: ShortcutItem[] = [
     {
         category: '视图操作',
         shortcuts: [
-            { description: '切换源代码模式', keys: ['Ctrl', 'Shift', 'M'] },
-            { description: '切换聚焦模式', keys: ['Ctrl', 'Shift', 'F'] },
-            { description: '切换打字机模式', keys: ['Ctrl', 'Shift', 'T'] },
-            { description: '显示设置', keys: ['Ctrl', ','] },
-            { description: '显示侧边栏', keys: ['Ctrl', 'B'] },
+            { description: '命令面板', keys: ['Ctrl', 'Shift', 'P'] },
+            { description: '源代码模式', keys: ['Ctrl', 'E'] },
+            { description: '专注模式', keys: ['Ctrl', 'Shift', 'G'] },
+            { description: '打字机模式', keys: ['Ctrl', 'Shift', 'J'] },
+            { description: '打开侧边栏', keys: ['Ctrl', 'J'] },
+            { description: '显示大纲', keys: ['Ctrl', 'K'] },
+            { description: '重新加载图片', keys: ['F5'] },
+            { description: '打开开发者工具', keys: ['Ctrl', 'Shift', 'I'] },
+            { description: '重新加载窗口', keys: ['Ctrl', 'F5'] },
         ],
     },
     {
         category: '窗口操作',
         shortcuts: [
-            { description: '关闭设置面板', keys: ['Escape'] },
-            { description: '关闭对话框', keys: ['Escape'] },
+            { description: '最小化', keys: ['Ctrl', 'M'] },
+            { description: '总是在最前', keys: ['Ctrl', 'F'] },
+            { description: '放大文字', keys: ['Ctrl', '+'] },
+            { description: '缩小文字', keys: ['Ctrl', '-'] },
+            { description: '重置文字', keys: ['Ctrl', '0'] },
+            { description: '全屏', keys: ['F11'] },
         ],
     },
 ];

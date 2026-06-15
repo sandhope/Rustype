@@ -32,6 +32,8 @@
     "clipboard-manager:allow-write-text",
     "core:path:default",
     "updater:default",
-    "process:default"
+    "process:default",
+    "core:webview:allow-set-webview-zoom",
+    "core:window:allow-set-always-on-top"
   ]
 }

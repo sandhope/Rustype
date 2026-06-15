@@ -21,6 +21,7 @@ import { loadSettings, saveSettings, type AppSettings, DEFAULT_SETTINGS } from '
 import { loadSession, saveSession } from './utils/session';
 import './App.css';
 import './styles/themes.css';
+import { zoomIn, zoomOut, zoomReset } from './utils/webview';
 
 const WELCOME_MARKDOWN = `# 欢迎使用 Rustype
 
@@ -99,6 +100,7 @@ function App() {
     const [typewriterMode, setTypewriterMode] = useState(false);
     const [tocItems, setTocItems] = useState<TocItem[]>([]);
     const [checkingUpdate, setCheckingUpdate] = useState(false);
+    const [alwaysOnTop, setAlwaysOnTop] = useState(false);
 
     // Editor context menu state
     const [editorCtxMenu, setEditorCtxMenu] = useState<{
@@ -798,6 +800,34 @@ function App() {
                 invoke('open_devtools');
                 setActiveMenu(null);
                 break;
+            case 'minimizeWindow':
+                getCurrentWindow().minimize();
+                setActiveMenu(null);
+                break;
+            case 'toggleAlwaysOnTop':
+                setAlwaysOnTop(prev => {
+                    const next = !prev;
+                    getCurrentWindow().setAlwaysOnTop(next);
+                    return next;
+                });
+                setActiveMenu(null);
+                break;
+            case 'zoomIn':
+                zoomIn();;
+                // setActiveMenu(null);
+                break;
+            case 'zoomOut':
+                zoomOut();
+                // setActiveMenu(null);
+                break;
+            case 'zoomReset':
+                zoomReset();
+                // setActiveMenu(null);
+                break;
+            case 'toggleFullscreen':
+                invoke('toggle_fullscreen');
+                setActiveMenu(null);
+                break;
             case 'settings':
                 setSettingsOpen(true);
                 setActiveMenu(null);
@@ -1221,6 +1251,49 @@ function App() {
 
                         <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
                             <div
+                                className={`menu-trigger ${activeMenu === 'window' ? 'active' : ''}`}
+                                onClick={() => toggleMenu('window')}
+                            >
+                                窗口
+                            </div>
+                            <div className={`menu-dropdown-content ${activeMenu === 'window' ? 'is-open' : ''}`}>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('minimizeWindow')}>
+                                    <span className="menu-item-status"></span>
+                                    <span className="menu-item-label">最小化</span>
+                                    <span className="menu-item-shortcut">Ctrl+M</span>
+                                </div>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('toggleAlwaysOnTop')}>
+                                    <span className="menu-item-status">{alwaysOnTop ? '✓' : ''}</span>
+                                    <span className="menu-item-label">总是在最前</span>
+                                    <span className="menu-item-shortcut">Ctrl+F</span>
+                                </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item" onClick={() => handleMenuItemClick('zoomIn')}>
+                                    <span className="menu-item-status"></span>
+                                    <span className="menu-item-label">放大文字</span>
+                                    <span className="menu-item-shortcut">Ctrl++</span>
+                                </div>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('zoomOut')}>
+                                    <span className="menu-item-status"></span>
+                                    <span className="menu-item-label">缩小文字</span>
+                                    <span className="menu-item-shortcut">Ctrl+-</span>
+                                </div>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('zoomReset')}>
+                                    <span className="menu-item-status"></span>
+                                    <span className="menu-item-label">重置文字</span>
+                                    <span className="menu-item-shortcut">Ctrl+0</span>
+                                </div>
+                                <div className="menu-divider" />
+                                <div className="menu-item" onClick={() => handleMenuItemClick('toggleFullscreen')}>
+                                    <span className="menu-item-status"></span>
+                                    <span className="menu-item-label">全屏</span>
+                                    <span className="menu-item-shortcut">F11</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                            <div
                                 className={`menu-trigger ${activeMenu === 'view' ? 'active' : ''}`}
                                 onClick={() => toggleMenu('view')}
                             >
@@ -1241,12 +1314,12 @@ function App() {
                                 <div className="menu-item" onClick={() => handleMenuItemClick('focusMode')}>
                                     <span className="menu-item-status">{focusMode ? '✓' : ''}</span>
                                     <span className="menu-item-label">专注模式</span>
-                                    <span className="menu-item-shortcut">Ctrl+Shift+J</span>
+                                    <span className="menu-item-shortcut">Ctrl+Shift+G</span>
                                 </div>
                                 <div className="menu-item" onClick={() => handleMenuItemClick('typewriterMode')}>
                                     <span className="menu-item-status">{typewriterMode ? '✓' : ''}</span>
                                     <span className="menu-item-label">打字机模式</span>
-                                    <span className="menu-item-shortcut"></span>
+                                    <span className="menu-item-shortcut">Ctrl+Shift+J</span>
                                 </div>
                                 <div className="menu-divider" />
                                 <div className="menu-item" onClick={() => handleMenuItemClick('sidebar')}>
@@ -1257,7 +1330,7 @@ function App() {
                                 <div className="menu-item" onClick={() => handleMenuItemClick('outline')}>
                                     <span className="menu-item-status">{activeSidebarPanel === 'outline' ? '✓' : ''}</span>
                                     <span className="menu-item-label">显示大纲</span>
-                                    <span className="menu-item-shortcut"></span>
+                                    <span className="menu-item-shortcut">Ctrl+K</span>
                                 </div>
                                 <div className="menu-item" onClick={() => handleMenuItemClick('reloadImages')}>
                                     <span className="menu-item-status"></span>
