@@ -19,6 +19,7 @@ interface UseKeyboardShortcutsProps {
     handleOpenFolder: () => void;
     handleSaveFile: () => void;
     handleSaveAs: () => void;
+    handleMenuAction: (action: string) => void;
 }
 
 export function useKeyboardShortcuts(
@@ -42,6 +43,7 @@ export function useKeyboardShortcuts(
         handleOpenFolder,
         handleSaveFile,
         handleSaveAs,
+        handleMenuAction,
     } = props;
 
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -56,11 +58,86 @@ export function useKeyboardShortcuts(
             return;
         }
 
+        // Single-modifier Ctrl/Cmd shortcuts
+        // Examples:
+        // Ctrl+B -> toggleBold
+        // Ctrl+I -> toggleItalic
+        // Ctrl+U -> toggleUnderline
+        // Ctrl+E -> sourceMode
+        // Ctrl+J -> sidebar
+        // Ctrl+K -> outline
+        // Ctrl+M -> minimizeWindow
+        // Ctrl+- -> zoomOut
+        // Ctrl+0 -> zoomReset
         if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
             switch (e.key.toLowerCase()) {
+                case 'b':
+                    if (!sourceMode) {
+                        e.preventDefault();
+                        handleMenuAction('toggleBold');
+                    }
+                    break;
+                case 'i':
+                    if (!sourceMode) {
+                        e.preventDefault();
+                        handleMenuAction('toggleItalic');
+                    }
+                    break;
+                case 'u':
+                    if (!sourceMode) {
+                        e.preventDefault();
+                        handleMenuAction('toggleUnderline');
+                    }
+                    break;
+                case '`':
+                    if (!sourceMode) {
+                        e.preventDefault();
+                        handleMenuAction('inlineCode');
+                    }
+                    break;
+                case 'l':
+                    if (!sourceMode) {
+                        e.preventDefault();
+                        handleMenuAction('insertLink');
+                    }
+                    break;
+                case 'd':
+                    if (!sourceMode) {
+                        e.preventDefault();
+                        handleMenuAction('strikethrough');
+                    }
+                    break;
                 case 'n':
                     e.preventDefault();
                     handleNewFile();
+                    break;
+                case 'e':
+                    e.preventDefault();
+                    handleMenuAction('sourceMode');
+                    break;
+                case 'j':
+                    e.preventDefault();
+                    handleMenuAction('sidebar');
+                    break;
+                case 'k':
+                    e.preventDefault();
+                    handleMenuAction('outline');
+                    break;
+                case 'm':
+                    e.preventDefault();
+                    handleMenuAction('minimizeWindow');
+                    break;
+                case '-':
+                    e.preventDefault();
+                    handleMenuAction('zoomOut');
+                    break;
+                case '+':
+                    e.preventDefault();
+                    handleMenuAction('zoomIn');
+                    break;
+                case '0':
+                    e.preventDefault();
+                    handleMenuAction('zoomReset');
                     break;
                 case 'o':
                     e.preventDefault();
@@ -97,18 +174,94 @@ export function useKeyboardShortcuts(
             }
         }
 
+        // Ctrl+Shift shortcuts
+        // Examples:
+        // Ctrl+Shift+M -> inlineMath
+        // Ctrl+Shift+H -> highlight
+        // Ctrl+Shift+R -> clearFormatting
+        // Ctrl+Shift+F -> toggle focus mode
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey) {
             if (e.key === 'S' || e.key === 's') {
                 e.preventDefault();
                 handleSaveAs();
             }
-            if (e.key === 'F' || e.key === 'f') {
+            if (e.key === 'J' || e.key === 'j') {
                 e.preventDefault();
                 setFocusMode(prev => {
                     const next = !prev;
                     editorRef.current?.setFocusMode(next);
                     return next;
                 });
+            }
+            if (!sourceMode) {
+                // Ctrl+Shift++ -> zoomIn (mapped before superscript to prefer zoom)
+                if (e.key === '+') {
+                    e.preventDefault();
+                    handleMenuAction('zoomIn');
+                }
+                if (e.key === 'M' || e.key === 'm') {
+                    e.preventDefault();
+                    handleMenuAction('inlineMath');
+                }
+                if (e.key === 'H' || e.key === 'h') {
+                    e.preventDefault();
+                    handleMenuAction('highlight');
+                }
+                if (e.key === 'G' || e.key === 'g') {
+                    e.preventDefault();
+                    handleMenuAction('typewriterMode');
+                }
+                if (e.key === 'R' || e.key === 'r') {
+                    e.preventDefault();
+                    handleMenuAction('clearFormatting');
+                }
+                if (e.key === '=' || e.key === '+') {
+                    e.preventDefault();
+                    handleMenuAction('superscript');
+                }
+                // Ctrl+Shift+I -> open devtools
+                if (e.key === 'I' || e.key === 'i') {
+                    e.preventDefault();
+                    handleMenuAction('openDevTools');
+                }
+            }
+        }
+
+        // Ctrl+= without Shift -> subscript
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === '=')) {
+            if (!sourceMode) {
+                e.preventDefault();
+                handleMenuAction('subscript');
+            }
+        }
+
+        // Ctrl+Alt+I -> insert image
+        if ((e.ctrlKey || e.metaKey) && e.altKey && !e.shiftKey) {
+            if (!sourceMode && (e.key === 'I' || e.key === 'i')) {
+                e.preventDefault();
+                handleMenuAction('insertImage');
+            }
+            // Ctrl+Alt+T -> toggle always on top
+            if (!sourceMode && (e.key === 'T' || e.key === 't')) {
+                e.preventDefault();
+                handleMenuAction('toggleAlwaysOnTop');
+            }
+        }
+
+        // F11 -> toggle fullscreen
+        if (e.key === 'F11') {
+            e.preventDefault();
+            handleMenuAction('toggleFullscreen');
+        }
+
+        // F5 / Ctrl+F5 -> reload images or reload window
+        if (e.key === 'F5') {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                handleMenuAction('reloadWindow');
+            } else {
+                e.preventDefault();
+                handleMenuAction('reloadImages');
             }
         }
 

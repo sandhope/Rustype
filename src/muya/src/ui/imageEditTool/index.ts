@@ -88,6 +88,9 @@ export class ImageEditTool extends BaseFloat<Options> {
         title: '',
     };
 
+    /** Active tab in the UI: 'select' for local picker, 'link' for paste URL */
+    private _activeTab: 'select' | 'link' = 'select';
+
     /** Container element for the image selector */
     private _imageSelectorContainer: HTMLDivElement
         = document.createElement('div');
@@ -409,6 +412,9 @@ export class ImageEditTool extends BaseFloat<Options> {
 
         const path = await this.options.imagePathPicker();
         this._state.src = path;
+        // After selecting a file, switch to the link tab so the user can
+        // confirm or edit the inserted path before applying.
+        this._activeTab = 'link';
         this._render();
     }
 
@@ -420,23 +426,30 @@ export class ImageEditTool extends BaseFloat<Options> {
         const { _oldVNode: oldVNode, _imageSelectorContainer: imageSelectorContainer, _state: { src } } = this;
         const { i18n } = this.muya;
 
-        // Optional file picker button
-        const moreButton = this.options.imagePathPicker
-            ? h(
-                    'span.more',
-                    {
-                        on: {
-                            click: () => this._handleMoreClick(),
-                        },
-                    },
-                    h('span.more-inner'),
-                )
-            : null;
+        // Tabs
+        const tabSelect = h('span.tab' + (this._activeTab === 'select' ? '.active' : ''), {
+            on: { click: () => { this._activeTab = 'select'; this._render(); } },
+        }, '选择图片');
+        const tabLink = h('span.tab' + (this._activeTab === 'link' ? '.active' : ''), {
+            on: { click: () => { this._activeTab = 'link'; this._render(); } },
+        }, '插入链接');
 
-        // Image source input
+        // Content for select tab: large picker button and preview of current src
+        const pickerArea = h('div.picker-area', [
+            this.options.imagePathPicker
+                ? h('button.select-file', { on: { click: () => this._handleMoreClick() } }, '选择图片')
+                : h('div.select-disabled', '文件选择不可用'),
+            src ? (() => {
+                const resolved = getImageSrc(src);
+                const displaySrc = resolved && resolved.src ? resolved.src : '';
+                return displaySrc ? h('div.preview', h('img', { props: { src: displaySrc } })) : null;
+            })() : null,
+        ]);
+
+        // Content for link tab: src input and confirm button
         const srcInput = h('input.src', {
             props: {
-                placeholder: i18n.t('Image src placeholder'),
+                placeholder: '图片链接',
                 value: src,
             },
             on: {
@@ -447,21 +460,13 @@ export class ImageEditTool extends BaseFloat<Options> {
             },
         });
 
-        // Confirm button
-        const confirmButton = h(
-            'span.confirm',
-            {
-                on: {
-                    click: () => this._handleConfirm(),
-                },
-            },
-            i18n.t('Confirm Text'),
-        );
+        const confirmButton = h('span.confirm', { on: { click: () => this._handleConfirm() } }, '确定');
+
+        const linkArea = h('div.link-area', [srcInput, confirmButton]);
 
         const vnode = h('div.image-edit-tool', [
-            moreButton,
-            srcInput,
-            confirmButton,
+            h('div.tabs', [tabSelect, tabLink]),
+            this._activeTab === 'select' ? pickerArea : linkArea,
         ]);
 
         patch(oldVNode || imageSelectorContainer, vnode);

@@ -20,6 +20,7 @@ import {
     PreviewToolBar,
     stableSlug,
 } from '@muyajs/core';
+import ImagePathPicker from '../muya/src/ui/imagePicker';
 import type { IMuyaOptions } from '@muyajs/core';
 import '@muyajs/core/assets/styles/index.css';
 import '@muyajs/core/assets/styles/blockSyntax.css';
@@ -50,6 +51,8 @@ export interface EditorHandle {
     pasteText: (text: string, asPlainText?: boolean) => void;
     getDomNode: () => HTMLElement | null;
     dispose: () => void;
+    format?: (type: string) => void;
+    insertImage?: (src?: string, alt?: string) => void;
 }
 
 interface EditorProps {
@@ -100,9 +103,77 @@ function ensurePlugins() {
     Muya.use(EmojiSelector);
     Muya.use(FootnoteTool);
     Muya.use(InlineFormatToolbar);
+    // ImagePathPicker is implemented inside the local muya copy and its
+    // `Muya` type differs from the one in `@muyajs/core`'s d.ts. Cast to
+    // the expected plugin constructor type to satisfy TypeScript.
+    Muya.use(ImagePathPicker as unknown as any);
     Muya.use(ImageEditTool, {
-        imagePathPicker: async () => '',
-        imageAction: async (state: { src: string }) => state.src,
+        imagePathPicker: async (query?: string) => {
+            // Try Tauri dialog plugin first (native file picker)
+            try {
+                const dialog = await import('@tauri-apps/plugin-dialog');
+                const file = await dialog.open({
+                    multiple: false,
+                    directory: false,
+                    filters: [
+                        { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'] }
+                    ]
+                });
+                if (!file) return '';
+                if (Array.isArray(file)) return file[0] ?? '';
+                return String(file);
+            } catch (err) {
+                // Fallback for web: show an input file and return object URL
+                return new Promise<string>((resolve) => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.style.position = 'fixed';
+                    input.style.left = '-10000px';
+                    document.body.appendChild(input);
+                    input.addEventListener('change', () => {
+                        const file = input.files?.[0] ?? null;
+                        if (file) {
+                            const url = URL.createObjectURL(file);
+                            resolve(url);
+                        } else {
+                            resolve('');
+                        }
+                        document.body.removeChild(input);
+                    }, { once: true });
+                    input.click();
+                });
+            }
+        },
+        imageAction: async (state: { src: unknown }) => {
+            // Muya expects imageAction to return the final src (string) to insert.
+            // Normalize common input shapes and provide safe fallbacks.
+            const src = state.src;
+            if (!src) return '';
+            if (typeof src === 'string') return src;
+
+            // If Muya passed a File object (browser fallback), create an object URL.
+            if (typeof File !== 'undefined' && src instanceof File) {
+                try {
+                    return URL.createObjectURL(src);
+                } catch (err) {
+                    return '';
+                }
+            }
+
+            // If src is an object with a path property (some environments), use it.
+            if (typeof src === 'object' && src !== null && 'path' in (src as any)) {
+                const p = (src as any).path;
+                if (typeof p === 'string') return p;
+            }
+
+            // Fallback to string coercion.
+            try {
+                return String(src);
+            } catch (err) {
+                return '';
+            }
+        },
     });
     Muya.use(ImageToolBar);
     Muya.use(ImageResizeBar);
@@ -357,6 +428,13 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             },
             getDomNode: () => {
                 return (muyaRef.current as any)?.domNode ?? null;
+            },
+            format: (type: string) => {
+                muyaRef.current?.format(type);
+            },
+            insertImage: (src = '', alt = '') => {
+                // prefer Muya.insertImage when available
+                (muyaRef.current as any)?.insertImage?.({ src, alt });
             },
             dispose: () => {
                 const muyaToDestroy = muyaRef.current;

@@ -186,6 +186,81 @@ export default function MenuBar({
 
                     <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
                         <div
+                            className={`menu-trigger ${activeMenu === 'format' ? 'active' : ''}`}
+                            onClick={() => onToggleMenu('format')}
+                        >
+                            格式
+                        </div>
+                        <div className={`menu-dropdown-content ${activeMenu === 'format' ? 'is-open' : ''}`}>
+                            <div className="menu-item" onClick={() => onMenuItemClick('toggleBold')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">粗体</span>
+                                <span className="menu-item-shortcut">Ctrl+B</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('toggleItalic')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">斜体</span>
+                                <span className="menu-item-shortcut">Ctrl+I</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('toggleUnderline')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">下划线</span>
+                                <span className="menu-item-shortcut">Ctrl+U</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('superscript')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">上标</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift++</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('subscript')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">下标</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+-</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('highlight')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">高亮</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+H</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('inlineCode')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">行内代码</span>
+                                <span className="menu-item-shortcut">Ctrl+`</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('inlineMath')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">行内数学</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+M</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('strikethrough')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">删除线</span>
+                                <span className="menu-item-shortcut">Ctrl+D</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('insertLink')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">超链接</span>
+                                <span className="menu-item-shortcut">Ctrl+L</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('insertImage')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">图片</span>
+                                <span className="menu-item-shortcut">Ctrl+Alt+I</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('clearFormatting')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">清除格式</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+R</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                        <div
                             className={`menu-trigger ${activeMenu === 'window' ? 'active' : ''}`}
                             onClick={() => onToggleMenu('window')}
                         >
@@ -200,7 +275,7 @@ export default function MenuBar({
                             <div className="menu-item" onClick={() => onMenuItemClick('toggleAlwaysOnTop')}>
                                 <span className="menu-item-status">{alwaysOnTop ? '✓' : ''}</span>
                                 <span className="menu-item-label">总是在最前</span>
-                                <span className="menu-item-shortcut">Ctrl+F</span>
+                                <span className="menu-item-shortcut">Ctrl+Alt+T</span>
                             </div>
                             <div className="menu-divider" />
                             <div className="menu-item" onClick={() => onMenuItemClick('zoomIn')}>
@@ -246,14 +321,14 @@ export default function MenuBar({
                                 <span className="menu-item-label">源代码模式</span>
                                 <span className="menu-item-shortcut">Ctrl+E</span>
                             </div>
-                            <div className="menu-item" onClick={() => onMenuItemClick('focusMode')}>
+                            <div className="menu-item" onClick={() => onMenuItemClick('typewriterMode')}>
                                 <span className="menu-item-status">{focusMode ? '✓' : ''}</span>
-                                <span className="menu-item-label">专注模式</span>
+                                <span className="menu-item-label">打字机模式</span>
                                 <span className="menu-item-shortcut">Ctrl+Shift+G</span>
                             </div>
-                            <div className="menu-item" onClick={() => onMenuItemClick('typewriterMode')}>
+                            <div className="menu-item" onClick={() => onMenuItemClick('focusMode')}>
                                 <span className="menu-item-status">{typewriterMode ? '✓' : ''}</span>
-                                <span className="menu-item-label">打字机模式</span>
+                                <span className="menu-item-label">专注模式</span>
                                 <span className="menu-item-shortcut">Ctrl+Shift+J</span>
                             </div>
                             <div className="menu-divider" />
@@ -275,8 +350,8 @@ export default function MenuBar({
                             <div className="menu-divider" />
                             <div className="menu-item" onClick={() => onMenuItemClick('openDevTools')}>
                                 <span className="menu-item-status"></span>
-                                <span className="menu-item-label">打开开发者工具</span>
-                                <span className="menu-item-shortcut">Alt+Ctrl+I</span>
+                                <span className="menu-item-label">开发者工具</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+I</span>
                             </div>
                             <div className="menu-item" onClick={() => onMenuItemClick('reloadWindow')}>
                                 <span className="menu-item-status"></span>

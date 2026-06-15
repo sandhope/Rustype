@@ -87,9 +87,31 @@ export function getImageSrc(src: string) {
         // engine runs in the host renderer where `window.DIRNAME` tracks the
         // current document's directory; when it is absent (headless / no open
         // file) we fall back to the legacy `file://${src}` form.
-        const baseUrl
-            = typeof window !== 'undefined' ? window.DIRNAME : undefined;
+        const baseUrl = typeof window !== 'undefined' ? window.DIRNAME : undefined;
+        // If this already looks like a remote URL (http/https) keep it.
+        // If it's a file:// URL we need to convert it to a Tauri-friendly
+        // asset URL using `convertFileSrc` so the webview can load it.
         if (isUrl) {
+            if (isFileUrl) {
+                try {
+                    // Strip the file:// prefix. On Windows this yields `/C:/path`.
+                    let absolutePath = src.replace(/^file:\/\//i, '');
+                    if (isWin && absolutePath.startsWith('/') && /^[a-zA-Z]:\//.test(absolutePath.slice(1))) {
+                        absolutePath = absolutePath.slice(1);
+                    }
+                    const assetUrl = convertFileSrc(absolutePath);
+                    return {
+                        isUnknownType: false,
+                        src: assetUrl,
+                    };
+                } catch (err) {
+                    // Fall back to returning the original src if conversion fails.
+                    return {
+                        isUnknownType: false,
+                        src,
+                    };
+                }
+            }
             return {
                 isUnknownType: false,
                 src,

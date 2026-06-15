@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { open as tauriOpen } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { check } from '@tauri-apps/plugin-updater';
@@ -189,6 +190,79 @@ export function useMenuActions(
                 break;
             case 'reloadImages':
                 editorRef.current?.reloadImages();
+                setActiveMenu(null);
+                break;
+            // Format actions
+            case 'toggleBold':
+                editorRef.current?.format?.('strong');
+                setActiveMenu(null);
+                break;
+            case 'toggleItalic':
+                editorRef.current?.format?.('em');
+                setActiveMenu(null);
+                break;
+            case 'toggleUnderline':
+                editorRef.current?.format?.('u');
+                setActiveMenu(null);
+                break;
+            case 'superscript':
+                editorRef.current?.format?.('sup');
+                setActiveMenu(null);
+                break;
+            case 'subscript':
+                editorRef.current?.format?.('sub');
+                setActiveMenu(null);
+                break;
+            case 'highlight':
+                editorRef.current?.format?.('mark');
+                setActiveMenu(null);
+                break;
+            case 'inlineCode':
+                editorRef.current?.format?.('inline_code');
+                setActiveMenu(null);
+                break;
+            case 'inlineMath':
+                editorRef.current?.format?.('inline_math');
+                setActiveMenu(null);
+                break;
+            case 'strikethrough':
+                editorRef.current?.format?.('del');
+                setActiveMenu(null);
+                break;
+            case 'insertLink':
+                editorRef.current?.format?.('link');
+                setActiveMenu(null);
+                break;
+            case 'insertImage': {
+                setActiveMenu(null);
+                // Open native file picker (Tauri) and pass selected path to Muya
+                ;(async () => {
+                    try {
+                        const selected = await tauriOpen({
+                            multiple: false,
+                            filters: [
+                                { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'] }
+                            ]
+                        }) as string | string[] | null;
+
+                        let src: string | null = null;
+                        if (Array.isArray(selected)) {
+                            src = selected[0] ?? null;
+                        } else if (typeof selected === 'string') {
+                            src = selected;
+                        }
+
+                        if (src) {
+                            editorRef.current?.insertImage?.(src);
+                        }
+                    } catch (err) {
+                        console.error('Failed to select image:', err);
+                    }
+                })();
+                break;
+            }
+            case 'clearFormatting':
+                editorRef.current?.format?.('clear');
                 setActiveMenu(null);
                 break;
             case 'reloadWindow':

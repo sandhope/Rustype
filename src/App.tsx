@@ -137,6 +137,7 @@ function App() {
         handleOpenFolder,
         handleSaveFile,
         handleSaveAs,
+        handleMenuAction: handleMenuItemClick,
     }, editorRef);
 
     const [editorCtxMenu, setEditorCtxMenu] = useState<{
