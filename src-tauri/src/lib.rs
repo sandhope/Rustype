@@ -65,7 +65,7 @@ fn reveal_in_folder(path: String) -> Result<(), String> {
 
     #[cfg(target_os = "windows")]
     {
-        // explorer /select,<path> 会打开父目录并选中目标文件/文件夹
+        // explorer /select,<path> opens parent directory and selects target file/folder
         std::process::Command::new("explorer")
             .arg(format!("/select,{}", p.to_string_lossy()))
             .spawn()
@@ -73,7 +73,7 @@ fn reveal_in_folder(path: String) -> Result<(), String> {
     }
     #[cfg(target_os = "macos")]
     {
-        // open -R <path> 在 Finder 中揭示并选中
+        // open -R <path> reveals and selects in Finder
         std::process::Command::new("open")
             .arg("-R")
             .arg(p)
@@ -82,7 +82,7 @@ fn reveal_in_folder(path: String) -> Result<(), String> {
     }
     #[cfg(target_os = "linux")]
     {
-        // dbus-send 打开父目录并选中
+        // xdg-open opens the parent directory
         let parent = p.parent().unwrap_or(p);
         std::process::Command::new("xdg-open")
             .arg(parent)
@@ -119,6 +119,19 @@ fn grant_file_access(app_handle: tauri::AppHandle, path: String) -> Result<(), S
     Ok(())
 }
 
+#[tauri::command]
+fn open_devtools(app_handle: tauri::AppHandle) -> Result<(), String> {
+    use tauri::Manager;
+
+    if let Some(window) = app_handle.get_webview_window("main") {
+        window.open_devtools();
+    } else {
+        return Err("Main window not found".to_string());
+    }
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -144,6 +157,7 @@ pub fn run() {
             reveal_in_folder,
             grant_directory_access,
             grant_file_access,
+            open_devtools,
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();

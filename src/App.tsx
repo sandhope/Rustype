@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { invoke } from '@tauri-apps/api/core';
 import { readText as readClipboardText } from '@tauri-apps/plugin-clipboard-manager';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { check } from '@tauri-apps/plugin-updater';
@@ -789,6 +790,14 @@ function App() {
                 editorRef.current?.reloadImages();
                 setActiveMenu(null);
                 break;
+            case 'reloadWindow':
+                window.location.reload();
+                setActiveMenu(null);
+                break;
+            case 'openDevTools':
+                invoke('open_devtools');
+                setActiveMenu(null);
+                break;
             case 'settings':
                 setSettingsOpen(true);
                 setActiveMenu(null);
@@ -1256,14 +1265,14 @@ function App() {
                                     <span className="menu-item-shortcut">F5</span>
                                 </div>
                                 <div className="menu-divider" />
-                                <div className="menu-item" onClick={() => handleMenuItemClick('outline')}>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('openDevTools')}>
                                     <span className="menu-item-status"></span>
-                                    <span className="menu-item-label">切换开发者工具- 未完成</span>
+                                    <span className="menu-item-label">打开开发者工具</span>
                                     <span className="menu-item-shortcut">Alt+Ctrl+I</span>
                                 </div>
-                                <div className="menu-item" onClick={() => handleMenuItemClick('outline')}>
+                                <div className="menu-item" onClick={() => handleMenuItemClick('reloadWindow')}>
                                     <span className="menu-item-status"></span>
-                                    <span className="menu-item-label">重新加载窗口- 未完成</span>
+                                    <span className="menu-item-label">重新加载窗口</span>
                                     <span className="menu-item-shortcut">Ctrl+F5</span>
                                 </div>
                             </div>
