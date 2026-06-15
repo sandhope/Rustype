@@ -9,7 +9,7 @@ import type { SidebarPanel } from '../components/Sidebar';
 import { WELCOME_MARKDOWN } from '../constants';
 
 let tabIdCounter = 0;
-const getNextTabId = () => `tab-${++tabIdCounter}`;
+export const getNextTabId = () => `tab-${++tabIdCounter}`;
 
 function createNewTab(file: FileInfo | null = null, content: string = WELCOME_MARKDOWN): Tab {
     return {
@@ -34,6 +34,8 @@ export interface UseAppStateReturn {
     projectTree: FileTreeNode | null;
     recentFiles: FileInfo[];
     recentFolders: FileInfo[];
+    setRecentFiles: React.Dispatch<React.SetStateAction<FileInfo[]>>;
+    setRecentFolders: React.Dispatch<React.SetStateAction<FileInfo[]>>;
     promptData: { tabId: string; filePath: string } | null;
     settings: AppSettings;
     settingsOpen: boolean;
@@ -301,6 +303,8 @@ export function useAppState() {
         projectTree,
         recentFiles,
         recentFolders,
+        setRecentFiles,
+        setRecentFolders,
         promptData,
         settings,
         settingsOpen,

@@ -4,6 +4,7 @@ import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openF
 import { getRecentFiles, addRecentFile, removeRecentFile, getRecentFolders, addRecentFolder } from '../utils/recentFiles';
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
+import { getNextTabId } from './useAppState';
 
 interface UseFileOperationsProps {
     tabs: Tab[];
@@ -109,7 +110,7 @@ export function useFileOperations({
             setRecentFolders(await getRecentFolders());
 
             const newTab: Tab = {
-                id: `tab-${Date.now()}`,
+                id: getNextTabId(),
                 file: fileInfo,
                 content: fileContent,
                 dirty: false,
@@ -145,7 +146,7 @@ export function useFileOperations({
                     ));
                 } else {
                     const newTab: Tab = {
-                        id: `tab-${Date.now()}`,
+                        id: getNextTabId(),
                         file: fileInfo,
                         content: fileContent,
                         dirty: false,
@@ -243,7 +244,7 @@ export function useFileOperations({
                 ));
             } else {
                 const newTab: Tab = {
-                    id: `tab-${Date.now()}`,
+                    id: getNextTabId(),
                     file: file,
                     content: fileContent,
                     dirty: false,
@@ -296,7 +297,7 @@ export function useFileOperations({
                     try {
                         const content = await file.text();
                         const newTab: Tab = {
-                            id: `tab-${Date.now()}`,
+                            id: getNextTabId(),
                             file: { name: file.name, path: '' },
                             content,
                             dirty: true,

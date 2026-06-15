@@ -27,6 +27,8 @@ function App() {
         projectTree,
         recentFiles,
         recentFolders,
+        setRecentFiles,
+        setRecentFolders,
         promptData,
         settings,
         settingsOpen,
@@ -86,8 +88,8 @@ function App() {
         setActiveTabId,
         setProjectTree,
         setActiveSidebarPanel,
-        setRecentFiles: () => {},
-        setRecentFolders: () => {},
+        setRecentFiles,
+        setRecentFolders,
         setActiveMenu,
     });
 
