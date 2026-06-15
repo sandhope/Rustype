@@ -39,6 +39,7 @@ export interface EditorHandle {
     replace: (replaceValue: string, opts?: Record<string, unknown>) => void;
     getTOC: () => Array<{ content: string; lvl: number; slug: string; githubSlug: string }>;
     scrollToHeading: (slug: string) => void;
+    scrollToCursor: () => void;
     setFocusMode: (focusMode: boolean) => void;
     setOptions: (options: Record<string, unknown>, forceRender?: boolean) => void;
     insertParagraph: (location: 'before' | 'after') => void;
@@ -290,6 +291,37 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             },
             setFocusMode: (focusMode: boolean) => {
                 muyaRef.current?.setOptions({ focusMode });
+            },
+            scrollToCursor: () => {
+                const muya = muyaRef.current as any;
+                
+                if (!muya?.domNode) {
+                    return;
+                }
+                
+                const container = muya.domNode;
+                
+                const sel = document.getSelection();
+                if (!sel || sel.rangeCount === 0) {
+                    return;
+                }
+                
+                const range = sel.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                
+                if (!rect) {
+                    return;
+                }
+                
+                const STANDARD_Y = 320;
+                const containerRect = container.getBoundingClientRect();
+                const cursorYRelativeToContainer = rect.top - containerRect.top;
+                const targetScrollTop = container.scrollTop + cursorYRelativeToContainer - STANDARD_Y;
+                
+                container.scrollTo({
+                    top: targetScrollTop,
+                    behavior: 'smooth'
+                });
             },
             setOptions: (options: Record<string, unknown>, forceRender = false) => {
                 muyaRef.current?.setOptions?.(options, forceRender);

@@ -119,7 +119,10 @@ function App() {
 
     const handleEditorSelectionChange = useCallback((hasSelection: boolean) => {
         hasSelectionRef.current = hasSelection;
-    }, []);
+        if (typewriterMode && editorRef.current) {
+            editorRef.current.scrollToCursor();
+        }
+    }, [typewriterMode]);
 
     const activeTab = tabs.find(t => t.id === activeTabId) || null;
     const hasOpenFile = tabs.length > 0 && activeTab !== null;
@@ -765,7 +768,13 @@ function App() {
                 setActiveMenu(null);
                 break;
             case 'typewriterMode':
-                setTypewriterMode(prev => !prev);
+                setTypewriterMode(prev => {
+                    const next = !prev;
+                    if (next && editorRef.current) {
+                        editorRef.current.scrollToCursor();
+                    }
+                    return next;
+                });
                 setActiveMenu(null);
                 break;
             case 'outline':
@@ -1223,7 +1232,7 @@ function App() {
                                 </div>
                                 <div className="menu-item" onClick={() => handleMenuItemClick('typewriterMode')}>
                                     <span className="menu-item-status">{typewriterMode ? '✓' : ''}</span>
-                                    <span className="menu-item-label">打字机模式- 未完成</span>
+                                    <span className="menu-item-label">打字机模式</span>
                                     <span className="menu-item-shortcut"></span>
                                 </div>
                                 <div className="menu-divider" />
