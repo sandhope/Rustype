@@ -29,6 +29,7 @@ interface UseMenuActionsProps {
     setSettingsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setAboutOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setShortcutsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setTableDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setCheckingUpdate: React.Dispatch<React.SetStateAction<boolean>>;
     setAlwaysOnTop: React.Dispatch<React.SetStateAction<boolean>>;
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
@@ -64,6 +65,7 @@ export function useMenuActions(
         setSettingsOpen,
         setAboutOpen,
         setShortcutsOpen,
+        setTableDialogOpen,
         setCheckingUpdate,
         setAlwaysOnTop,
         setActiveMenu,
@@ -235,34 +237,92 @@ export function useMenuActions(
                 break;
             case 'insertImage': {
                 setActiveMenu(null);
-                // Open native file picker (Tauri) and pass selected path to Muya
-                ;(async () => {
-                    try {
-                        const selected = await tauriOpen({
-                            multiple: false,
-                            filters: [
-                                { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'] }
-                            ]
-                        }) as string | string[] | null;
-
-                        let src: string | null = null;
-                        if (Array.isArray(selected)) {
-                            src = selected[0] ?? null;
-                        } else if (typeof selected === 'string') {
-                            src = selected;
-                        }
-
-                        if (src) {
-                            editorRef.current?.insertImage?.(src);
-                        }
-                    } catch (err) {
-                        console.error('Failed to select image:', err);
-                    }
-                })();
+                // Show image selector (choose file or paste link)
+                editorRef.current?.showImageSelector?.();
                 break;
             }
             case 'clearFormatting':
                 editorRef.current?.format?.('clear');
+                setActiveMenu(null);
+                break;
+            case 'heading1':
+                editorRef.current?.updateParagraph?.('heading 1');
+                setActiveMenu(null);
+                break;
+            case 'heading2':
+                editorRef.current?.updateParagraph?.('heading 2');
+                setActiveMenu(null);
+                break;
+            case 'heading3':
+                editorRef.current?.updateParagraph?.('heading 3');
+                setActiveMenu(null);
+                break;
+            case 'heading4':
+                editorRef.current?.updateParagraph?.('heading 4');
+                setActiveMenu(null);
+                break;
+            case 'heading5':
+                editorRef.current?.updateParagraph?.('heading 5');
+                setActiveMenu(null);
+                break;
+            case 'heading6':
+                editorRef.current?.updateParagraph?.('heading 6');
+                setActiveMenu(null);
+                break;
+            case 'promoteHeading':
+                editorRef.current?.updateParagraph?.('upgrade heading');
+                setActiveMenu(null);
+                break;
+            case 'demoteHeading':
+                editorRef.current?.updateParagraph?.('degrade heading');
+                setActiveMenu(null);
+                break;
+            case 'table':
+                setTableDialogOpen(true);
+                setActiveMenu(null);
+                break;
+            case 'codeFences':
+                editorRef.current?.updateParagraph?.('pre');
+                setActiveMenu(null);
+                break;
+            case 'quoteBlock':
+                editorRef.current?.updateParagraph?.('blockquote');
+                setActiveMenu(null);
+                break;
+            case 'mathBlock':
+                editorRef.current?.updateParagraph?.('mathblock');
+                setActiveMenu(null);
+                break;
+            case 'htmlBlock':
+                editorRef.current?.updateParagraph?.('html');
+                setActiveMenu(null);
+                break;
+            case 'orderedList':
+                editorRef.current?.updateParagraph?.('ol-order');
+                setActiveMenu(null);
+                break;
+            case 'bulletList':
+                editorRef.current?.updateParagraph?.('ul-bullet');
+                setActiveMenu(null);
+                break;
+            case 'taskList':
+                editorRef.current?.updateParagraph?.('ul-task');
+                setActiveMenu(null);
+                break;
+            case 'looseListItem':
+                editorRef.current?.updateParagraph?.('loose-list-item');
+                setActiveMenu(null);
+                break;
+            case 'paragraph':
+                editorRef.current?.updateParagraph?.('paragraph');
+                setActiveMenu(null);
+                break;
+            case 'horizontalRule':
+                editorRef.current?.updateParagraph?.('hr');
+                setActiveMenu(null);
+                break;
+            case 'frontMatter':
+                editorRef.current?.updateParagraph?.('front-matter');
                 setActiveMenu(null);
                 break;
             case 'reloadWindow':

@@ -7,6 +7,7 @@ import SourceMode from './components/SourceMode';
 import SettingsPanel from './components/SettingsPanel';
 import AboutDialog from './components/AboutDialog';
 import ShortcutsPanel from './components/ShortcutsPanel';
+import TableInsertDialog from './components/TableInsertDialog';
 import MenuBar from './components/MenuBar';
 import EditorContextMenu from './components/EditorContextMenu';
 import { useAppState, useFileOperations, useMenuActions, useKeyboardShortcuts } from './hooks';
@@ -19,6 +20,8 @@ import './styles/themes.css';
 function App() {
     const editorRef = useRef<EditorHandle>(null);
     const hasSelectionRef = useRef(false);
+    const [tableDialogOpen, setTableDialogOpen] = useState(false);
+    const [isInList, setIsInList] = useState(false);
 
     const {
         tabs,
@@ -110,6 +113,7 @@ function App() {
         setSettingsOpen,
         setAboutOpen,
         setShortcutsOpen,
+        setTableDialogOpen,
         setCheckingUpdate,
         setAlwaysOnTop,
         setActiveMenu,
@@ -151,6 +155,9 @@ function App() {
         hasSelectionRef.current = hasSelection;
         if (typewriterMode && editorRef.current) {
             editorRef.current.scrollToCursor();
+        }
+        if (editorRef.current?.isInList) {
+            setIsInList(editorRef.current.isInList());
         }
     }, [typewriterMode]);
 
@@ -204,6 +211,15 @@ function App() {
             setTocItems(toc);
         }
     }, [activeTabId, activeSidebarPanel, activeTab?.content]);
+
+    useEffect(() => {
+        const checkIsInList = () => {
+            if (editorRef.current?.isInList) {
+                setIsInList(editorRef.current.isInList());
+            }
+        };
+        checkIsInList();
+    }, [activeTabId, activeTab?.content]);
 
     const handleEditorContextMenu = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
@@ -274,6 +290,7 @@ function App() {
                 alwaysOnTop={alwaysOnTop}
                 recentFiles={recentFiles}
                 recentFolders={recentFolders}
+                isInList={isInList}
                 onToggleMenu={toggleMenu}
                 onMenuItemClick={handleMenuItemClickWrapper}
                 onSetOpenRecentSubmenu={setOpenRecentSubmenu}
@@ -472,6 +489,15 @@ function App() {
 
             {shortcutsOpen && (
                 <ShortcutsPanel onClose={() => setShortcutsOpen(false)} />
+            )}
+
+            {tableDialogOpen && (
+                <TableInsertDialog
+                    onClose={() => setTableDialogOpen(false)}
+                    onConfirm={(rows, columns) => {
+                        editorRef.current?.createTable?.(rows, columns);
+                    }}
+                />
             )}
         </div>
     );

@@ -162,6 +162,12 @@ body,
   pointer-events: none;
 }
 
+.menu-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* 状态标记列（✓）*/
 .menu-item-status {
   font-size: 13px;
@@ -1191,6 +1197,119 @@ body,
   background-color: var(--settings-btn-secondary-hover);
 }
 
+/* ============ Table Dialog ============ */
+.table-dialog {
+  background: var(--app-modal-bg);
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 320px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.dialog-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-color);
+  margin: 0;
+}
+
+.dialog-body {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-row label {
+  font-size: 14px;
+  color: var(--app-text-secondary);
+}
+
+.number-input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--settings-input-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.number-input-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background-color: var(--settings-btn-secondary-bg);
+  color: var(--settings-btn-secondary-color);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.number-input-btn:hover {
+  background-color: var(--settings-btn-secondary-hover);
+}
+
+.number-input {
+  width: 60px;
+  height: 32px;
+  text-align: center;
+  border: none;
+  background-color: var(--settings-input-bg);
+  color: var(--app-text-color);
+  font-size: 14px;
+}
+
+.number-input:focus {
+  outline: none;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dialog-btn {
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.dialog-btn-secondary {
+  background-color: var(--settings-btn-secondary-bg);
+  color: var(--settings-btn-secondary-color);
+}
+
+.dialog-btn-secondary:hover {
+  background-color: var(--settings-btn-secondary-hover);
+}
+
+.dialog-btn-primary {
+  background-color: var(--settings-btn-primary-bg);
+  color: #fff;
+}
+
+.dialog-btn-primary:hover {
+  background-color: var(--settings-btn-primary-hover);
+}
+
 /* ============ Find & Replace Panel ============ */
 .find-replace-panel {
   position: absolute;
@@ -1466,6 +1585,12 @@ body,
   }
 
   .menu-item-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .menu-item.disabled {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;

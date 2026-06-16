@@ -91,6 +91,9 @@ export class ImageEditTool extends BaseFloat<Options> {
     /** Active tab in the UI: 'select' for local picker, 'link' for paste URL */
     private _activeTab: 'select' | 'link' = 'select';
 
+    /** View mode: 'simple' for just src input, 'full' for alt + src + title */
+    private _viewMode: 'simple' | 'full' = 'simple';
+
     /** Container element for the image selector */
     private _imageSelectorContainer: HTMLDivElement
         = document.createElement('div');
@@ -172,6 +175,18 @@ export class ImageEditTool extends BaseFloat<Options> {
         if (!isHTMLInputElement(event.target))
             return;
         this._state.src = event.target.value;
+    }
+
+    private _handleAltInput(event: Event) {
+        if (!isHTMLInputElement(event.target))
+            return;
+        this._state.alt = event.target.value;
+    }
+
+    private _handleTitleInput(event: Event) {
+        if (!isHTMLInputElement(event.target))
+            return;
+        this._state.title = event.target.value;
     }
 
     /**
@@ -332,6 +347,12 @@ export class ImageEditTool extends BaseFloat<Options> {
         }
 
         // Upload flow: show loading state, upload, then replace
+        // For new images, insert directly instead of replace
+        if (!this._imageInfo!.token.range) {
+            this.muya.insertImage({ src, alt });
+            this.hide();
+            return;
+        }
         await this._replaceImageWithUpload(alt, src, title);
     };
 
@@ -340,7 +361,16 @@ export class ImageEditTool extends BaseFloat<Options> {
      * Only replaces if values have changed
      */
     private _replaceImageDirect(alt: string, src: string, title: string) {
-        const { alt: oldAlt, src: oldSrc, title: oldTitle } = this._imageInfo!.token.attrs;
+        const token = this._imageInfo!.token;
+
+        // If token doesn't have range, this is a new image insertion
+        if (!token.range) {
+            this.muya.insertImage({ src, alt });
+            this.hide();
+            return;
+        }
+
+        const { alt: oldAlt, src: oldSrc, title: oldTitle } = token.attrs;
 
         // Only update if something changed
         if (alt !== oldAlt || src !== oldSrc || title !== oldTitle) {
@@ -404,7 +434,7 @@ export class ImageEditTool extends BaseFloat<Options> {
 
     /**
      * Handle click on "more" button to open file picker
-     * Updates the src input with selected path
+     * Directly confirms after selecting a file
      */
     private async _handleMoreClick() {
         if (!this.options.imagePathPicker)
@@ -412,10 +442,8 @@ export class ImageEditTool extends BaseFloat<Options> {
 
         const path = await this.options.imagePathPicker();
         this._state.src = path;
-        // After selecting a file, switch to the link tab so the user can
-        // confirm or edit the inserted path before applying.
-        this._activeTab = 'link';
-        this._render();
+        // After selecting a file, directly confirm
+        this._handleConfirm();
     }
 
     /**
@@ -434,22 +462,21 @@ export class ImageEditTool extends BaseFloat<Options> {
             on: { click: () => { this._activeTab = 'link'; this._render(); } },
         }, '插入链接');
 
-        // Content for select tab: large picker button and preview of current src
+        // Content for select tab: large picker button
         const pickerArea = h('div.picker-area', [
             this.options.imagePathPicker
-                ? h('button.select-file', { on: { click: () => this._handleMoreClick() } }, '选择图片')
+                ? h('button.select-file', { on: { click: () => this._handleMoreClick() } }, [
+                    h('span', '\uD83D\uDCC1'),
+                    '选择图片',
+                  ])
                 : h('div.select-disabled', '文件选择不可用'),
-            src ? (() => {
-                const resolved = getImageSrc(src);
-                const displaySrc = resolved && resolved.src ? resolved.src : '';
-                return displaySrc ? h('div.preview', h('img', { props: { src: displaySrc } })) : null;
-            })() : null,
+            h('span.select-hint', '从你的电脑选择图片。'),
         ]);
 
         // Content for link tab: src input and confirm button
         const srcInput = h('input.src', {
             props: {
-                placeholder: '图片链接',
+                placeholder: '图片链接或本地路径',
                 value: src,
             },
             on: {
@@ -460,9 +487,45 @@ export class ImageEditTool extends BaseFloat<Options> {
             },
         });
 
-        const confirmButton = h('span.confirm', { on: { click: () => this._handleConfirm() } }, '确定');
+        const altInput = h('input.alt', {
+            props: {
+                placeholder: '替代文本',
+                value: this._state.alt,
+            },
+            on: {
+                input: event => this._handleAltInput(event),
+            },
+        });
 
-        const linkArea = h('div.link-area', [srcInput, confirmButton]);
+        const titleInput = h('input.title', {
+            props: {
+                placeholder: '图片标题',
+                value: this._state.title,
+            },
+            on: {
+                input: event => this._handleTitleInput(event),
+            },
+        });
+
+        const confirmButton = h('span.confirm', { on: { click: () => this._handleConfirm() } }, '嵌入图片');
+        const cancelButton = h('span.cancel', { on: { click: () => this.hide() } }, '取消');
+
+        const modeToggle = h('span.mode-toggle', {
+            on: { click: () => { this._viewMode = this._viewMode === 'simple' ? 'full' : 'simple'; this._render(); } },
+        }, this._viewMode === 'simple' ? '完整模式' : '简洁模式');
+
+        const inputFields = this._viewMode === 'full'
+            ? [altInput, srcInput, titleInput]
+            : [srcInput];
+
+        const linkArea = h('div.link-area', [
+            ...inputFields,
+            h('div.button-row', [cancelButton, confirmButton]),
+            h('div.mode-switch', [
+                h('span.mode-hint', '粘贴网络图片或本地路径。切换模式'),
+                modeToggle,
+            ]),
+        ]);
 
         const vnode = h('div.image-edit-tool', [
             h('div.tabs', [tabSelect, tabLink]),

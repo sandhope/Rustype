@@ -14,6 +14,7 @@ interface MenuBarProps {
     alwaysOnTop: boolean;
     recentFiles: FileInfo[];
     recentFolders: FileInfo[];
+    isInList: boolean;
     onToggleMenu: (menu: string) => void;
     onMenuItemClick: (action: string) => void;
     onSetOpenRecentSubmenu: (open: boolean) => void;
@@ -33,6 +34,7 @@ export default function MenuBar({
     alwaysOnTop,
     recentFiles,
     recentFolders,
+    isInList,
     onToggleMenu,
     onMenuItemClick,
     onSetOpenRecentSubmenu,
@@ -180,6 +182,122 @@ export default function MenuBar({
                                 <span className="menu-item-status"></span>
                                 <span className="menu-item-label">重做</span>
                                 <span className="menu-item-shortcut">Ctrl+Y</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                        <div
+                            className={`menu-trigger ${activeMenu === 'paragraph' ? 'active' : ''}`}
+                            onClick={() => onToggleMenu('paragraph')}
+                        >
+                            段落
+                        </div>
+                        <div className={`menu-dropdown-content ${activeMenu === 'paragraph' ? 'is-open' : ''}`}>
+                            <div className="menu-item" onClick={() => onMenuItemClick('heading1')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">标题 1</span>
+                                <span className="menu-item-shortcut">Ctrl+1</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('heading2')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">标题 2</span>
+                                <span className="menu-item-shortcut">Ctrl+2</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('heading3')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">标题 3</span>
+                                <span className="menu-item-shortcut">Ctrl+3</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('heading4')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">标题 4</span>
+                                <span className="menu-item-shortcut">Ctrl+4</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('heading5')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">标题 5</span>
+                                <span className="menu-item-shortcut">Ctrl+5</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('heading6')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">标题 6</span>
+                                <span className="menu-item-shortcut">Ctrl+6</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('promoteHeading')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">提升标题级别</span>
+                                <span className="menu-item-shortcut">Ctrl+Alt++</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('demoteHeading')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">降低标题级别</span>
+                                <span className="menu-item-shortcut">Ctrl+Alt+-</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('table')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">表格</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+T</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('codeFences')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">代码围栏</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+K</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('quoteBlock')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">引用块</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+Q</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('mathBlock')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">数学块</span>
+                                <span className="menu-item-shortcut">Ctrl+Alt+N</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('htmlBlock')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">HTML 块</span>
+                                <span className="menu-item-shortcut">Ctrl+Alt+H</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('orderedList')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">有序列表</span>
+                                <span className="menu-item-shortcut">Ctrl+G</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('bulletList')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">无序列表</span>
+                                <span className="menu-item-shortcut">Ctrl+H</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('taskList')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">任务列表</span>
+                                <span className="menu-item-shortcut">Ctrl+Alt+X</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className={`menu-item ${!isInList ? 'disabled' : ''}`} onClick={() => isInList && onMenuItemClick('looseListItem')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">宽松列表项</span>
+                                <span className="menu-item-shortcut">Ctrl+Alt+L</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('paragraph')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">段落</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+0</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('horizontalRule')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">水平分割线</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+U</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('frontMatter')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">前置元数据</span>
+                                <span className="menu-item-shortcut">Ctrl+Alt+Y</span>
                             </div>
                         </div>
                     </div>

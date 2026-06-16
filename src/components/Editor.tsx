@@ -1,4 +1,5 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import Selection from '../muya/src/selection';
 import {
     Muya,
     zhCN,
@@ -53,6 +54,10 @@ export interface EditorHandle {
     dispose: () => void;
     format?: (type: string) => void;
     insertImage?: (src?: string, alt?: string) => void;
+    showImageSelector?: () => void;
+    updateParagraph?: (type: string) => void;
+    createTable?: (rows: number, columns: number) => void;
+    isInList?: () => boolean;
 }
 
 interface EditorProps {
@@ -435,6 +440,50 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             insertImage: (src = '', alt = '') => {
                 // prefer Muya.insertImage when available
                 (muyaRef.current as any)?.insertImage?.({ src, alt });
+            },
+            showImageSelector: () => {
+                const muya = muyaRef.current as any;
+                if (!muya?.editor) return;
+
+                const block = muya.editor.activeContentBlock ?? muya.editor.selection.anchorBlock;
+                if (!block) return;
+
+                const cursor = block.getCursor();
+                if (cursor == null) return;
+
+                const rect = Selection.getCursorCoords();
+                const reference = rect
+                    ? {
+                          getBoundingClientRect: () => rect,
+                          clientWidth: rect.width,
+                          clientHeight: rect.height,
+                      }
+                    : block.domNode ?? {
+                          getBoundingClientRect: () => new DOMRect(window.innerWidth / 2, window.innerHeight / 2, 0, 0),
+                      };
+
+                muya.eventCenter.emit('muya-image-selector', {
+                    block,
+                    reference,
+                    imageInfo: {
+                        token: { attrs: { src: '', alt: '', title: '' } },
+                        imageId: `new-image-${Date.now()}`,
+                    },
+                });
+            },
+            updateParagraph: (type: string) => {
+                (muyaRef.current as any)?.updateParagraph(type);
+            },
+            createTable: (rows: number, columns: number) => {
+                (muyaRef.current as any)?.createTable({ rows, columns });
+            },
+            isInList: () => {
+                const block = (muyaRef.current as any)?._outmostBlockAtCursor?.();
+                if (!block) return false;
+                const state = block.getState?.();
+                if (!state) return false;
+                const name = state.name;
+                return name === 'bullet-list' || name === 'order-list' || name === 'task-list';
             },
             dispose: () => {
                 const muyaToDestroy = muyaRef.current;
