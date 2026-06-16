@@ -63,6 +63,9 @@ function App() {
         setAlwaysOnTop,
         setActiveMenu,
         setOpenRecentSubmenu,
+        setSettings,
+        currentLineEnding,
+        setCurrentLineEnding,
         handleNewFile,
         handleTabSelect,
         handleTabClose,
@@ -117,6 +120,7 @@ function App() {
         setCheckingUpdate,
         setAlwaysOnTop,
         setActiveMenu,
+        setCurrentLineEnding,
         handleNewFile,
         handleOpenFile,
         handleOpenFolder,
@@ -291,6 +295,7 @@ function App() {
                 recentFiles={recentFiles}
                 recentFolders={recentFolders}
                 isInList={isInList}
+                currentLineEnding={currentLineEnding}
                 onToggleMenu={toggleMenu}
                 onMenuItemClick={handleMenuItemClickWrapper}
                 onSetOpenRecentSubmenu={setOpenRecentSubmenu}

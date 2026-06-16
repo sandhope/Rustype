@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { open as tauriOpen } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
@@ -7,6 +7,7 @@ import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { zoomIn, zoomOut, zoomReset } from '../utils/webview';
 import { saveSettings, type AppSettings } from '../utils/settings';
+import { readText as readClipboardText } from '@tauri-apps/plugin-clipboard-manager';
 import type { EditorHandle } from '../components/Editor';
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
@@ -33,6 +34,7 @@ interface UseMenuActionsProps {
     setCheckingUpdate: React.Dispatch<React.SetStateAction<boolean>>;
     setAlwaysOnTop: React.Dispatch<React.SetStateAction<boolean>>;
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
+    setCurrentLineEnding: (lineEnding: 'crlf' | 'lf') => void;
     handleNewFile: () => void;
     handleOpenFile: () => void;
     handleOpenFolder: () => void;
@@ -42,7 +44,7 @@ interface UseMenuActionsProps {
 
 export interface UseMenuActionsReturn {
     toggleMenu: (menu: string) => void;
-    handleMenuItemClick: (action: string) => void;
+    handleMenuItemClick: (action: string) => Promise<void>;
     handleSettingsUpdate: (newSettings: AppSettings) => Promise<void>;
     handleOutlineItemClick: (item: TocItem) => void;
 }
@@ -69,6 +71,7 @@ export function useMenuActions(
         setCheckingUpdate,
         setAlwaysOnTop,
         setActiveMenu,
+        setCurrentLineEnding,
         handleNewFile,
         handleOpenFile,
         handleOpenFolder,
@@ -131,7 +134,7 @@ export function useMenuActions(
         }
     }, [setActiveMenu, setCheckingUpdate]);
 
-    const handleMenuItemClick = useCallback((action: string) => {
+    const handleMenuItemClick = useCallback(async (action: string) => {
         switch (action) {
             case 'new':
                 handleNewFile();
@@ -152,8 +155,92 @@ export function useMenuActions(
                 setActiveSidebarPanel(prev => prev ? null : 'explorer');
                 setActiveMenu(null);
                 break;
-            case 'findReplace':
+            case 'cut': {
+                const sel = document.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    document.execCommand('cut');
+                }
+                setActiveMenu(null);
+                break;
+            }
+            case 'copy': {
+                const sel = document.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    document.execCommand('copy');
+                }
+                setActiveMenu(null);
+                break;
+            }
+            case 'paste': {
+                try {
+                    const text = await readClipboardText();
+                    editorRef.current?.pasteText(text);
+                } catch {
+                    // clipboard read failed — do nothing
+                }
+                setActiveMenu(null);
+                break;
+            }
+            case 'copyAsRich':
+                editorRef.current?.copyAsRich?.();
+                setActiveMenu(null);
+                break;
+            case 'copyAsHtml':
+                editorRef.current?.copyAsHtml?.();
+                setActiveMenu(null);
+                break;
+            case 'pasteAsPlainText': {
+                try {
+                    const text = await readClipboardText();
+                    editorRef.current?.pasteText(text, true);
+                } catch {
+                    // clipboard read failed — do nothing
+                }
+                setActiveMenu(null);
+                break;
+            }
+            case 'selectAll':
+                editorRef.current?.selectAll?.();
+                setActiveMenu(null);
+                break;
+            case 'duplicate':
+                editorRef.current?.format?.('duplicate');
+                setActiveMenu(null);
+                break;
+            case 'createParagraph':
+                editorRef.current?.insertParagraph?.('after');
+                setActiveMenu(null);
+                break;
+            case 'deleteParagraph':
+                editorRef.current?.deleteParagraph?.();
+                setActiveMenu(null);
+                break;
+            case 'find':
                 setFindReplaceOpen(prev => !prev);
+                setActiveMenu(null);
+                break;
+            case 'findNext':
+                editorRef.current?.find?.('next');
+                setActiveMenu(null);
+                break;
+            case 'findPrevious':
+                editorRef.current?.find?.('previous');
+                setActiveMenu(null);
+                break;
+            case 'replace':
+                setFindReplaceOpen(prev => !prev);
+                setActiveMenu(null);
+                break;
+            case 'findInFolder':
+                setActiveSidebarPanel('search');
+                setActiveMenu(null);
+                break;
+            case 'setLineEndingCrlf':
+                setCurrentLineEnding('crlf');
+                setActiveMenu(null);
+                break;
+            case 'setLineEndingLf':
+                setCurrentLineEnding('lf');
                 setActiveMenu(null);
                 break;
             case 'sourceMode':
@@ -415,6 +502,7 @@ export function useMenuActions(
         setShortcutsOpen,
         setAlwaysOnTop,
         setActiveMenu,
+        setCurrentLineEnding,
         handleCheckUpdate,
         editorRef,
     ]);

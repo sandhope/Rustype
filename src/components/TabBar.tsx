@@ -8,6 +8,7 @@ export interface Tab {
     dirty: boolean;
     lastModified?: number;
     externallyModified?: boolean;
+    lineEnding: 'crlf' | 'lf';
 }
 
 interface TabBarProps {

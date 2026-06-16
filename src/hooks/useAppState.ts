@@ -3,7 +3,7 @@ import { dirname } from '@tauri-apps/api/path';
 import { getRecentFiles, getRecentFolders } from '../utils/recentFiles';
 import { loadSettings, type AppSettings, DEFAULT_SETTINGS } from '../utils/settings';
 import { loadSession, saveSession } from '../utils/session';
-import { readFileContent, getFileStat, grantDirectoryAccess, grantFileAccess, readDirectoryTree, type FileInfo, type FileTreeNode } from '../utils/file';
+import { readFileContent, getFileStat, grantDirectoryAccess, grantFileAccess, readDirectoryTree, getDefaultLineEnding, type FileInfo, type FileTreeNode } from '../utils/file';
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
 import { WELCOME_MARKDOWN } from '../constants';
@@ -11,12 +11,13 @@ import { WELCOME_MARKDOWN } from '../constants';
 let tabIdCounter = 0;
 export const getNextTabId = () => `tab-${++tabIdCounter}`;
 
-function createNewTab(file: FileInfo | null = null, content: string = WELCOME_MARKDOWN): Tab {
+function createNewTab(file: FileInfo | null = null, content: string = WELCOME_MARKDOWN, lineEnding: 'crlf' | 'lf' = getDefaultLineEnding()): Tab {
     return {
         id: getNextTabId(),
         file,
         content,
         dirty: false,
+        lineEnding,
     };
 }
 
@@ -38,6 +39,7 @@ export interface UseAppStateReturn {
     setRecentFolders: React.Dispatch<React.SetStateAction<FileInfo[]>>;
     promptData: { tabId: string; filePath: string } | null;
     settings: AppSettings;
+    setSettings: React.Dispatch<React.SetStateAction<AppSettings>>;
     settingsOpen: boolean;
     aboutOpen: boolean;
     shortcutsOpen: boolean;
@@ -67,6 +69,8 @@ export interface UseAppStateReturn {
     setAlwaysOnTop: React.Dispatch<React.SetStateAction<boolean>>;
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
     setOpenRecentSubmenu: React.Dispatch<React.SetStateAction<boolean>>;
+    currentLineEnding: 'crlf' | 'lf';
+    setCurrentLineEnding: (lineEnding: 'crlf' | 'lf') => void;
     handleNewFile: () => void;
     handleTabSelect: (tabId: string) => void;
     handleTabClose: (tabId: string) => void;
@@ -166,6 +170,7 @@ export function useAppState() {
                                 dirty: false,
                                 lastModified: stat?.mtime,
                                 externallyModified: false,
+                                lineEnding: savedTab.lineEnding ?? 'lf',
                             });
                         } catch {
                             // File was deleted or moved, skip this tab
@@ -178,6 +183,7 @@ export function useAppState() {
                             content: savedTab.content,
                             dirty: savedTab.content !== WELCOME_MARKDOWN,
                             externallyModified: false,
+                            lineEnding: savedTab.lineEnding ?? 'lf',
                         });
                     }
                 }
@@ -210,7 +216,7 @@ export function useAppState() {
         if (!isRestoringRef.current) {
             saveSession({
                 folderPath: projectTree?.path ?? null,
-                tabs: tabs.map(t => ({ file: t.file, content: t.content, lastModified: t.lastModified })),
+                tabs: tabs.map(t => ({ file: t.file, content: t.content, lastModified: t.lastModified, lineEnding: t.lineEnding })),
                 activeTabId,
             });
         }
@@ -220,7 +226,7 @@ export function useAppState() {
         if (!isRestoringRef.current) {
             saveSession({
                 folderPath: projectTree?.path ?? null,
-                tabs: tabs.map(t => ({ file: t.file, content: t.content, lastModified: t.lastModified })),
+                tabs: tabs.map(t => ({ file: t.file, content: t.content, lastModified: t.lastModified, lineEnding: t.lineEnding })),
                 activeTabId,
             });
         }
@@ -295,6 +301,13 @@ export function useAppState() {
 
     const activeTab = tabs.find(t => t.id === activeTabId) || null;
     const hasOpenFile = tabs.length > 0 && activeTab !== null;
+    const currentLineEnding = activeTab?.lineEnding ?? 'lf';
+
+    const setCurrentLineEnding = useCallback((lineEnding: 'crlf' | 'lf') => {
+        setTabs(prev => prev.map(t =>
+            t.id === activeTabId ? { ...t, lineEnding, dirty: true } : t
+        ));
+    }, [activeTabId]);
 
     return {
         tabs,
@@ -307,6 +320,7 @@ export function useAppState() {
         setRecentFolders,
         promptData,
         settings,
+        setSettings,
         settingsOpen,
         aboutOpen,
         shortcutsOpen,
@@ -336,6 +350,8 @@ export function useAppState() {
         setAlwaysOnTop,
         setActiveMenu,
         setOpenRecentSubmenu,
+        currentLineEnding,
+        setCurrentLineEnding,
         handleNewFile,
         handleTabSelect,
         handleTabClose,

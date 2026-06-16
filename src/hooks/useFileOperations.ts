@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { dirname } from '@tauri-apps/api/path';
-import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, grantDirectoryAccess, type FileInfo, type FileTreeNode } from '../utils/file';
+import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, grantDirectoryAccess, detectLineEnding, type FileInfo, type FileTreeNode } from '../utils/file';
 import { getRecentFiles, addRecentFile, removeRecentFile, getRecentFolders, addRecentFolder } from '../utils/recentFiles';
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
@@ -116,6 +116,7 @@ export function useFileOperations({
                 dirty: false,
                 lastModified: fileStat?.mtime,
                 externallyModified: false,
+                lineEnding: detectLineEnding(fileContent),
             };
             setTabs(prev => [...prev, newTab]);
             setActiveTabId(newTab.id);
@@ -152,6 +153,7 @@ export function useFileOperations({
                         dirty: false,
                         lastModified: stat?.mtime,
                         externallyModified: false,
+                        lineEnding: detectLineEnding(fileContent),
                     };
                     setTabs(prev => [...prev, newTab]);
                     setActiveTabId(newTab.id);
@@ -169,15 +171,16 @@ export function useFileOperations({
         if (!activeTab) return;
 
         const markdown = activeTab.content;
+        const lineEnding = activeTab.lineEnding;
 
         if (activeTab.file) {
-            await saveMarkdownFile(markdown, activeTab.file.path);
+            await saveMarkdownFile(markdown, activeTab.file.path, lineEnding);
             const stat = await getFileStat(activeTab.file.path);
             setTabs(prev => prev.map(t =>
                 t.id === activeTabId ? { ...t, content: markdown, dirty: false, lastModified: stat?.mtime, externallyModified: false } : t
             ));
         } else {
-            const savedFile = await saveMarkdownFile(markdown);
+            const savedFile = await saveMarkdownFile(markdown, undefined, lineEnding);
             if (savedFile) {
                 const stat = await getFileStat(savedFile.path);
                 setTabs(prev => prev.map(t =>
@@ -195,7 +198,8 @@ export function useFileOperations({
         if (!activeTab) return;
 
         const markdown = activeTab.content;
-        const savedFile = await saveMarkdownFile(markdown);
+        const lineEnding = activeTab.lineEnding;
+        const savedFile = await saveMarkdownFile(markdown, undefined, lineEnding);
         if (savedFile) {
             await addRecentFile(savedFile);
             setRecentFiles(await getRecentFiles());
@@ -215,7 +219,16 @@ export function useFileOperations({
             const fileContent = await readFileContent(tab.file.path);
             const stat = await getFileStat(tab.file.path);
             setTabs(prev => prev.map(t =>
-                t.id === tabId ? { ...t, content: fileContent, lastModified: stat?.mtime, externallyModified: false, dirty: false } : t
+                t.id === tabId
+                    ? {
+                        ...t,
+                        content: fileContent,
+                        lastModified: stat?.mtime,
+                        externallyModified: false,
+                        dirty: false,
+                        lineEnding: detectLineEnding(fileContent),
+                    }
+                    : t
             ));
             if (tabId === activeTabId) {
                 setActiveTabId(tabId);
@@ -250,6 +263,7 @@ export function useFileOperations({
                     dirty: false,
                     lastModified: stat?.mtime,
                     externallyModified: false,
+                    lineEnding: detectLineEnding(fileContent),
                 };
                 setTabs(prev => [...prev, newTab]);
                 setActiveTabId(newTab.id);
@@ -301,6 +315,7 @@ export function useFileOperations({
                             file: { name: file.name, path: '' },
                             content,
                             dirty: true,
+                            lineEnding: detectLineEnding(content),
                         };
                         setTabs(prev => [...prev, newTab]);
                         setActiveTabId(newTab.id);

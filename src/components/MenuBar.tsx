@@ -15,6 +15,7 @@ interface MenuBarProps {
     recentFiles: FileInfo[];
     recentFolders: FileInfo[];
     isInList: boolean;
+    currentLineEnding: 'crlf' | 'lf';
     onToggleMenu: (menu: string) => void;
     onMenuItemClick: (action: string) => void;
     onSetOpenRecentSubmenu: (open: boolean) => void;
@@ -35,6 +36,7 @@ export default function MenuBar({
     recentFiles,
     recentFolders,
     isInList,
+    currentLineEnding,
     onToggleMenu,
     onMenuItemClick,
     onSetOpenRecentSubmenu,
@@ -168,11 +170,6 @@ export default function MenuBar({
                             编辑
                         </div>
                         <div className={`menu-dropdown-content ${activeMenu === 'edit' ? 'is-open' : ''}`}>
-                            <div className="menu-item" onClick={() => onMenuItemClick('findReplace')}>
-                                <span className="menu-item-status"></span>
-                                <span className="menu-item-label">查找 / 替换</span>
-                                <span className="menu-item-shortcut">Ctrl+F</span>
-                            </div>
                             <div className="menu-item" onClick={() => onMenuItemClick('undo')}>
                                 <span className="menu-item-status"></span>
                                 <span className="menu-item-label">撤销</span>
@@ -181,7 +178,110 @@ export default function MenuBar({
                             <div className="menu-item" onClick={() => onMenuItemClick('redo')}>
                                 <span className="menu-item-status"></span>
                                 <span className="menu-item-label">重做</span>
-                                <span className="menu-item-shortcut">Ctrl+Y</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+Z</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('cut')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">剪切</span>
+                                <span className="menu-item-shortcut">Ctrl+X</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('copy')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">复制</span>
+                                <span className="menu-item-shortcut">Ctrl+C</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('paste')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">粘贴</span>
+                                <span className="menu-item-shortcut">Ctrl+V</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('copyAsRich')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">复制为富文本</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+C</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('copyAsHtml')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">复制为 HTML</span>
+                                <span className="menu-item-shortcut"></span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('pasteAsPlainText')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">粘贴为纯文本</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+V</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('selectAll')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">全选</span>
+                                <span className="menu-item-shortcut">Ctrl+A</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('duplicate')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">创建副本</span>
+                                <span className="menu-item-shortcut">Ctrl+Alt+D</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('createParagraph')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">创建段落</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+N</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('deleteParagraph')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">删除段落</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+D</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('find')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">查找</span>
+                                <span className="menu-item-shortcut">Ctrl+F</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('findNext')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">查找下一个</span>
+                                <span className="menu-item-shortcut">F3</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('findPrevious')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">查找上一个</span>
+                                <span className="menu-item-shortcut">Shift+F3</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('replace')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">替换</span>
+                                <span className="menu-item-shortcut">Ctrl+R</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('findInFolder')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">在文件夹中查找</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+F</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div
+                                className="menu-item menu-item-submenu"
+                                onMouseEnter={() => onSetOpenRecentSubmenu(true)}
+                                onMouseLeave={() => onSetOpenRecentSubmenu(false)}
+                            >
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">行结束符</span>
+                                <span className="menu-item-arrow">›</span>
+                                {openRecentSubmenu && (
+                                    <div className="menu-submenu" onClick={(e) => e.stopPropagation()}>
+                                        <div className="menu-submenu-item" onClick={() => onMenuItemClick('setLineEndingCrlf')}>
+                                            <span className="menu-submenu-item-status">{currentLineEnding === 'crlf' ? '●' : '○'}</span>
+                                            <span className="menu-submenu-item-label">CRLF (Windows)</span>
+                                        </div>
+                                        <div className="menu-submenu-item" onClick={() => onMenuItemClick('setLineEndingLf')}>
+                                            <span className="menu-submenu-item-status">{currentLineEnding === 'lf' ? '●' : '○'}</span>
+                                            <span className="menu-submenu-item-label">LF (Unix/macOS)</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

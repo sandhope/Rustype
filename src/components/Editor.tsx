@@ -52,6 +52,7 @@ export interface EditorHandle {
     pasteText: (text: string, asPlainText?: boolean) => void;
     getDomNode: () => HTMLElement | null;
     dispose: () => void;
+    deleteParagraph: () => void;
     format?: (type: string) => void;
     insertImage?: (src?: string, alt?: string) => void;
     showImageSelector?: () => void;
@@ -417,6 +418,9 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             },
             pasteAsPlainText: () => {
                 (muyaRef.current as any)?.pasteAsPlainText?.();
+            },
+            deleteParagraph: () => {
+                (muyaRef.current as any)?.deleteParagraph?.();
             },
             pasteText: (text: string, asPlainText = false) => {
                 const muya = muyaRef.current as any;

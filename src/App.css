@@ -260,6 +260,13 @@ body,
   margin-left: 8px;
 }
 
+.menu-submenu-item-status {
+  font-size: 14px;
+  width: 18px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
 .menu-submenu-empty {
   color: var(--app-text-secondary);
   cursor: default;
@@ -273,6 +280,13 @@ body,
   height: 1px;
   background-color: var(--float-border-color);
   margin: 4px 8px;
+}
+
+.menu-submenu-hint {
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  white-space: nowrap;
 }
 
 .menu-submenu-item-danger {
@@ -805,7 +819,7 @@ body,
 
 .sidebar-content {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 6px 0;
 }
 
