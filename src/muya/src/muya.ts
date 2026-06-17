@@ -27,6 +27,7 @@ import {
     resolveSentinelCursor,
 } from './selection/offsetCursor';
 import { getTOC } from './state/getTOC';
+import { MarkdownToHtml } from './state/markdownToHtml';
 import { isAnyListState, isAtxHeadingState } from './state/types';
 import { insertFrontMatterAtStart, replaceBlockByLabel } from './ui/paragraphQuickInsertMenu/config';
 import { Ui } from './ui/ui';
@@ -190,6 +191,39 @@ export class Muya {
      */
     getTOC(): ITocItem[] {
         return getTOC(this);
+    }
+
+    /**
+     * Export the document as a styled HTML document.
+     *
+     * @param options Export options:
+     *   - title: Document title
+     *   - extraCSS: Additional CSS to include
+     *   - printOptimization: Optimize for printing (default: false)
+     *   - toc: Table of contents HTML
+     *   - header: Header configuration
+     *   - footer: Footer configuration
+     *   - headerFooterStyled: Whether to style header/footer
+     */
+    async exportStyledHTML(options?: {
+        title?: string;
+        extraCSS?: string;
+        printOptimization?: boolean;
+        toc?: string;
+        header?: { type: number; left: string; center: string; right: string };
+        footer?: { type: number; left: string; center: string; right: string };
+        headerFooterStyled?: boolean;
+    }) {
+        const markdown = this.getMarkdown();
+        return new MarkdownToHtml(markdown, this).generate(options);
+    }
+
+    /**
+     * Export the document as HTML content (without full document wrapper).
+     */
+    async exportHtml() {
+        const markdown = this.getMarkdown();
+        return new MarkdownToHtml(markdown, this).renderHtml();
     }
 
     undo() {

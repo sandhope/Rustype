@@ -8,11 +8,13 @@ import SettingsPanel from './components/SettingsPanel';
 import AboutDialog from './components/AboutDialog';
 import ShortcutsPanel from './components/ShortcutsPanel';
 import TableInsertDialog from './components/TableInsertDialog';
+import RenameDialog from './components/RenameDialog';
 import MenuBar from './components/MenuBar';
 import EditorContextMenu from './components/EditorContextMenu';
 import { useAppState, useFileOperations, useMenuActions, useKeyboardShortcuts } from './hooks';
 import { clearRecentlyOpened } from './utils/recentFiles';
-import { grantDirectoryAccess, readDirectoryTree, type FileInfo } from './utils/file';
+import { grantDirectoryAccess, readDirectoryTree, fsRename, type FileInfo } from './utils/file';
+import { join } from '@tauri-apps/api/path';
 import logo from '../src-tauri/icons/128x128.png';
 import './App.css';
 import './styles/themes.css';
@@ -22,6 +24,8 @@ function App() {
     const hasSelectionRef = useRef(false);
     const [tableDialogOpen, setTableDialogOpen] = useState(false);
     const [isInList, setIsInList] = useState(false);
+    const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+    const [renameFileName, setRenameFileName] = useState('');
 
     const {
         tabs,
@@ -45,7 +49,9 @@ function App() {
         checkingUpdate,
         alwaysOnTop,
         activeMenu,
-        openRecentSubmenu,
+        openSubmenu,
+        autoSave,
+        setAutoSave,
         setTabs,
         setActiveTabId,
         setActiveSidebarPanel,
@@ -62,8 +68,7 @@ function App() {
         setCheckingUpdate,
         setAlwaysOnTop,
         setActiveMenu,
-        setOpenRecentSubmenu,
-        setSettings,
+        setOpenSubmenu,
         currentLineEnding,
         setCurrentLineEnding,
         handleNewFile,
@@ -106,6 +111,7 @@ function App() {
         tabs,
         activeSidebarPanel,
         checkingUpdate,
+        autoSave,
         setSourceMode,
         setFocusMode,
         setTabs,
@@ -121,11 +127,16 @@ function App() {
         setAlwaysOnTop,
         setActiveMenu,
         setCurrentLineEnding,
+        setAutoSave,
+        setActiveTabId,
         handleNewFile,
         handleOpenFile,
         handleOpenFolder,
         handleSaveFile,
         handleSaveAs,
+        handleTabClose,
+        setRenameDialogOpen,
+        setRenameFileName,
     }, editorRef);
 
     useKeyboardShortcuts({
@@ -241,18 +252,18 @@ function App() {
 
     const handleRecentFolderSelect = useCallback(async (folder: FileInfo) => {
         setActiveMenu(null);
-        setOpenRecentSubmenu(false);
+        setOpenSubmenu(null);
         await grantDirectoryAccess(folder.path);
         const tree = await readDirectoryTree(folder.path);
         setProjectTree(tree);
         setActiveSidebarPanel('explorer');
-    }, [setActiveMenu, setOpenRecentSubmenu, setProjectTree, setActiveSidebarPanel]);
+    }, [setActiveMenu, setOpenSubmenu, setProjectTree, setActiveSidebarPanel]);
 
     const handleClearRecentlyOpened = useCallback(async () => {
         await clearRecentlyOpened();
         setActiveMenu(null);
-        setOpenRecentSubmenu(false);
-    }, [setActiveMenu, setOpenRecentSubmenu]);
+        setOpenSubmenu(null);
+    }, [setActiveMenu, setOpenSubmenu]);
 
     const handleMenuUndo = useCallback(() => {
         editorRef.current?.undo();
@@ -285,7 +296,7 @@ function App() {
         <div className={appRootClass} onClick={() => setActiveMenu(null)}>
             <MenuBar
                 activeMenu={activeMenu}
-                openRecentSubmenu={openRecentSubmenu}
+                openSubmenu={openSubmenu}
                 sourceMode={sourceMode}
                 focusMode={focusMode}
                 typewriterMode={typewriterMode}
@@ -296,9 +307,10 @@ function App() {
                 recentFolders={recentFolders}
                 isInList={isInList}
                 currentLineEnding={currentLineEnding}
+                autoSave={autoSave}
                 onToggleMenu={toggleMenu}
                 onMenuItemClick={handleMenuItemClickWrapper}
-                onSetOpenRecentSubmenu={setOpenRecentSubmenu}
+                onSetOpenSubmenu={setOpenSubmenu}
                 onRecentFileSelect={handleRecentFileSelect}
                 onRecentFolderSelect={handleRecentFolderSelect}
                 onClearRecentlyOpened={handleClearRecentlyOpened}
@@ -501,6 +513,32 @@ function App() {
                     onClose={() => setTableDialogOpen(false)}
                     onConfirm={(rows, columns) => {
                         editorRef.current?.createTable?.(rows, columns);
+                    }}
+                />
+            )}
+
+            {renameDialogOpen && (
+                <RenameDialog
+                    currentName={renameFileName}
+                    onClose={() => setRenameDialogOpen(false)}
+                    onConfirm={async (newName) => {
+                        const activeTab = tabs.find(t => t.id === activeTabId);
+                        if (activeTab?.file) {
+                            try {
+                                const dirPath = activeTab.file.path.substring(0, activeTab.file.path.lastIndexOf('/')) || 
+                                               activeTab.file.path.substring(0, activeTab.file.path.lastIndexOf('\\'));
+                                const fileName = newName.trim().toLowerCase().endsWith('.md') ? newName.trim() : `${newName.trim()}.md`;
+                                const newPath = await join(dirPath, fileName);
+                                await fsRename(activeTab.file.path, newPath);
+                                setTabs(prev => prev.map(t =>
+                                    t.id === activeTabId ? { ...t, file: { ...t.file!, path: newPath, name: fileName }, dirty: true } : t
+                                ));
+                            } catch (error) {
+                                console.error('Failed to rename file:', error);
+                                alert('重命名失败');
+                            }
+                        }
+                        setRenameDialogOpen(false);
                     }}
                 />
             )}

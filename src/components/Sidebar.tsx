@@ -40,7 +40,7 @@ interface SidebarProps {
     onCloseTabsForPath: (path: string) => void;
 }
 
-/* ==================== 剪贴板状态（模块级，跨组件共享） ==================== */
+/* ==================== Clipboard state (module-level, shared across components) ==================== */
 let clipboardPath: string | null = null;
 let clipboardIsCut = false;
 
@@ -64,8 +64,10 @@ function getParentPath(filePath: string): string | null {
 }
 
 /**
- * 生成复制后的文件名：file.txt → file copy.txt → file copy 2.txt → ...
- * copyIndex 从 1 开始，1 时省略数字
+ * Generate a new file name for a copy operation.
+ * @param name The original file name.
+ * @param copyIndex The index of the copy operation, starting from 1.
+ * @returns The new file name with a suffix like "copy.txt" or "copy 2.txt".
  */
 function generateCopyName(name: string, copyIndex: number): string {
     const dotIdx = name.lastIndexOf('.');
@@ -75,7 +77,7 @@ function generateCopyName(name: string, copyIndex: number): string {
     return `${baseName}${suffix}${ext}`;
 }
 
-/* ==================== 右键菜单 ==================== */
+/* ==================== Context menu (module-level, shared across components) ==================== */
 interface ContextMenuState {
     visible: boolean;
     x: number;
@@ -131,13 +133,13 @@ function ContextMenu({
 
     const isBlankArea = !state.node;
     const { path: clipPath, isCut: clipIsCut } = getClipboard();
-    // 粘贴目标：文件夹节点直接粘贴到自身，文件节点粘贴到其父目录，空白区粘贴到项目根
+    // Paste target: Folder nodes paste directly into themselves, file nodes paste into their parent directory, and blank areas paste into the project root.
     const pasteTarget = isBlankArea
         ? state.rootPath
         : state.node!.isDir
             ? state.node!.path
             : getParentPath(state.node!.path);
-    // 剪切到同目录不允许；复制到同目录允许（自动加 copy 后缀）；无剪贴板不允许
+    // Cut to the same directory is not allowed; copy to the same directory is allowed (with a copy suffix); no clipboard is allowed
     const srcDir = clipPath ? getParentPath(clipPath) : null;
     const sameDir = srcDir !== null && srcDir === pasteTarget;
     const canPaste = clipPath !== null && pasteTarget !== null && !(clipIsCut && sameDir);
@@ -190,7 +192,7 @@ function ContextMenu({
     );
 }
 
-/* ==================== 内联重命名输入 ==================== */
+/* ==================== Inline rename input ==================== */
 function InlineRename({
     initialName,
     onConfirm,
@@ -240,7 +242,7 @@ function InlineRename({
     );
 }
 
-/* ==================== 内联新建输入 ==================== */
+/* ==================== Inline create input ==================== */
 function InlineCreate({
     placeholder,
     onConfirm,
@@ -290,7 +292,7 @@ function InlineCreate({
     );
 }
 
-/* ==================== 目录树节点 ==================== */
+/* ==================== Folder tree node ==================== */
 type NodeAction =
     | { type: 'none' }
     | { type: 'rename'; targetPath: string }
@@ -324,7 +326,7 @@ function FolderTreeNode({
     const [children, setChildren] = useState<FileTreeNode[]>(node.children);
     const [loading, setLoading] = useState(false);
 
-    // refreshKey 变化时，如果目录已展开则重新加载子节点
+    // When refreshKey changes, reload children if the directory is expanded
     useEffect(() => {
         if (expanded && node.isDir) {
             onLoadChildren(node.path).then(setChildren).catch(console.error);
@@ -335,7 +337,7 @@ function FolderTreeNode({
     const isCreatingFile = nodeAction.type === 'newFile' && nodeAction.parentPath === node.path;
     const isCreatingDir = nodeAction.type === 'newDir' && nodeAction.parentPath === node.path;
 
-    // 新建文件/目录时自动展开当前目录
+    // When creating a file or directory, expand the current directory
     useEffect(() => {
         if ((isCreatingFile || isCreatingDir) && !expanded) {
             setExpanded(true);
@@ -370,7 +372,7 @@ function FolderTreeNode({
     const handleNewFile = async (name: string) => {
         onActionDone();
         try {
-            // 确保文件名以 .md 结尾
+            // Ensure the file name ends with .md
             const fileName = name.endsWith('.md') ? name : `${name}.md`;
             const newPath = await join(node.path, fileName);
             await fsCreateFile(newPath);
@@ -401,7 +403,10 @@ function FolderTreeNode({
         onActionDone();
         try {
             const parentPath = node.path.substring(0, node.path.lastIndexOf('/') !== -1 ? node.path.lastIndexOf('/') : node.path.lastIndexOf('\\'));
-            const newPath = await join(parentPath, newName);
+            const fileName = !node.isDir && !newName.trim().toLowerCase().endsWith('.md') 
+                ? `${newName.trim()}.md` 
+                : newName.trim();
+            const newPath = await join(parentPath, fileName);
             await fsRename(node.path, newPath);
             onTreeRefresh();
         } catch (error) {
@@ -500,7 +505,7 @@ function FolderTreeNode({
         );
     }
 
-    // 文件节点
+    // File node component
     const isActive = activeFilePath === node.path;
     return (
         <div
@@ -526,7 +531,7 @@ function FolderTreeNode({
     );
 }
 
-/* ==================== 搜索结果行高亮组件 ==================== */
+/* ==================== Search result line highlight component ==================== */
 function HighlightedLine({ match }: { match: FolderSearchMatch }) {
     const { range, lineText } = match;
     const startCh = range[0][1];
@@ -543,7 +548,7 @@ function HighlightedLine({ match }: { match: FolderSearchMatch }) {
     );
 }
 
-/* ==================== Sidebar 主组件 ==================== */
+/* ==================== Sidebar main component ==================== */
 const MIN_SIDEBAR_WIDTH = 160;
 const MAX_SIDEBAR_WIDTH = 600;
 
@@ -571,7 +576,7 @@ export default function Sidebar({
     const [refreshKey, setRefreshKey] = useState(0);
 
     // -----------------------------------------------------------------------
-    // 搜索面板状态
+    // Search panel state
     // -----------------------------------------------------------------------
     const [keyword, setKeyword] = useState('');
     const [searchResults, setSearchResults] = useState<FolderSearchResult[]>([]);
@@ -584,14 +589,14 @@ export default function Sidebar({
     const activeSearchSessionRef = useRef<{ cancel: () => void } | null>(null);
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // 激活搜索面板时自动聚焦输入框
+    // Focus search input when search panel is activated
     useEffect(() => {
         if (activePanel === 'search') {
             searchInputRef.current?.focus();
         }
     }, [activePanel]);
 
-    // 切换到搜索面板后，如果项目刚打开且有 keyword，自动搜索一次
+    // Search once when project is opened and keyword is set
     const handleRequestOpenFolder = useCallback(() => {
         onOpenFolder();
     }, [onOpenFolder]);
@@ -606,7 +611,7 @@ export default function Sidebar({
                 return;
             }
 
-            // 取消上一次还在运行的搜索
+            // Cancel the previous search session if it's still running
             if (activeSearchSessionRef.current) {
                 activeSearchSessionRef.current.cancel();
                 activeSearchSessionRef.current = null;
@@ -636,7 +641,7 @@ export default function Sidebar({
         [projectTree],
     );
 
-    // 关键字变化 → 防抖搜索
+    // Search when keyword changes, with debounce to avoid frequent calls
     useEffect(() => {
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
@@ -664,7 +669,7 @@ export default function Sidebar({
         };
     }, [keyword, isCaseSensitive, isWholeWord, isRegexp, runSearch]);
 
-    // 当 projectTree 变化时（例如换了一个打开文件夹），如果当前有 keyword 则重新搜索
+    // Search when the projectTree changes
     useEffect(() => {
         if (!projectTree) {
             setSearchResults([]);
@@ -686,8 +691,7 @@ export default function Sidebar({
     const handleMatchClick = useCallback(
         async (filePath: string) => {
             try {
-                // 让上层组件用 dirname 设置 window.DIRNAME
-                // 这里我们先直接触发 onFolderFileSelect（它会自动处理 dirname）
+                // Set window.DIRNAME in the parent component and then trigger onFolderFileSelect
                 onFolderFileSelect(filePath);
             } catch (err) {
                 console.error('打开搜索结果失败：', err);
@@ -699,13 +703,13 @@ export default function Sidebar({
     const totalMatches = searchResults.reduce((sum, r) => sum + r.matches.length, 0);
 
     // -----------------------------------------------------------------------
-    // 结束搜索面板状态
+    // Search panel state
     // -----------------------------------------------------------------------
 
-    // 侧边栏宽度（支持拖拽调整）
+    // Sidebar width (supports drag-and-drop adjustment)
     const [sidebarWidth, setSidebarWidth] = useState<number>(getDefaultSidebarWidth());
 
-    // 启动时从 store 异步加载宽度
+    // Load sidebar width from store on startup
     useEffect(() => {
         let cancelled = false;
         loadSidebarWidth().then((width) => {
@@ -718,7 +722,7 @@ export default function Sidebar({
         };
     }, []);
 
-    // 拖拽调整宽度
+    // Handle sidebar width drag-and-drop adjustment
     const handleResizeStart = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         const startX = e.clientX;
@@ -753,7 +757,7 @@ export default function Sidebar({
         setRefreshKey((k) => k + 1);
     }, [onTreeRefresh]);
 
-    // 监听项目目录的文件系统变更
+    // Watch project directory for file system changes
     useEffect(() => {
         if (!projectTree?.path) return;
 
@@ -810,7 +814,7 @@ export default function Sidebar({
 
     const handleContextNewFile = useCallback(() => {
         if (!contextMenu.node) {
-            // 空白区右键：在项目根目录新建
+            // Empty area right-click: create in project root directory
             if (projectTree) setNodeAction({ type: 'newFile', parentPath: projectTree.path });
             return;
         }
@@ -822,7 +826,7 @@ export default function Sidebar({
 
     const handleContextNewDir = useCallback(() => {
         if (!contextMenu.node) {
-            // 空白区右键：在项目根目录新建
+            // Empty area right-click: create in project root directory
             if (projectTree) setNodeAction({ type: 'newDir', parentPath: projectTree.path });
             return;
         }
@@ -861,7 +865,7 @@ export default function Sidebar({
             let destName = srcName;
 
             if (isCut) {
-                // 剪切：同目录不允许
+                // Cut: same directory is not allowed
                 const srcDir = getParentPath(path);
                 if (srcDir === targetDir) {
                     clearClipboard();
@@ -869,7 +873,7 @@ export default function Sidebar({
                 }
             }
 
-            // 检查目标路径是否已存在同名文件，存在则自动加 copy 后缀
+            // Check if target path already exists
             const directPath = await join(targetDir, destName);
             if (await fsExists(directPath)) {
                 let copyIndex = 1;
@@ -915,7 +919,7 @@ export default function Sidebar({
         if (contextMenu.node) {
             fsRevealInFolder(contextMenu.node.path);
         } else if (projectTree) {
-            // 空白区右键：打开项目根目录的父目录
+            // Empty area right-click: open parent directory of project root directory
             fsRevealInFolder(projectTree.path);
         }
     }, [contextMenu.node, projectTree]);
@@ -979,9 +983,9 @@ export default function Sidebar({
                     </div>
 
                     <div className="sidebar-content" onContextMenu={(e) => {
-                        // 拦截整个 sidebar-content 的右键，阻止系统默认菜单
+                        // Intercept all sidebar-content right-clicks, preventing system default menu
                         e.preventDefault();
-                        // 如果不是从节点冒泡上来的，显示空白区菜单
+                        // Show empty area menu if right-click is not on a node element
                         if (!(e.target as HTMLElement).closest('.tree-folder, .tree-file')) {
                             setContextMenu({ visible: true, x: e.clientX, y: e.clientY, node: null, rootPath: projectTree?.path ?? null });
                         }
@@ -991,7 +995,7 @@ export default function Sidebar({
                                 <div className="sidebar-section">
                                     <span className="sidebar-section-title">{projectTree.name}</span>
                                     <div className="project-tree">
-                                        {/* 根目录层级的新建输入框 */}
+                                        {/* Root directory level new file input */}
                                         {nodeAction.type === 'newFile' && nodeAction.parentPath === projectTree.path && (
                                             <div
                                                 className="tree-file tree-creating"
@@ -1001,7 +1005,7 @@ export default function Sidebar({
                                                     placeholder="新文件名"
                                                     onConfirm={async (name: string) => {
                                                         try {
-                                                            // 确保文件名以 .md 结尾
+                                                            // Add file name with .md suffix
                                                             const fileName = name.endsWith('.md') ? name : `${name}.md`;
                                                             const newPath = await join(projectTree.path, fileName);
                                                             await fsCreateFile(newPath);
@@ -1075,7 +1079,7 @@ export default function Sidebar({
 
                         {activePanel === 'search' && (
                             <div className="sidebar-section sidebar-search-section">
-                                {/* 搜索输入框 + 控制按钮 */}
+                                {/* Search input box + controls buttons */}
                                 <div className="search-wrapper">
                                     <input
                                         ref={searchInputRef}
@@ -1113,7 +1117,7 @@ export default function Sidebar({
                                     </div>
                                 </div>
 
-                                {/* 状态提示 */}
+                                {/* Search status prompt */}
                                 {!projectTree && (
                                     <div className="search-empty">
                                         <div className="sidebar-empty-icon">🔍</div>
@@ -1138,18 +1142,18 @@ export default function Sidebar({
                                     </div>
                                 )}
 
-                                {/* 结果信息 */}
+                                {/* Search result info */}
                                 {projectTree && searchResults.length > 0 && (
                                     <div className="search-result-info">
                                         在 {searchResults.length} 个文件中找到 {totalMatches} 处匹配
                                     </div>
                                 )}
 
-                                {/* 结果列表 */}
+                                {/* Result list */}
                                 <div className="search-result-list">
                                     {searchResults.map((result) => {
                                         const filename = result.filePath.split(/[/\\]/).pop() || result.filePath;
-                                        const isExpanded = expandedFiles[result.filePath] !== false; // 默认展开
+                                        const isExpanded = expandedFiles[result.filePath] !== false; // Default expanded
                                         const matchCount = result.matches.length;
                                         return (
                                             <div className="search-result-file" key={result.filePath}>

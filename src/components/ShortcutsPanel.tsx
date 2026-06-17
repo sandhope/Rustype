@@ -25,7 +25,6 @@ const shortcutsData: ShortcutItem[] = [
             { description: '自动保存', keys: [] },
             { description: '移动到', keys: [] },
             { description: '重命名', keys: [] },
-            { description: '导入', keys: [] },
             { description: '导出为HTML', keys: [] },
             { description: '导出为PDF', keys: ['Ctrl', 'Alt', 'E'] },
             { description: '打印', keys: ['Ctrl', 'P'] },

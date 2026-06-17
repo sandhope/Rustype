@@ -1,34 +1,100 @@
 import type { Muya } from '../muya';
-import githubMarkdownCss from 'github-markdown-css/github-markdown-light.css?inline';
+import githubMarkdownCss from 'github-markdown-css/github-markdown.css?inline';
 import katexCss from 'katex/dist/katex.css?inline';
-import prismCss from 'prismjs/themes/prism.css?inline';
+import highlightCss from 'prismjs/themes/prism.css?inline';
 import exportStyle from '../assets/styles/exportStyle.css?inline';
+import footerHeaderCss from '../assets/styles/headerFooterStyle.css?inline';
 import { EXPORT_DOMPURIFY_CONFIG } from '../config';
 import { isHTMLElement, sanitize, unescapeHTML } from '../utils';
 import loadRenderer from '../utils/diagram';
 
 import { getHighlightHtml } from '../utils/marked';
-import { generateGithubSlug } from '../utils/slug';
 
-// Core stylesheets inlined into the exported document so the output is fully
-// self-contained and renders offline / behind CSP / air-gapped — matching the
-// legacy `packages/muyajs` `ExportHtml` behavior (PG7). Linking these from a
-// CDN left a saved `.html` file unstyled with no network access, a regression
-// for an offline desktop editor. Callers that explicitly want the lighter
-// CDN-linked shell can opt in via `generate({ inlineStyles: false })`.
-const BASE_STYLESHEETS = [githubMarkdownCss, katexCss, prismCss];
+export const getSanitizeHtml = (markdown: string, options: Record<string, unknown>) => {
+  const html = getHighlightHtml(markdown, options as any);
+  return sanitize(html, EXPORT_DOMPURIFY_CONFIG, false);
+};
 
-// CDN `<link>` tags used when `inlineStyles` is disabled. Kept verbatim from
-// the previous default so the opt-out path is byte-identical to the old output.
-const CDN_STYLESHEET_LINKS = `  <!-- https://cdnjs.com/libraries/github-markdown-css -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.css" integrity="sha512-n5zPz6LZB0QV1eraRj4OOxRbsV7a12eAGfFcrJ4bBFxxAwwYDp542z5M0w24tKPEhKk2QzjjIpR5hpOjJtGGoA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <!-- https://katex.org/docs/browser -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
-  <!-- https://cdnjs.com/libraries/prism -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/themes/prism.min.css" integrity="sha512-/mZ1FHPkg6EKcxo0fKXF51ak6Cr2ocgDi5ytaTBjsQZIH/RNs6GF6+oId/vPe3eJB836T36nXwVh/WBl/cWT4w==" crossorigin="anonymous" referrerpolicy="no-referrer" />`;
+const HF_TABLE_START = '<table class="page-container">';
+const HF_TABLE_END = '</table>';
+
+const createMarkdownArticle = (html: string) => {
+    return `<article class="markdown-body">${html}</article>`;
+};
+
+const createTableBody = (html: string) => {
+    return `<tbody><tr><td>
+  <div class="main-container">
+    ${createMarkdownArticle(html)}
+  </div>
+</td></tr></tbody>`;
+};
+
+const HF_TABLE_FOOTER = `<tfoot class="page-footer-fake"><tr><td>
+  <div class="hf-container">
+    &nbsp;
+  </div>
+</td></tr></tfoot>`;
+
+const createTableHeader = (options: ExportOptions) => {
+    const { header, headerFooterStyled } = options;
+    if (!header)
+        return '';
+    const { type, left, center, right } = header;
+    let headerClass = type === 1 ? 'single' : '';
+    headerClass += getHeaderFooterStyledClass(headerFooterStyled);
+    return `<thead class="page-header ${headerClass}"><tr><th>
+  <div class="hf-container">
+    <div class="header-content-left">${left}</div>
+    <div class="header-content">${center}</div>
+    <div class="header-content-right">${right}</div>
+  </div>
+</th></tr></thead>`;
+};
+
+const createRealFooter = (options: ExportOptions) => {
+    const { footer, headerFooterStyled } = options;
+    if (!footer)
+        return '';
+    const { type, left, center, right } = footer;
+    let footerClass = type === 1 ? 'single' : '';
+    footerClass += getHeaderFooterStyledClass(headerFooterStyled);
+    return `<div class="page-footer ${footerClass}">
+  <div class="hf-container">
+    <div class="footer-content-left">${left}</div>
+    <div class="footer-content">${center}</div>
+    <div class="footer-content-right">${right}</div>
+  </div>
+</div>`;
+};
+
+const getHeaderFooterStyledClass = (value: boolean | undefined) => {
+    if (value === undefined) {
+        return '';
+    }
+    return !value ? ' simple' : ' styled';
+};
+
+interface HeaderFooterConfig {
+    type: number;
+    left: string;
+    center: string;
+    right: string;
+}
+
+export interface ExportOptions {
+    title?: string;
+    extraCss?: string;
+    printOptimization?: boolean;
+    toc?: string;
+    header?: HeaderFooterConfig;
+    footer?: HeaderFooterConfig;
+    headerFooterStyled?: boolean;
+}
 
 export class MarkdownToHtml {
     private _exportContainer: HTMLDivElement | null = null;
+    private _mathRendererCalled = false;
 
     constructor(public markdown: string, public muya?: Muya) {}
 
@@ -49,16 +115,13 @@ export class MarkdownToHtml {
             mermaidContainer.classList.add('mermaid');
             preEle.replaceWith(mermaidContainer);
         }
-        const mermaid = await loadRenderer('mermaid');
-        // We only export light theme, so set mermaid theme to `default`, in the future, we can choose which theme to export.
-        mermaid.initialize({
-            startOnLoad: false,
+          const mermaid = await loadRenderer('mermaid');
+          // We only export light theme, set mermaid theme to `default` for export.
+          mermaid.initialize({
             securityLevel: 'strict',
             theme: 'default',
-        });
-        await mermaid.run({
-            nodes: [...this._exportContainer!.querySelectorAll('div.mermaid')],
-        });
+          });
+          mermaid.init(undefined, this._exportContainer!.querySelectorAll('div.mermaid'));
         if (this.muya) {
             mermaid.initialize({
                 securityLevel: 'strict',
@@ -68,131 +131,100 @@ export class MarkdownToHtml {
     }
 
     async renderDiagram() {
-        const selector
-            = 'code.language-vega-lite, code.language-plantuml, code.language-flowchart, code.language-sequence';
-        const codes = this._exportContainer!.querySelectorAll(selector);
+      const selector =
+        'code.language-vega-lite, code.language-flowchart, code.language-sequence, code.language-plantuml';
 
-        for (const code of codes) {
-            const rawCode = unescapeHTML(code.innerHTML);
-            const functionType = (() => {
-                if (/plantuml/.test(code.className))
-                    return 'plantuml';
-                else if (/flowchart/.test(code.className))
-                    return 'flowchart';
-                else if (/sequence/.test(code.className))
-                    return 'sequence';
-                else
-                    return 'vega-lite';
-            })();
-            const render = await loadRenderer(functionType);
-            const preParent = code.parentNode;
-            if (!isHTMLElement(preParent))
-                continue;
-            const diagramContainer = document.createElement('div');
-            diagramContainer.classList.add(functionType);
-            preParent.replaceWith(diagramContainer);
-            const options = {};
-            if (functionType === 'vega-lite') {
-                Object.assign(options, {
-                    actions: false,
-                    tooltip: false,
-                    renderer: 'svg',
-                    theme: 'latimes', // only render light theme
-                });
-            }
-            else if (functionType === 'sequence') {
-                Object.assign(options, {
-                    theme: this.muya?.options.sequenceTheme ?? 'hand',
-                });
-            }
+      const RENDER_MAP: Record<string, any> = {
+        flowchart: await loadRenderer('flowchart'),
+        sequence: await loadRenderer('sequence'),
+        plantuml: await loadRenderer('plantuml'),
+        'vega-lite': await loadRenderer('vega-lite'),
+      };
 
-            try {
-                if (functionType === 'plantuml') {
-                    const diagram = render.parse(rawCode);
-                    diagramContainer.innerHTML = '';
-                    diagram.insertImgElement(diagramContainer);
-                }
-                else if (functionType === 'flowchart' || functionType === 'sequence') {
-                    const diagram = render.parse(rawCode);
-                    diagramContainer.innerHTML = '';
-                    diagram.drawSVG(diagramContainer, options);
-                }
-                else if (functionType === 'vega-lite') {
-                    await render(diagramContainer, JSON.parse(rawCode), options);
-                }
-            }
-            catch {
-                diagramContainer.innerHTML = '< Invalid Diagram >';
-            }
+      const codes = this._exportContainer!.querySelectorAll(selector);
+
+      for (const code of codes) {
+        const rawCode = unescapeHTML(code.innerHTML);
+        const functionType = (() => {
+          if (/sequence/.test(code.className))
+            return 'sequence';
+          else if (/plantuml/.test(code.className))
+            return 'plantuml';
+          else if (/flowchart/.test(code.className))
+            return 'flowchart';
+          else
+            return 'vega-lite';
+        })();
+        const render = RENDER_MAP[functionType];
+        const preParent = code.parentNode;
+        if (!isHTMLElement(preParent))
+          continue;
+        const diagramContainer = document.createElement('div');
+        diagramContainer.classList.add(functionType);
+        preParent.replaceWith(diagramContainer);
+        const options: Record<string, unknown> = {};
+        if (functionType === 'vega-lite') {
+          Object.assign(options, {
+            actions: false,
+            tooltip: false,
+            renderer: 'svg',
+            theme: 'latimes',
+          });
         }
+        else if (functionType === 'sequence') {
+          Object.assign(options, {
+            theme: this.muya?.options.sequenceTheme ?? 'hand',
+          });
+        }
+
+        try {
+          if (functionType === 'plantuml') {
+            const diagram = render.parse(rawCode);
+            diagramContainer.innerHTML = '';
+            diagram.insertImgElement(diagramContainer);
+          }
+          else if (functionType === 'flowchart' || functionType === 'sequence') {
+            const diagram = render.parse(rawCode);
+            diagramContainer.innerHTML = '';
+            diagram.drawSVG(diagramContainer, options);
+          }
+          else if (functionType === 'vega-lite') {
+            await render(diagramContainer, JSON.parse(rawCode), options);
+          }
+        }
+        catch {
+          diagramContainer.innerHTML = '< Invalid Diagram >';
+        }
+      }
     }
 
-    // Assign a github-compatible slug `id` to every `<h1>..<h6>` in the
-    // export container. Headings that already carry an explicit id (none today,
-    // but defensive) are left as-is and reserve that id. Duplicates are
-    // deduplicated by incrementing a `-N` suffix until the *full* candidate id
-    // is unused — so a later heading whose text already looks like an earlier
-    // `-N` slug (e.g. `heading`, `heading`, `heading-1`) still resolves to a
-    // unique anchor, matching github / the legacy muyajs Slugger.
-    private _injectHeadingIds(container: HTMLElement) {
-        const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        const seen = new Set<string>();
-
-        // Reserve any pre-existing ids first so generated slugs never collide
-        // with them.
-        for (const heading of headings) {
-            if (heading.id)
-                seen.add(heading.id);
-        }
-
-        for (const heading of headings) {
-            if (heading.id)
-                continue;
-
-            const base = generateGithubSlug(heading.textContent ?? '') || 'heading';
-            let slug = base;
-            let n = 1;
-            while (seen.has(slug))
-                slug = `${base}-${n++}`;
-
-            seen.add(slug);
-            heading.id = slug;
-        }
-    }
-
-    // render pure html by marked
-    async renderHtml() {
+    async renderHtml(toc?: string) {
+        this._mathRendererCalled = false;
         let html = getHighlightHtml(this.markdown, {
-            superSubScript: this.muya?.options?.superSubScript ?? true,
-            footnote: this.muya?.options?.footnote ?? false,
-            isGitlabCompatibilityEnabled:
-        this.muya?.options?.isGitlabCompatibilityEnabled ?? true,
-            math: this.muya?.options?.math ?? true,
+            superSubScript: this.muya ? this.muya.options.superSubScript : false,
+            footnote: this.muya ? this.muya.options.footnote : false,
+            isGitlabCompatibilityEnabled: this.muya
+                ? this.muya.options.isGitlabCompatibilityEnabled
+                : false,
+            math: this.muya ? this.muya.options.math : false,
         });
 
         html = sanitize(html, EXPORT_DOMPURIFY_CONFIG, false) as string;
 
         const exportContainer = (this._exportContainer
             = document.createElement('div'));
-        exportContainer.classList.add('mu-render-container');
+        exportContainer.classList.add('ag-render-container');
         exportContainer.innerHTML = html;
         document.body.appendChild(exportContainer);
 
-        // render only render the light theme of mermaid and diagram...
+        this._mathRendererCalled = exportContainer.querySelector('.katex') !== null;
+
         await this.renderMermaid();
         await this.renderDiagram();
-
-        // Inject github-compatible slug ids onto exported headings so the
-        // exported document's [TOC] / `getHtmlToc` `href="#slug"` anchors
-        // resolve (PG8). Scoped to this export DOM path — the conformance
-        // renderer (`renderToStaticHTML`) is deliberately left untouched.
-        this._injectHeadingIds(exportContainer);
 
         let result = exportContainer.innerHTML;
         exportContainer.remove();
 
-        // hack to add arrow marker to output html
-        // TODO: JOCS, are these codes still needed?
         const paths = document.querySelectorAll('path[id^=raphael-marker-]');
         const def = '<defs style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">';
         result = result.replace(def, () => {
@@ -205,30 +237,47 @@ export class MarkdownToHtml {
 
         this._exportContainer = null;
 
-        return `<article class="markdown-body">${result}</article>`;
+        return result;
     }
 
-    /**
-     * Get HTML with style.
-     *
-     * @param options Document options.
-     * @param options.title Document `<title>`.
-     * @param options.extraCSS Extra CSS appended after the base stylesheets.
-     * @param options.inlineStyles Inline the core stylesheets so the output is
-     * self-contained and renders offline (default `true`); pass `false` to fall
-     * back to CDN `<link>` tags.
-     */
-    async generate(
-        options: { title?: string; extraCSS?: string; inlineStyles?: boolean } = {},
-    ) {
-        const html = await this.renderHtml();
+    private _prepareHtml(html: string, options: ExportOptions) {
+        const { header, footer } = options;
+        const appendHeaderFooter = !!header || !!footer;
+        if (!appendHeaderFooter) {
+            return createMarkdownArticle(html);
+        }
 
-        // `extraCSS` may changed in the mean time.
-        const { title = '', extraCSS = '', inlineStyles = true } = options;
+        if (!options.extraCss) {
+            options.extraCss = footerHeaderCss;
+        }
+        else {
+            options.extraCss = footerHeaderCss + options.extraCss;
+        }
 
-        const baseStyles = inlineStyles
-            ? BASE_STYLESHEETS.map(css => `  <style>${css}</style>`).join('\n')
-            : CDN_STYLESHEET_LINKS;
+        let output = HF_TABLE_START;
+        if (header) {
+            output += createTableHeader(options);
+        }
+
+        if (footer) {
+            output += HF_TABLE_FOOTER;
+            output = createRealFooter(options) + output;
+        }
+
+        output = output + createTableBody(html) + HF_TABLE_END;
+        return sanitize(output, EXPORT_DOMPURIFY_CONFIG, false) as string;
+    }
+
+    async generate(options: ExportOptions = {}) {
+        const { printOptimization = false } = options;
+
+        // WORKAROUND: Hide Prism.js style when exporting or printing. Otherwise the background color is white in the dark theme.
+        const highlightCssStyle = printOptimization ? `@media print { ${highlightCss} }` : highlightCss
+        const html = this._prepareHtml(await this.renderHtml(options.toc), options);
+        const katexCssStyle = this._mathRendererCalled ? katexCss : '';
+        this._mathRendererCalled = false;
+
+        const { title = '', extraCss = ''} = options;
 
         return `<!DOCTYPE html>
 <html lang="en">
@@ -236,9 +285,80 @@ export class MarkdownToHtml {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${sanitize(title, EXPORT_DOMPURIFY_CONFIG, true)}</title>
-${baseStyles}
+  <style>
+  ${githubMarkdownCss}
+  </style>
+  <style>
+  ${highlightCssStyle}
+  </style>
+  <style>
+  ${katexCssStyle}
+  </style>
+  <style>
+    .markdown-body {
+      font-family: -apple-system,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+      box-sizing: border-box;
+      min-width: 200px;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 45px;
+    }
+
+    @media not print {
+      .markdown-body {
+        padding: 45px;
+      }
+
+      @media (max-width: 767px) {
+        .markdown-body {
+          padding: 15px;
+        }
+      }
+    }
+
+    .hf-container {
+      color: #24292e;
+      line-height: 1.3;
+    }
+
+    .markdown-body .highlight pre,
+    .markdown-body pre {
+      white-space: pre-wrap;
+    }
+    .markdown-body table {
+      display: table;
+    }
+    .markdown-body img[data-align="center"] {
+      display: block;
+      margin: 0 auto;
+    }
+    .markdown-body img[data-align="right"] {
+      display: block;
+      margin: 0 0 0 auto;
+    }
+    .markdown-body li.task-list-item {
+      list-style-type: none;
+    }
+    .markdown-body li > [type=checkbox] {
+      margin: 0 0 0 -1.3em;
+    }
+    .markdown-body input[type="checkbox"] ~ p {
+      margin-top: 0;
+      display: inline-block;
+    }
+    .markdown-body ol ol,
+    .markdown-body ul ol {
+      list-style-type: decimal;
+    }
+    .markdown-body ol ol ol,
+    .markdown-body ol ul ol,
+    .markdown-body ul ol ol,
+    .markdown-body ul ul ol {
+      list-style-type: decimal;
+    }
+  </style>
   <style>${exportStyle}</style>
-  <style>${extraCSS}</style>
+  <style>${extraCss}</style>
 </head>
 <body>
   ${html}

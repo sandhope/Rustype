@@ -1,3 +1,5 @@
+@import './services/printService.css';
+
 :root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   font-size: 16px;
@@ -168,7 +170,7 @@ body,
   pointer-events: none;
 }
 
-/* 状态标记列（✓）*/
+/* Status column (✓) */
 .menu-item-status {
   font-size: 13px;
   color: var(--app-text-color);
@@ -180,7 +182,7 @@ body,
   justify-content: center;
 }
 
-/* 标签列 */
+/* Label column */
 .menu-item-label {
   flex: 1;
   text-align: left;
@@ -189,7 +191,7 @@ body,
   white-space: nowrap;
 }
 
-/* 快捷键列 */
+/* Shortcut column */
 .menu-item-shortcut {
   font-size: 12px;
   color: var(--app-text-secondary);
@@ -234,7 +236,7 @@ body,
 .menu-submenu-item {
   display: flex;
   align-items: center;
-  padding: 5px 12px;
+  padding: 5px 20px;
   font-size: 13px;
   color: var(--app-text-color);
   cursor: pointer;
@@ -257,14 +259,18 @@ body,
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-left: 8px;
+}
+
+.menu-submenu-item-shortcut {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  text-align: right;
 }
 
 .menu-submenu-item-status {
   font-size: 14px;
-  width: 18px;
   flex-shrink: 0;
-  text-align: center;
+  margin-right: 10px;
 }
 
 .menu-submenu-empty {
@@ -382,6 +388,7 @@ body,
   overflow-x: auto;
   overflow-y: hidden;
   cursor: default;
+  z-index: 1000;
 }
 
 .tab-bar:hover {
@@ -973,7 +980,7 @@ body,
   background-color: var(--tab-bg-active, rgba(0, 0, 0, 0.08));
 }
 
-/* ==================== 目录树右键菜单 ==================== */
+/* ==================== Folder tree right-click menu ==================== */
 .tree-context-menu {
   position: fixed;
   z-index: 10000;
@@ -1021,7 +1028,7 @@ body,
   background-color: #e0e0e0;
 }
 
-/* ==================== 编辑器右键菜单 ==================== */
+/* ==================== Editor right-click menu ==================== */
 .editor-context-menu {
   position: fixed;
   z-index: 10000;
@@ -1070,7 +1077,6 @@ body,
   background-color: #e0e0e0;
 }
 
-/* 内联重命名/新建输入 */
 .tree-rename-input {
   flex: 1;
   min-width: 0;
@@ -1209,6 +1215,81 @@ body,
 
 .modal-button-secondary:hover {
   background-color: var(--settings-btn-secondary-hover);
+}
+
+/* ============ Rename Dialog ============ */
+.rename-dialog {
+  background: var(--app-modal-bg);
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 320px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.rename-header {
+  margin-bottom: 16px;
+}
+
+.rename-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-color);
+  margin: 0;
+}
+
+.rename-input-container {
+  margin-bottom: 16px;
+}
+
+.rename-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid var(--settings-input-border);
+  border-radius: 6px;
+  background: var(--settings-input-bg);
+  color: var(--app-text-color);
+  box-sizing: border-box;
+}
+
+.rename-input:focus {
+  outline: none;
+  border-color: var(--settings-btn-primary-bg);
+}
+
+.rename-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rename-cancel-btn,
+.rename-confirm-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.rename-cancel-btn {
+  background-color: var(--settings-btn-secondary-bg);
+  color: var(--settings-btn-secondary-color);
+}
+
+.rename-cancel-btn:hover {
+  background-color: var(--settings-btn-secondary-hover);
+}
+
+.rename-confirm-btn {
+  background-color: var(--settings-btn-primary-bg);
+  color: #fff;
+}
+
+.rename-confirm-btn:hover {
+  background-color: var(--settings-btn-primary-hover);
 }
 
 /* ============ Table Dialog ============ */

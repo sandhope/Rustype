@@ -59,6 +59,16 @@ export interface EditorHandle {
     updateParagraph?: (type: string) => void;
     createTable?: (rows: number, columns: number) => void;
     isInList?: () => boolean;
+    exportStyledHTML?: (options?: {
+        title?: string;
+        extraCSS?: string;
+        printOptimization?: boolean;
+        toc?: string;
+        header?: { type: number; left: string; center: string; right: string };
+        footer?: { type: number; left: string; center: string; right: string };
+        headerFooterStyled?: boolean;
+    }) => Promise<string>;
+    exportHtml?: () => Promise<string>;
 }
 
 interface EditorProps {
@@ -114,7 +124,7 @@ function ensurePlugins() {
     // the expected plugin constructor type to satisfy TypeScript.
     Muya.use(ImagePathPicker as unknown as any);
     Muya.use(ImageEditTool, {
-        imagePathPicker: async (query?: string) => {
+        imagePathPicker: async (_query?: string) => {
             // Try Tauri dialog plugin first (native file picker)
             try {
                 const dialog = await import('@tauri-apps/plugin-dialog');
@@ -488,6 +498,12 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
                 if (!state) return false;
                 const name = state.name;
                 return name === 'bullet-list' || name === 'order-list' || name === 'task-list';
+            },
+            exportStyledHTML: async (options) => {
+                return muyaRef.current?.exportStyledHTML(options) ?? '';
+            },
+            exportHtml: async () => {
+                return muyaRef.current?.exportHtml() ?? '';
             },
             dispose: () => {
                 const muyaToDestroy = muyaRef.current;

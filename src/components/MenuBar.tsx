@@ -5,7 +5,7 @@ import type { SidebarPanel } from './Sidebar';
 
 interface MenuBarProps {
     activeMenu: string | null;
-    openRecentSubmenu: boolean;
+    openSubmenu: string | null;
     sourceMode: boolean;
     focusMode: boolean;
     typewriterMode: boolean;
@@ -16,9 +16,10 @@ interface MenuBarProps {
     recentFolders: FileInfo[];
     isInList: boolean;
     currentLineEnding: 'crlf' | 'lf';
+    autoSave: boolean;
     onToggleMenu: (menu: string) => void;
     onMenuItemClick: (action: string) => void;
-    onSetOpenRecentSubmenu: (open: boolean) => void;
+    onSetOpenSubmenu: (submenu: string | null) => void;
     onRecentFileSelect: (file: FileInfo) => void;
     onRecentFolderSelect: (folder: FileInfo) => void;
     onClearRecentlyOpened: () => void;
@@ -26,7 +27,7 @@ interface MenuBarProps {
 
 export default function MenuBar({
     activeMenu,
-    openRecentSubmenu,
+    openSubmenu,
     sourceMode,
     focusMode,
     typewriterMode,
@@ -37,9 +38,10 @@ export default function MenuBar({
     recentFolders,
     isInList,
     currentLineEnding,
+    autoSave,
     onToggleMenu,
     onMenuItemClick,
-    onSetOpenRecentSubmenu,
+    onSetOpenSubmenu,
     onRecentFileSelect,
     onRecentFolderSelect,
     onClearRecentlyOpened,
@@ -60,9 +62,14 @@ export default function MenuBar({
                             文件
                         </div>
                         <div className={`menu-dropdown-content ${activeMenu === 'file' ? 'is-open' : ''}`}>
-                            <div className="menu-item" onClick={() => onMenuItemClick('new')}>
+                            <div className="menu-item" onClick={() => onMenuItemClick('newTab')}>
                                 <span className="menu-item-status"></span>
-                                <span className="menu-item-label">新建</span>
+                                <span className="menu-item-label">新建标签页</span>
+                                <span className="menu-item-shortcut">Ctrl+T</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('newWindow')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">新建窗口</span>
                                 <span className="menu-item-shortcut">Ctrl+N</span>
                             </div>
                             <div className="menu-divider" />
@@ -78,13 +85,13 @@ export default function MenuBar({
                             </div>
                             <div
                                 className="menu-item menu-item-submenu"
-                                onMouseEnter={() => onSetOpenRecentSubmenu(true)}
-                                onMouseLeave={() => onSetOpenRecentSubmenu(false)}
+                                onMouseEnter={() => onSetOpenSubmenu('recent')}
+                                onMouseLeave={() => onSetOpenSubmenu(null)}
                             >
                                 <span className="menu-item-status"></span>
                                 <span className="menu-item-label">打开最近</span>
                                 <span className="menu-item-arrow">›</span>
-                                {openRecentSubmenu && (
+                                {openSubmenu === 'recent' && (
                                     <div className="menu-submenu">
                                         {(recentFolders.length === 0 && recentFiles.length === 0) ? (
                                             <div className="menu-submenu-item menu-submenu-empty">暂无最近使用</div>
@@ -153,11 +160,72 @@ export default function MenuBar({
                                 <span className="menu-item-label">另存为…</span>
                                 <span className="menu-item-shortcut">Ctrl+Shift+S</span>
                             </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('autoSave')}>
+                                <span className="menu-item-status">{autoSave ? '✓' : ''}</span>
+                                <span className="menu-item-label">自动保存</span>
+                                <span className="menu-item-shortcut"></span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('moveTo')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">移动到</span>
+                                <span className="menu-item-shortcut"></span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('rename')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">重命名</span>
+                                <span className="menu-item-shortcut"></span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div
+                                className="menu-item menu-item-submenu"
+                                onMouseEnter={() => onSetOpenSubmenu('export')}
+                                onMouseLeave={() => onSetOpenSubmenu(null)}
+                            >
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">导出</span>
+                                <span className="menu-item-arrow">›</span>
+                                {openSubmenu === 'export' && (
+                                    <div className="menu-submenu" onClick={(e) => e.stopPropagation()}>
+                                        <div className="menu-submenu-item" onClick={() => onMenuItemClick('exportHtml')}>
+                                            <span className="menu-submenu-item-icon"></span>
+                                            <span className="menu-submenu-item-label">导出为 HTML</span>
+                                        </div>
+                                        <div className="menu-submenu-item" onClick={() => onMenuItemClick('exportPdf')}>
+                                            <span className="menu-submenu-item-icon"></span>
+                                            <span className="menu-submenu-item-label">导出为 PDF</span>
+                                            <span className="menu-submenu-item-shortcut">Ctrl+Alt+E</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('print')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">打印</span>
+                                <span className="menu-item-shortcut">Ctrl+P</span>
+                            </div>
                             <div className="menu-divider" />
                             <div className="menu-item" onClick={() => onMenuItemClick('settings')}>
                                 <span className="menu-item-status"></span>
                                 <span className="menu-item-label">设置</span>
                                 <span className="menu-item-shortcut">Ctrl+,</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('closeTab')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">关闭标签页</span>
+                                <span className="menu-item-shortcut">Ctrl+W</span>
+                            </div>
+                            <div className="menu-item" onClick={() => onMenuItemClick('closeWindow')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">关闭窗口</span>
+                                <span className="menu-item-shortcut">Ctrl+Shift+W</span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item" onClick={() => onMenuItemClick('quit')}>
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label">退出</span>
+                                <span className="menu-item-shortcut">Ctrl+Q</span>
                             </div>
                         </div>
                     </div>
@@ -264,13 +332,13 @@ export default function MenuBar({
                             <div className="menu-divider" />
                             <div
                                 className="menu-item menu-item-submenu"
-                                onMouseEnter={() => onSetOpenRecentSubmenu(true)}
-                                onMouseLeave={() => onSetOpenRecentSubmenu(false)}
+                                onMouseEnter={() => onSetOpenSubmenu('lineEnding')}
+                                onMouseLeave={() => onSetOpenSubmenu(null)}
                             >
                                 <span className="menu-item-status"></span>
                                 <span className="menu-item-label">行结束符</span>
                                 <span className="menu-item-arrow">›</span>
-                                {openRecentSubmenu && (
+                                {openSubmenu === 'lineEnding' && (
                                     <div className="menu-submenu" onClick={(e) => e.stopPropagation()}>
                                         <div className="menu-submenu-item" onClick={() => onMenuItemClick('setLineEndingCrlf')}>
                                             <span className="menu-submenu-item-status">{currentLineEnding === 'crlf' ? '●' : '○'}</span>

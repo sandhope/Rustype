@@ -3,7 +3,7 @@ import { dirname } from '@tauri-apps/api/path';
 import { getRecentFiles, getRecentFolders } from '../utils/recentFiles';
 import { loadSettings, type AppSettings, DEFAULT_SETTINGS } from '../utils/settings';
 import { loadSession, saveSession } from '../utils/session';
-import { readFileContent, getFileStat, grantDirectoryAccess, grantFileAccess, readDirectoryTree, getDefaultLineEnding, type FileInfo, type FileTreeNode } from '../utils/file';
+import { readFileContent, getFileStat, grantDirectoryAccess, grantFileAccess, readDirectoryTree, getDefaultLineEnding, saveMarkdownFile, type FileInfo, type FileTreeNode } from '../utils/file';
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
 import { WELCOME_MARKDOWN } from '../constants';
@@ -51,7 +51,8 @@ export interface UseAppStateReturn {
     checkingUpdate: boolean;
     alwaysOnTop: boolean;
     activeMenu: string | null;
-    openRecentSubmenu: boolean;
+    openSubmenu: string | null;
+    autoSave: boolean;
     setTabs: React.Dispatch<React.SetStateAction<Tab[]>>;
     setActiveTabId: React.Dispatch<React.SetStateAction<string>>;
     setActiveSidebarPanel: React.Dispatch<React.SetStateAction<SidebarPanel | null>>;
@@ -68,7 +69,8 @@ export interface UseAppStateReturn {
     setCheckingUpdate: React.Dispatch<React.SetStateAction<boolean>>;
     setAlwaysOnTop: React.Dispatch<React.SetStateAction<boolean>>;
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
-    setOpenRecentSubmenu: React.Dispatch<React.SetStateAction<boolean>>;
+    setOpenSubmenu: React.Dispatch<React.SetStateAction<string | null>>;
+    setAutoSave: React.Dispatch<React.SetStateAction<boolean>>;
     currentLineEnding: 'crlf' | 'lf';
     setCurrentLineEnding: (lineEnding: 'crlf' | 'lf') => void;
     handleNewFile: () => void;
@@ -102,7 +104,8 @@ export function useAppState() {
     const [checkingUpdate, setCheckingUpdate] = useState(false);
     const [alwaysOnTop, setAlwaysOnTop] = useState(false);
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
-    const [openRecentSubmenu, setOpenRecentSubmenu] = useState(false);
+    const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+    const [autoSave, setAutoSave] = useState(false);
 
     const isRestoringRef = useRef(false);
 
@@ -293,6 +296,29 @@ export function useAppState() {
         ));
     }, [activeTabId]);
 
+    useEffect(() => {
+        if (!autoSave) return;
+        
+        const currentTab = tabs.find(t => t.id === activeTabId);
+        if (!currentTab || !currentTab.file || !currentTab.dirty) return;
+
+        const debounce = setTimeout(async () => {
+            try {
+                const markdown = currentTab.content;
+                const lineEnding = currentTab.lineEnding;
+                await saveMarkdownFile(markdown, currentTab.file.path, lineEnding);
+                const stat = await getFileStat(currentTab.file.path);
+                setTabs(prev => prev.map(t =>
+                    t.id === activeTabId ? { ...t, content: markdown, dirty: false, lastModified: stat?.mtime, externallyModified: false } : t
+                ));
+            } catch (error) {
+                console.error('Auto-save failed:', error);
+            }
+        }, 1000);
+
+        return () => clearTimeout(debounce);
+    }, [autoSave, activeTabId, tabs]);
+
     const handleSourceChange = useCallback((content: string) => {
         setTabs(prev => prev.map(t =>
             t.id === activeTabId ? { ...t, content, dirty: true } : t
@@ -332,7 +358,8 @@ export function useAppState() {
         checkingUpdate,
         alwaysOnTop,
         activeMenu,
-        openRecentSubmenu,
+        openSubmenu,
+        autoSave,
         setTabs,
         setActiveTabId,
         setActiveSidebarPanel,
@@ -349,7 +376,8 @@ export function useAppState() {
         setCheckingUpdate,
         setAlwaysOnTop,
         setActiveMenu,
-        setOpenRecentSubmenu,
+        setOpenSubmenu,
+        setAutoSave,
         currentLineEnding,
         setCurrentLineEnding,
         handleNewFile,

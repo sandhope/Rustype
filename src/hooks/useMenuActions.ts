@@ -1,17 +1,20 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { open as tauriOpen } from '@tauri-apps/plugin-dialog';
+import { save } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { check } from '@tauri-apps/plugin-updater';
-import { relaunch } from '@tauri-apps/plugin-process';
+import { relaunch, exit } from '@tauri-apps/plugin-process';
 import { zoomIn, zoomOut, zoomReset } from '../utils/webview';
+import { createSecondWindow } from '../utils/webviewWindow';
 import { saveSettings, type AppSettings } from '../utils/settings';
 import { readText as readClipboardText } from '@tauri-apps/plugin-clipboard-manager';
+import { fsRename } from '../utils/file';
 import type { EditorHandle } from '../components/Editor';
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
 import type { TocItem } from './useAppState';
+import { exportHtml, exportPdf, printDocument } from '../utils/exportActions';
 
 interface UseMenuActionsProps {
     sourceMode: boolean;
@@ -20,9 +23,11 @@ interface UseMenuActionsProps {
     tabs: Tab[];
     activeSidebarPanel: SidebarPanel | null;
     checkingUpdate: boolean;
+    autoSave: boolean;
     setSourceMode: React.Dispatch<React.SetStateAction<boolean>>;
     setFocusMode: React.Dispatch<React.SetStateAction<boolean>>;
     setTabs: React.Dispatch<React.SetStateAction<Tab[]>>;
+    setActiveTabId: React.Dispatch<React.SetStateAction<string>>;
     setActiveSidebarPanel: React.Dispatch<React.SetStateAction<SidebarPanel | null>>;
     setFindReplaceOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setTypewriterMode: React.Dispatch<React.SetStateAction<boolean>>;
@@ -35,11 +40,15 @@ interface UseMenuActionsProps {
     setAlwaysOnTop: React.Dispatch<React.SetStateAction<boolean>>;
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
     setCurrentLineEnding: (lineEnding: 'crlf' | 'lf') => void;
+    setAutoSave: React.Dispatch<React.SetStateAction<boolean>>;
     handleNewFile: () => void;
     handleOpenFile: () => void;
     handleOpenFolder: () => void;
     handleSaveFile: () => void;
     handleSaveAs: () => void;
+    handleTabClose: (tabId: string) => void;
+    setRenameDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setRenameFileName: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export interface UseMenuActionsReturn {
@@ -57,9 +66,12 @@ export function useMenuActions(
         sourceMode,
         focusMode,
         activeTabId,
+        tabs,
+        autoSave,
         setSourceMode,
         setFocusMode,
         setTabs,
+        setActiveTabId,
         setActiveSidebarPanel,
         setFindReplaceOpen,
         setTypewriterMode,
@@ -72,11 +84,15 @@ export function useMenuActions(
         setAlwaysOnTop,
         setActiveMenu,
         setCurrentLineEnding,
+        setAutoSave,
         handleNewFile,
         handleOpenFile,
         handleOpenFolder,
         handleSaveFile,
         handleSaveAs,
+        handleTabClose,
+        setRenameDialogOpen,
+        setRenameFileName,
     } = props;
 
     const toggleMenu = useCallback((menu: string) => {
@@ -139,6 +155,14 @@ export function useMenuActions(
             case 'new':
                 handleNewFile();
                 break;
+            case 'newTab':
+                handleNewFile();
+                setActiveMenu(null);
+                break;
+            case 'newWindow':
+                await createSecondWindow();
+                setActiveMenu(null);
+                break;
             case 'openFile':
                 handleOpenFile();
                 break;
@@ -150,6 +174,65 @@ export function useMenuActions(
                 break;
             case 'saveAs':
                 handleSaveAs();
+                break;
+            case 'autoSave':
+                setAutoSave(prev => !prev);
+                setActiveMenu(null);
+                break;
+            case 'moveTo': {
+                const activeTab = tabs.find(t => t.id === activeTabId);
+                if (activeTab?.file) {
+                    try {
+                        const result = await save({
+                            defaultPath: activeTab.file.path,
+                        });
+                        if (typeof result === 'string') {
+                            await fsRename(activeTab.file.path, result);
+                            const newName = result.split('/').pop() || result.split('\\').pop() || activeTab.file.name;
+                            setTabs(prev => prev.map(t =>
+                                t.id === activeTabId ? { ...t, file: { ...t.file!, path: result, name: newName }, dirty: true } : t
+                            ));
+                        }
+                    } catch (error) {
+                        console.error('Failed to move file:', error);
+                        alert('移动文件失败');
+                    }
+                } else {
+                    alert('请先打开一个文件');
+                }
+                setActiveMenu(null);
+                break;
+            }
+            case 'rename': {
+                const activeTab = tabs.find(t => t.id === activeTabId);
+                if (activeTab?.file) {
+                    setRenameFileName(activeTab.file.name);
+                    setRenameDialogOpen(true);
+                } else {
+                    alert('请先打开一个文件');
+                }
+                setActiveMenu(null);
+                break;
+            }
+            case 'exportHtml':
+                await exportHtml({ tabs, activeTabId, editorRef, setActiveMenu });
+                break;
+            case 'exportPdf':
+                await exportPdf({ tabs, activeTabId, editorRef, setActiveMenu });
+                break;
+            case 'print':
+                await printDocument({ tabs, activeTabId, editorRef, setActiveMenu });
+                break;
+            case 'closeTab':
+                handleTabClose(activeTabId);
+                setActiveMenu(null);
+                break;
+            case 'closeWindow':
+                getCurrentWindow().close();
+                setActiveMenu(null);
+                break;
+            case 'quit':
+                exit(0);
                 break;
             case 'sidebar':
                 setActiveSidebarPanel(prev => prev ? null : 'explorer');
@@ -487,9 +570,11 @@ export function useMenuActions(
         handleOpenFolder,
         handleSaveFile,
         handleSaveAs,
+        handleTabClose,
         sourceMode,
         focusMode,
         activeTabId,
+        autoSave,
         setSourceMode,
         setFocusMode,
         setTabs,
@@ -503,6 +588,7 @@ export function useMenuActions(
         setAlwaysOnTop,
         setActiveMenu,
         setCurrentLineEnding,
+        setAutoSave,
         handleCheckUpdate,
         editorRef,
     ]);

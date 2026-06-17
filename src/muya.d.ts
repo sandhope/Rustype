@@ -75,6 +75,16 @@ declare module '@muyajs/core' {
         replace(value: string, opt?: { isSingle?: boolean; isRegexp?: boolean }): void;
         invalidateImageCache(): void;
         destroy(): void;
+        exportStyledHTML(options?: {
+            title?: string;
+            extraCSS?: string;
+            printOptimization?: boolean;
+            toc?: string;
+            header?: { type: number; left: string; center: string; right: string };
+            footer?: { type: number; left: string; center: string; right: string };
+            headerFooterStyled?: boolean;
+        }): Promise<string>;
+        exportHtml(): Promise<string>;
     }
 
     export const en: { name: string; resource: Record<string, string> };

@@ -81,8 +81,8 @@
 .mu-container h5 > .mu-copy-header-link,
 .mu-container h6 > .mu-copy-header-link {
     position: absolute;
-    top: 0.65em;
-    left: -26px;
+    top: 0.75em;
+    left: -56px;
 
     display: inline-flex;
     align-items: center;
