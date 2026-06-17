@@ -1,16 +1,59 @@
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile, writeFile } from '@tauri-apps/plugin-fs';
 import { message } from '@tauri-apps/plugin-dialog';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import type { EditorHandle } from '../components/Editor';
 import type { Tab } from '../components/TabBar';
 import { getCssForOptions, getHtmlToc, type PdfCssOptions, type HtmlTocOptions, type TocEntry } from './export';
 import MarkdownPrint from '../services/printService';
+import TocConfigDialog from '../components/TocConfigDialog';
 
 interface ExportActionsProps {
     tabs: Tab[];
     activeTabId: string;
     editorRef: React.RefObject<EditorHandle | null>;
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+/**
+ * Check if the document contains [TOC], and show configuration dialog if it does
+ * @returns TOC configuration options, or null if user cancels
+ */
+async function checkAndConfigureToc(editorRef: React.RefObject<EditorHandle | null>): Promise<HtmlTocOptions | null> {
+    const markdown = editorRef.current?.getMarkdown() ?? '';
+    const hasToc = /^\s*\[toc\]\s*$/im.test(markdown);
+
+    const defaultTocOptions: HtmlTocOptions = {
+        tocIncludeTopHeading: true,
+        tocTitle: 'Table of Contents',
+    };
+
+    if (!hasToc) {
+        return defaultTocOptions;
+    }
+
+    // Show TOC configuration dialog
+    return new Promise<HtmlTocOptions | null>((resolve) => {
+        const dialog = document.createElement('div');
+        document.body.appendChild(dialog);
+
+        const root = ReactDOM.createRoot(dialog);
+        root.render(
+            React.createElement(TocConfigDialog, {
+                onClose: () => {
+                    root.unmount();
+                    document.body.removeChild(dialog);
+                    resolve(null);
+                },
+                onConfirm: (tocIncludeTopHeading: boolean, tocTitle: string) => {
+                    root.unmount();
+                    document.body.removeChild(dialog);
+                    resolve({ tocIncludeTopHeading, tocTitle });
+                },
+            }),
+        );
+    });
 }
 
 export async function exportHtml(props: ExportActionsProps): Promise<void> {
@@ -22,14 +65,20 @@ export async function exportHtml(props: ExportActionsProps): Promise<void> {
         return;
     }
 
-    let defaultPath = 'Untitled.html';
-    if (activeTab.file?.path) {
-        const baseName = activeTab.file.path.replace(/\.md$/i, '');
-        defaultPath = `${baseName}.html`;
+    // Check TOC configuration
+    const tocOptions = await checkAndConfigureToc(editorRef);
+    if (tocOptions === null) {
+        setActiveMenu(null);
+        return;
     }
+
+    const baseName = activeTab.file?.path?.replace(/\.md$/i, '') 
+        || activeTab.file?.name?.replace(/\.md$/i, '') 
+        || 'Untitled';
+
     try {
         const targetPath = await save({
-            defaultPath,
+            defaultPath: `${baseName}.html`,
             filters: [{ name: 'HTML Files', extensions: ['html'] }],
         });
 
@@ -48,11 +97,6 @@ export async function exportHtml(props: ExportActionsProps): Promise<void> {
             lineHeight: 1.5,
             autoNumberingHeadings: false,
             showFrontMatter: true,
-        };
-
-        const tocOptions: HtmlTocOptions = {
-            tocIncludeTopHeading: false,
-            tocTitle: '',
         };
 
         const extraCss = await getCssForOptions(opts);
@@ -87,6 +131,13 @@ export async function exportPdf(props: ExportActionsProps): Promise<void> {
         return;
     }
 
+    // Check TOC configuration
+    const tocOptions = await checkAndConfigureToc(editorRef);
+    if (tocOptions === null) {
+        setActiveMenu(null);
+        return;
+    }
+
     const baseName = activeTab.file?.path?.replace(/\.md$/i, '') 
         || activeTab.file?.name?.replace(/\.md$/i, '') 
         || 'Untitled';
@@ -112,11 +163,6 @@ export async function exportPdf(props: ExportActionsProps): Promise<void> {
             lineHeight: 1.5,
             autoNumberingHeadings: false,
             showFrontMatter: true,
-        };
-
-        const tocOptions: HtmlTocOptions = {
-            tocIncludeTopHeading: true,
-            tocTitle: '',
         };
 
         const extraCss = await getCssForOptions(opts);
@@ -156,6 +202,13 @@ export async function printDocument(props: ExportActionsProps): Promise<void> {
         return;
     }
 
+    // Check TOC configuration
+    const tocOptions = await checkAndConfigureToc(editorRef);
+    if (tocOptions === null) {
+        setActiveMenu(null);
+        return;
+    }
+
     const printer = new MarkdownPrint();
 
     try {
@@ -169,11 +222,6 @@ export async function printDocument(props: ExportActionsProps): Promise<void> {
             lineHeight: 1.5,
             autoNumberingHeadings: false,
             showFrontMatter: true,
-        };
-
-        const tocOptions: HtmlTocOptions = {
-            tocIncludeTopHeading: true,
-            tocTitle: '',
         };
 
         const extraCss = await getCssForOptions(opts);
