@@ -49,6 +49,11 @@ export interface IFrontmatterToken {
     lang: 'yaml' | 'toml' | 'json';
 }
 
+export interface ITocToken {
+    type: 'toc';
+    raw: string;
+}
+
 export interface IBlockEndToken {
     type: 'block-end';
     tokenType: 'blockquote' | 'list' | 'list-item' | 'footnote';
@@ -68,7 +73,8 @@ export type TLexedToken
         | ListItemToken
         | IFootnoteToken
         | IMultipleMathToken
-        | IFrontmatterToken;
+        | IFrontmatterToken
+        | ITocToken;
 
 // The working token stream `markdownToState` walks: lexer output plus the
 // synthetic `block-end` markers it injects to pop the parent stack.

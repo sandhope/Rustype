@@ -164,6 +164,11 @@ export interface IFootnoteBlockState {
     children: TState[];
 }
 
+export interface ITocState {
+    name: 'toc';
+    text: string;
+}
+
 export type TLeafState
     = | IParagraphState
         | IAtxHeadingState
@@ -175,7 +180,8 @@ export type TLeafState
         | IMathBlockState
         | IFrontmatterState
         | IDiagramState
-        | ITableCellState;
+        | ITableCellState
+        | ITocState;
 
 export type TContainerState
     = | IBlockQuoteState

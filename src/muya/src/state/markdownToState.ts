@@ -403,6 +403,15 @@ export class MarkdownToState {
                     break;
                 }
 
+                case 'toc': {
+                    state = {
+                        name: 'toc' as const,
+                        text: token.raw.replace(/\n+$/, ''),
+                    };
+                    parentList[0].push(state);
+                    break;
+                }
+
                 default:
                     debug.warn(`Unknown type ${token.type}`);
                     break;

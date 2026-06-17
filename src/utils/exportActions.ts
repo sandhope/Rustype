@@ -131,7 +131,11 @@ export async function exportPdf(props: ExportActionsProps): Promise<void> {
         });
 
         if (html) {
-            // todo: 拿到tauri后端去渲染 或者 纯前端渲染方案
+            // todo: 拿到tauri后端去渲染
+            // electron win.webContents.printToPDF
+            // 考虑只在Windows支持该功能
+            // 利用 Tauri 在 Windows 上使用的 WebView2 引擎。WebView2 提供了 PrintToPdf 的原生 API。
+            // 实现思路：通过 Tauri 的插件机制或 unsafe 代码，获取底层 WebView2 的 ICoreWebView2 接口，然后调用其 PrintToPdf 方法。
             // await writeFile(targetPath, new Uint8Array(arrayBuffer));
             // await message('PDF 导出成功！', { title: '成功', kind: 'info' });
         }

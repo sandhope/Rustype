@@ -12,6 +12,7 @@ import type {
     ITableState,
     ITaskListState,
     IThematicBreakState,
+    ITocState,
 } from '../state/types';
 
 interface IEmptyStates {
@@ -28,6 +29,7 @@ interface IEmptyStates {
     'bullet-list': IBulletListState;
     'task-list': ITaskListState;
     'diagram': IDiagramState;
+    'toc': ITocState;
 }
 
 const emptyStates: IEmptyStates = {
@@ -38,6 +40,10 @@ const emptyStates: IEmptyStates = {
     'thematic-break': {
         name: 'thematic-break',
         text: '---', // --- or ___ or ***
+    },
+    'toc': {
+        name: 'toc',
+        text: '[TOC]',
     },
     'frontmatter': {
         name: 'frontmatter',

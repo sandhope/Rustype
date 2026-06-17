@@ -207,6 +207,7 @@ export class MarkdownToHtml {
                 ? this.muya.options.isGitlabCompatibilityEnabled
                 : false,
             math: this.muya ? this.muya.options.math : false,
+            tocRenderer: () => toc ?? '',
         });
 
         html = sanitize(html, EXPORT_DOMPURIFY_CONFIG, false) as string;

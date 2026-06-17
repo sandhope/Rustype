@@ -4,6 +4,7 @@ import { Marked } from 'marked';
 import compatibleTaskList from './compatibleTaskList';
 import footnoteExtension from './extensions/footnote';
 import mathExtension from './extensions/math';
+import tocExtension from './extensions/toc';
 import fm from './frontMatter';
 import { DEFAULT_OPTIONS } from './options';
 import walkTokens from './walkTokens';
@@ -38,6 +39,8 @@ export function lexBlock(
     if (footnote) {
         m.use(footnoteExtension());
     }
+
+    m.use(tocExtension());
 
     if (frontMatter) {
         const { token, src: newSrc } = fm(src);

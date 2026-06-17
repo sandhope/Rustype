@@ -17,6 +17,7 @@ import type {
     ITaskListItemState,
     ITaskListState,
     IThematicBreakState,
+    ITocState,
     TState,
 } from './types';
 /**
@@ -159,6 +160,11 @@ export default class ExportMarkdown {
                 case 'footnote':
                     this.insertLineBreak(result, indent);
                     result.push(this.serializeFootnote(state, indent));
+                    break;
+
+                case 'toc':
+                    this.insertLineBreak(result, indent);
+                    result.push(this.serializeToc(state, indent));
                     break;
 
                 case 'order-list':
@@ -385,6 +391,10 @@ export default class ExportMarkdown {
         // sits flush, leaving subsequent lines at the four-space indent.
         const stripped = inner.replace(innerIndent, '');
         return `${prefix}${stripped}`;
+    }
+
+    serializeToc(state: ITocState, indent: string) {
+        return `${indent}[TOC]\n`;
     }
 
     serializeTable(state: ITableState, indent: string) {

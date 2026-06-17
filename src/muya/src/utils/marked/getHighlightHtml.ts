@@ -7,6 +7,7 @@ import emojiExtension from './extensions/emoji';
 import footnoteExtension from './extensions/footnote';
 import mathExtension from './extensions/math';
 import superSubScriptExtension from './extensions/superSubscript';
+import tocExtension from './extensions/toc';
 import fm, { frontMatterRender } from './frontMatter';
 import { DEFAULT_OPTIONS } from './options';
 import walkTokens from './walkTokens';
@@ -35,9 +36,9 @@ function highlight(code: string, lang: string) {
     return Prism.highlight(code, grammar, lang);
 }
 
-export function getHighlightHtml(src: string, options: ILexOption = {}) {
+export function getHighlightHtml(src: string, options: ILexOption & { tocRenderer?: () => string } = {}) {
     options = Object.assign({}, DEFAULT_OPTIONS, options);
-    const { footnote, frontMatter, math, isGitlabCompatibilityEnabled, superSubScript }
+    const { footnote, frontMatter, math, isGitlabCompatibilityEnabled, superSubScript, tocRenderer }
         = options;
 
     // Build a fresh Marked instance per call. `Marked.use({ walkTokens })`
@@ -71,6 +72,8 @@ export function getHighlightHtml(src: string, options: ILexOption = {}) {
 
     if (footnote)
         marked.use(footnoteExtension());
+
+    marked.use(tocExtension({ tocRenderer }));
 
     let html = '';
 
