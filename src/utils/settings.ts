@@ -1,8 +1,8 @@
 import { LazyStore } from '@tauri-apps/plugin-store';
 
 export interface AppSettings {
-  // Theme
-  theme: 'light' | 'dark' | 'system';
+  // Theme (theme id like 'cadmium-light', 'dracula', or 'system')
+  theme: string;
 
   // Editor
   fontSize: number;

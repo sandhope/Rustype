@@ -1,0 +1,93 @@
+/* ============ Dark Mode Overrides ============ */
+/* Applied to all dark themes via [data-theme-mode="dark"] attribute */
+/* Most editor element rules are in themes.css — only dark-mode-specific rules go here */
+
+[data-theme-mode="dark"] .mu-list-item-content::before,
+[data-theme-mode="dark"] .mu-container ul li::before {
+  color: var(--list-marker-color) !important;
+}
+
+[data-theme-mode="dark"] .mu-quick-insert-hint {
+  color: var(--editor-color-50) !important;
+}
+
+[data-theme-mode="dark"] .mu-footnote,
+[data-theme-mode="dark"] .mu-footnote-target {
+  color: var(--link-color) !important;
+}
+
+/* Code syntax highlighting in dark mode */
+[data-theme-mode="dark"] .mu-editor pre code,
+[data-theme-mode="dark"] .mu-editor code {
+  color: var(--editor-color) !important;
+}
+
+[data-theme-mode="dark"] .mu-editor .token.comment,
+[data-theme-mode="dark"] .mu-editor .token.prolog,
+[data-theme-mode="dark"] .mu-editor .token.doctype,
+[data-theme-mode="dark"] .mu-editor .token.cdata {
+  color: #6a737d;
+}
+
+[data-theme-mode="dark"] .mu-editor .token.punctuation {
+  color: var(--editor-color-50);
+}
+
+[data-theme-mode="dark"] .mu-editor .token.property,
+[data-theme-mode="dark"] .mu-editor .token.tag,
+[data-theme-mode="dark"] .mu-editor .token.boolean,
+[data-theme-mode="dark"] .mu-editor .token.number,
+[data-theme-mode="dark"] .mu-editor .token.constant,
+[data-theme-mode="dark"] .mu-editor .token.symbol {
+  color: #f78c6c;
+}
+
+[data-theme-mode="dark"] .mu-editor .token.selector,
+[data-theme-mode="dark"] .mu-editor .token.attr-name,
+[data-theme-mode="dark"] .mu-editor .token.string,
+[data-theme-mode="dark"] .mu-editor .token.char,
+[data-theme-mode="dark"] .mu-editor .token.builtin {
+  color: #98c379;
+}
+
+[data-theme-mode="dark"] .mu-editor .token.operator,
+[data-theme-mode="dark"] .mu-editor .token.entity,
+[data-theme-mode="dark"] .mu-editor .token.url,
+[data-theme-mode="dark"] .mu-editor .language-css .token.string,
+[data-theme-mode="dark"] .mu-editor .style .token.string {
+  color: #89ddff;
+}
+
+[data-theme-mode="dark"] .mu-editor .token.atrule,
+[data-theme-mode="dark"] .mu-editor .token.attr-value,
+[data-theme-mode="dark"] .mu-editor .token.keyword {
+  color: #c678dd;
+}
+
+[data-theme-mode="dark"] .mu-editor .token.function,
+[data-theme-mode="dark"] .mu-editor .token.class-name {
+  color: #61afef;
+}
+
+[data-theme-mode="dark"] .mu-editor .token.regex,
+[data-theme-mode="dark"] .mu-editor .token.important,
+[data-theme-mode="dark"] .mu-editor .token.variable {
+  color: #c678dd;
+}
+
+/* UI component dark mode overrides */
+[data-theme-mode="dark"] .menu-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme-mode="dark"] .menu-trigger.active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme-mode="dark"] .dirty-indicator {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme-mode="dark"] .window-control-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}

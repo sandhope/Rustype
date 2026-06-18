@@ -1,469 +1,186 @@
-/* Light Theme - Default */
-.theme-light {
-  --theme-color: rgb(33 181 111 / 100%);
-  --highlight-color: rgb(33 181 111 / 40%);
-  --selection-color: rgb(45 170 219 / 30%);
-  --editor-color: rgb(0 0 0 / 70%);
-  --editor-color-80: rgb(0 0 0 / 80%);
-  --editor-color-50: rgb(0 0 0 / 50%);
-  --editor-color-30: rgb(0 0 0 / 30%);
-  --editor-color-10: rgb(0 0 0 / 10%);
-  --editor-color-04: rgb(0 0 0 / 3%);
-  --editor-bg-color: rgb(255 255 255 / 100%);
-  
-  --editor-area-width: 800px;
-  --delete-color: #ff6969;
-  --icon-color: #6b737b;
-  --code-block-bg-color: rgb(0 0 0 / 3%);
-  --table-border-color: #e5e5e5;
-  --input-bg-color: rgb(0 0 0 / 6%);
-  
-  --link-color: rgb(20 86 240);
-  --h1-color: var(--editor-color-80);
-  --h2-color: var(--editor-color-80);
-  --h3-color: var(--editor-color-80);
-  --h4-color: var(--editor-color-80);
-  --h5-color: var(--editor-color-80);
-  --h6-color: var(--editor-color-80);
-  --blockquote-text-color: var(--editor-color-50);
-  --blockquote-border-color: var(--editor-color-30);
-  --strong-color: inherit;
-  --em-color: inherit;
-  --list-marker-color: inherit;
-  --hr-color: var(--editor-color-10);
-  
-  --float-bg-color: #fff;
-  --float-hover-color: rgb(0 0 0 / 4%);
-  --float-border-color: rgb(0 0 0 / 10%);
-  --float-shadow: rgb(15 15 15 / 3%) 0 0 0 1px, rgb(15 15 15 / 4%) 0 3px 6px, rgb(15 15 15 / 5%) 0 9px 24px;
-  
-  --button-font-color: var(--editor-color);
-  --button-bg-color: #fff;
-  --button-border: 1px solid #dcdfe6;
-  --button-bg-color-hover: linear-gradient(#f9f9f9, #f2f2f2);
-  --button-border-hover: var(--button-border);
-  --button-bg-color-active: var(--button-bg-color);
-  --button-border-active: var(--button-border);
-  --button-border-focus: var(--button-border);
-  
-  /* App colors */
-  --app-bg-color: #ffffff;
-  --app-header-bg: #fafafa;
-  --app-header-border: #e0e0e0;
-  --app-text-color: #333333;
-  --app-text-secondary: #666666;
-  --app-sidebar-bg: #fafafa;
-  --app-sidebar-border: #e0e0e0;
-  --app-tab-bg: #f5f5f5;
-  --app-tab-active-bg: #ffffff;
-  --app-modal-bg: #ffffff;
-  
-  /* Tab Bar */
-  --tab-text-color: #666;
-  --tab-text-active-color: #333;
-  --tab-bg: #f0f0f0;
-  --tab-bg-hover: #e8e8e8;
-  --tab-close-color: #999;
-  --tab-dirty-color: #f57c00;
-  --tab-external-color: #d32f2f;
-  --tab-external-bg: #ffebee;
-  
-  /* Shortcuts Panel */
-  --shortcuts-bg: #ffffff;
-  --shortcuts-header-bg: #fafafa;
-  --shortcuts-header-border: #eeeeee;
-  --shortcuts-title-color: #333;
-  --shortcuts-close-color: #666;
-  --shortcuts-category-color: #999;
-  --shortcuts-item-hover: rgba(25, 118, 210, 0.08);
-  --shortcuts-desc-color: #333;
-  --shortcuts-key-bg: #f0f0f0;
-  --shortcuts-key-border: #dddddd;
-  --shortcuts-key-shadow: rgba(0, 0, 0, 0.06);
-  --shortcuts-footer-bg: #fafafa;
-  --shortcuts-footer-border: #eeeeee;
-  --shortcuts-footer-hint: #999999;
-  
-  /* About Dialog */
-  --about-bg: #ffffff;
-  --about-header-bg: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-  --about-title-color: #333333;
-  --about-version-color: #666666;
-  --about-desc-color: #555555;
-  --about-section-title-color: #333333;
-  --about-section-border: #eeeeee;
-  --about-list-color: #555555;
-  
-  /* Settings Panel */
-  --settings-bg: #ffffff;
-  --settings-shadow: rgba(0, 0, 0, 0.2);
-  --settings-header-border: #e0e0e0;
-  --settings-title-color: #333333;
-  --settings-close-color: #666666;
-  --settings-close-hover-bg: #f0f0f0;
-  --settings-section-title-color: #333333;
-  --settings-section-border: #eeeeee;
-  --settings-label-color: #555555;
-  --settings-input-bg: #ffffff;
-  --settings-input-border: #d0d0d0;
-  --settings-input-focus: #1976d2;
-  --settings-unit-color: #999999;
-  --settings-footer-border: #e0e0e0;
-  --settings-btn-primary-bg: #1976d2;
-  --settings-btn-primary-hover: #1565c0;
-  --settings-btn-secondary-bg: #e0e0e0;
-  --settings-btn-secondary-color: #333333;
-  --settings-btn-secondary-hover: #bdbdbd;
-  
-  /* Tech Tag */
-  --tech-tag-color: #1976d2;
-  --tech-tag-bg: #e3f2fd;
-}
+/* ============ Theme CSS Variable Imports ============ */
+@import './themes/cadmium-light.css';
+@import './themes/cadmium-dark.css';
+@import './themes/ayu-light.css';
+@import './themes/ayu-dark.css';
+@import './themes/ayu-mirage.css';
+@import './themes/catppuccin-latte.css';
+@import './themes/catppuccin-mocha.css';
+@import './themes/cyberdream.css';
+@import './themes/dark.css';
+@import './themes/dracula.css';
+@import './themes/everforest-dark.css';
+@import './themes/everforest-light.css';
+@import './themes/graphite.css';
+@import './themes/gruvbox-dark.css';
+@import './themes/gruvbox-light.css';
+@import './themes/horizon-dark.css';
+@import './themes/kanagawa.css';
+@import './themes/material-dark.css';
+@import './themes/monokai-pro.css';
+@import './themes/nightfox.css';
+@import './themes/nord.css';
+@import './themes/one-dark.css';
+@import './themes/oxocarbon-dark.css';
+@import './themes/palenight.css';
+@import './themes/rose-pine-dawn.css';
+@import './themes/rose-pine-moon.css';
+@import './themes/rose-pine.css';
+@import './themes/solarized-dark.css';
+@import './themes/solarized-light.css';
+@import './themes/synthwave-84.css';
+@import './themes/tokyo-night-light.css';
+@import './themes/tokyo-night-storm.css';
+@import './themes/tokyo-night.css';
+@import './themes/ulysses.css';
 
-/* Dark Theme */
-.theme-dark {
-  --theme-color: rgb(33 181 111 / 100%);
-  --highlight-color: rgb(33 181 111 / 40%);
-  --selection-color: rgb(45 170 219 / 30%);
-  --editor-color: rgb(255 255 255 / 70%);
-  --editor-color-80: rgb(255 255 255 / 80%);
-  --editor-color-50: rgb(255 255 255 / 50%);
-  --editor-color-30: rgb(255 255 255 / 30%);
-  --editor-color-10: rgb(255 255 255 / 10%);
-  --editor-color-04: rgb(255 255 255 / 3%);
-  --editor-bg-color: rgb(30 30 30 / 100%);
-  
-  --editor-area-width: 800px;
-  --delete-color: #ff6969;
-  --icon-color: #9ca3af;
-  --code-block-bg-color: rgb(255 255 255 / 5%);
-  --table-border-color: #4d4d4d;
-  --input-bg-color: rgb(255 255 255 / 6%);
-  
-  --link-color: rgb(100 180 255);
-  --h1-color: var(--editor-color-80);
-  --h2-color: var(--editor-color-80);
-  --h3-color: var(--editor-color-80);
-  --h4-color: var(--editor-color-80);
-  --h5-color: var(--editor-color-80);
-  --h6-color: var(--editor-color-80);
-  --blockquote-text-color: var(--editor-color-50);
-  --blockquote-border-color: var(--editor-color-30);
-  --strong-color: inherit;
-  --em-color: inherit;
-  --list-marker-color: inherit;
-  --hr-color: var(--editor-color-10);
-  
-  --float-bg-color: #2d2d2d;
-  --float-hover-color: rgb(255 255 255 / 4%);
-  --float-border-color: rgb(255 255 255 / 10%);
-  --float-shadow: rgb(0 0 0 / 30%) 0 0 0 1px, rgb(0 0 0 / 40%) 0 3px 6px, rgb(0 0 0 / 50%) 0 9px 24px;
-  
-  --button-font-color: var(--editor-color);
-  --button-bg-color: #3d3d3d;
-  --button-border: 1px solid #4d4d4d;
-  --button-bg-color-hover: linear-gradient(#4d4d4d, #3d3d3d);
-  --button-border-hover: var(--button-border);
-  --button-bg-color-active: var(--button-bg-color);
-  --button-border-active: var(--button-border);
-  --button-border-focus: var(--button-border);
-  
-  /* App colors */
-  --app-bg-color: #1a1a1a;
-  --app-header-bg: #252525;
-  --app-header-border: #3d3d3d;
-  --app-text-color: #f0f0f0;
-  --app-text-secondary: #aaaaaa;
-  --app-sidebar-bg: #252525;
-  --app-sidebar-border: #3d3d3d;
-  --app-tab-bg: #252525;
-  --app-tab-active-bg: #1a1a1a;
-  --app-modal-bg: #2d2d2d;
-  
-  /* Tab Bar */
-  --tab-text-color: #aaaaaa;
-  --tab-text-active-color: #f0f0f0;
-  --tab-bg: #2a2a2a;
-  --tab-bg-hover: #3a3a3a;
-  --tab-close-color: #888888;
-  --tab-dirty-color: #ff9800;
-  --tab-external-color: #ff5252;
-  --tab-external-bg: rgba(255, 82, 82, 0.15);
-  
-  /* Shortcuts Panel */
-  --shortcuts-bg: #2d2d2d;
-  --shortcuts-header-bg: #3d3d3d;
-  --shortcuts-header-border: #4d4d4d;
-  --shortcuts-title-color: #f0f0f0;
-  --shortcuts-close-color: #888888;
-  --shortcuts-category-color: #777777;
-  --shortcuts-item-hover: rgba(255, 255, 255, 0.06);
-  --shortcuts-desc-color: #cccccc;
-  --shortcuts-key-bg: #3d3d3d;
-  --shortcuts-key-border: #4d4d4d;
-  --shortcuts-key-shadow: #2d2d2d;
-  --shortcuts-footer-bg: #3d3d3d;
-  --shortcuts-footer-border: #4d4d4d;
-  --shortcuts-footer-hint: #777777;
-  
-  /* About Dialog */
-  --about-bg: #2d2d2d;
-  --about-header-bg: linear-gradient(135deg, #3d3d3d 0%, #2d2d2d 100%);
-  --about-title-color: #f0f0f0;
-  --about-version-color: #aaaaaa;
-  --about-desc-color: #bbbbbb;
-  --about-section-title-color: #dddddd;
-  --about-section-border: #3d3d3d;
-  --about-list-color: #bbbbbb;
-  
-  /* Settings Panel */
-  --settings-bg: #2d2d2d;
-  --settings-shadow: rgba(0, 0, 0, 0.5);
-  --settings-header-border: #3d3d3d;
-  --settings-title-color: #f0f0f0;
-  --settings-close-color: #888888;
-  --settings-close-hover-bg: #3d3d3d;
-  --settings-section-title-color: #dddddd;
-  --settings-section-border: #3d3d3d;
-  --settings-label-color: #bbbbbb;
-  --settings-input-bg: #1a1a1a;
-  --settings-input-border: #3d3d3d;
-  --settings-input-focus: #64b5f6;
-  --settings-unit-color: #777777;
-  --settings-footer-border: #3d3d3d;
-  --settings-btn-primary-bg: #1976d2;
-  --settings-btn-primary-hover: #1e88e5;
-  --settings-btn-secondary-bg: #3d3d3d;
-  --settings-btn-secondary-color: #cccccc;
-  --settings-btn-secondary-hover: #4d4d4d;
-  
-  /* Tech Tag */
-  --tech-tag-color: #90caf9;
-  --tech-tag-bg: #1a3a5c;
-}
+/* Dark mode overrides (using data-theme-mode attribute) */
+@import './dark-mode-overrides.css';
 
-/* Apply theme to app */
-.theme-light .app-root,
-.theme-dark .app-root {
+/* ============ Theme Application Rules ============ */
+/* These use generic selectors that work with any theme class */
+.app-root {
   background-color: var(--app-bg-color);
   color: var(--app-text-color);
 }
 
-.theme-light .app-header,
-.theme-dark .app-header {
+.app-header {
   background-color: var(--app-header-bg);
   border-bottom-color: var(--app-header-border);
 }
 
-.theme-light .sidebar,
-.theme-dark .sidebar {
+.sidebar {
   background-color: var(--app-sidebar-bg);
   border-right-color: var(--app-sidebar-border);
 }
 
-.theme-light .tab-bar,
-.theme-dark .tab-bar {
+.tab-bar {
   background-color: var(--app-tab-bg);
   border-bottom-color: var(--app-header-border);
 }
 
-.theme-light .tab.active,
-.theme-dark .tab.active {
+.tab.active {
   background-color: var(--app-tab-active-bg);
 }
 
-/* ============ Editor (Muya) Dark Mode ============ */
-.theme-dark .rustype-editor,
-.theme-dark .mu-editor,
-.theme-dark .mu-scroll-page {
+.modal {
+  background-color: var(--app-modal-bg);
+}
+
+/* ============ Editor Background & Text (all themes) ============ */
+.rustype-editor,
+.mu-editor,
+.mu-scroll-page {
   background-color: var(--editor-bg-color) !important;
 }
 
-.theme-dark .rustype-editor .mu-editor,
-.theme-dark .rustype-editor .mu-container,
-.theme-dark .mu-editor .mu-container {
+.rustype-editor .mu-editor,
+.rustype-editor .mu-container,
+.mu-editor .mu-container {
   background-color: var(--editor-bg-color) !important;
   color: var(--editor-color) !important;
 }
 
-.theme-dark .mu-block,
-.theme-dark .mu-ag-front-content,
-.theme-dark .mu-content,
-.theme-dark .mu-ag-paragraph,
-.theme-dark .mu-container p,
-.theme-dark .mu-container div {
+.mu-block,
+.mu-container > p {
   color: var(--editor-color) !important;
 }
 
-.theme-dark .mu-heading,
-.theme-dark .mu-container h1,
-.theme-dark .mu-container h2,
-.theme-dark .mu-container h3,
-.theme-dark .mu-container h4,
-.theme-dark .mu-container h5,
-.theme-dark .mu-container h6,
-.theme-dark .mu-h1,
-.theme-dark .mu-h2,
-.theme-dark .mu-h3,
-.theme-dark .mu-h4,
-.theme-dark .mu-h5,
-.theme-dark .mu-h6 {
-  color: var(--h1-color) !important;
+.mu-heading,
+.mu-heading div {
+  color: var(--heading-color, var(--editor-color)) !important;
 }
 
-.theme-dark .mu-link,
-.theme-dark a {
+.mu-container h1,
+.mu-container h1 div,
+.mu-h1,
+.mu-h1 div {
+  color: var(--h1-color, var(--editor-color)) !important;
+}
+
+.mu-container h2,
+.mu-container h2 div,
+.mu-h2,
+.mu-h2 div {
+  color: var(--h2-color, var(--h1-color, var(--editor-color))) !important;
+}
+
+.mu-container h3,
+.mu-container h3 div,
+.mu-h3,
+.mu-h3 div {
+  color: var(--h3-color, var(--h1-color, var(--editor-color))) !important;
+}
+
+.mu-container h4,
+.mu-container h4 div,
+.mu-h4,
+.mu-h4 div {
+  color: var(--h4-color, var(--h1-color, var(--editor-color))) !important;
+}
+
+.mu-container h5,
+.mu-container h5 div,
+.mu-h5,
+.mu-h5 div {
+  color: var(--h5-color, var(--h1-color, var(--editor-color))) !important;
+}
+
+.mu-container h6,
+.mu-container h6 div,
+.mu-h6,
+.mu-h6 div {
+  color: var(--h6-color, var(--h1-color, var(--editor-color))) !important;
+}
+
+.mu-link,
+.mu-editor a {
   color: var(--link-color) !important;
 }
 
-.theme-dark .mu-strong,
-.theme-dark .mu-em,
-.theme-dark .mu-code,
-.theme-dark .mu-inline-code,
-.theme-dark .mu-pre,
-.theme-dark .mu-code-block,
-.theme-dark .mu-container code,
-.theme-dark .mu-container pre {
-  color: var(--editor-color) !important;
+.mu-strong {
+  color: var(--strong-color, var(--editor-color)) !important;
 }
 
-.theme-dark .mu-code,
-.theme-dark .mu-inline-code,
-.theme-dark .mu-pre,
-.theme-dark .mu-code-block,
-.theme-dark .mu-container code,
-.theme-dark .mu-container pre {
+.mu-em {
+  color: var(--em-color, var(--editor-color)) !important;
+}
+
+.mu-code,
+.mu-inline-code,
+.mu-pre,
+.mu-code-block,
+.mu-container code,
+.mu-container pre {
   background-color: var(--code-block-bg-color) !important;
 }
 
-.theme-dark .mu-table,
-.theme-dark .mu-table td,
-.theme-dark .mu-table th,
-.theme-dark .mu-container table,
-.theme-dark .mu-container td,
-.theme-dark .mu-container th {
+.mu-table td,
+.mu-table th,
+.mu-container table td,
+.mu-container table th {
   border-color: var(--table-border-color) !important;
 }
 
-.theme-dark .mu-blockquote,
-.theme-dark .mu-container blockquote {
+.mu-blockquote,
+.mu-container blockquote {
   color: var(--blockquote-text-color) !important;
   border-left-color: var(--blockquote-border-color) !important;
 }
 
-.theme-dark .mu-hr,
-.theme-dark .mu-container hr {
+.mu-container hr {
   border-color: var(--hr-color) !important;
 }
 
-.theme-dark .mu-list-item-content::before,
-.theme-dark .mu-container ul li::before {
-  color: var(--list-marker-color) !important;
-}
-
-.theme-dark .mu-task-list-item .mu-checkbox-wrapper,
-.theme-dark .mu-container input[type="checkbox"] {
-  background-color: var(--input-bg-color) !important;
-}
-
-.theme-dark .mu-float-wrapper,
-.theme-dark .mu-front-button-wrapper,
-.theme-dark .mu-float-container {
+.mu-float-wrapper,
+.mu-front-button-wrapper,
+.mu-float-container {
   background-color: var(--float-bg-color) !important;
   border-color: var(--float-border-color) !important;
   box-shadow: var(--float-shadow) !important;
 }
 
-.theme-dark .mu-quick-insert-hint {
-  color: var(--editor-color-50) !important;
-}
-
-.theme-dark .mu-footnote,
-.theme-dark .mu-footnote-target {
-  color: var(--link-color) !important;
-}
-
-/* Code syntax highlighting in dark mode */
-.theme-dark .mu-editor pre code,
-.theme-dark .mu-editor code {
-  color: var(--editor-color) !important;
-}
-
-.theme-dark .mu-editor .token.comment,
-.theme-dark .mu-editor .token.prolog,
-.theme-dark .mu-editor .token.doctype,
-.theme-dark .mu-editor .token.cdata {
-  color: #6a737d;
-}
-
-.theme-dark .mu-editor .token.punctuation {
-  color: var(--editor-color-50);
-}
-
-.theme-dark .mu-editor .token.property,
-.theme-dark .mu-editor .token.tag,
-.theme-dark .mu-editor .token.boolean,
-.theme-dark .mu-editor .token.number,
-.theme-dark .mu-editor .token.constant,
-.theme-dark .mu-editor .token.symbol {
-  color: #f78c6c;
-}
-
-.theme-dark .mu-editor .token.selector,
-.theme-dark .mu-editor .token.attr-name,
-.theme-dark .mu-editor .token.string,
-.theme-dark .mu-editor .token.char,
-.theme-dark .mu-editor .token.builtin {
-  color: #98c379;
-}
-
-.theme-dark .mu-editor .token.operator,
-.theme-dark .mu-editor .token.entity,
-.theme-dark .mu-editor .token.url,
-.theme-dark .mu-editor .language-css .token.string,
-.theme-dark .mu-editor .style .token.string {
-  color: #89ddff;
-}
-
-.theme-dark .mu-editor .token.atrule,
-.theme-dark .mu-editor .token.attr-value,
-.theme-dark .mu-editor .token.keyword {
-  color: #c678dd;
-}
-
-.theme-dark .mu-editor .token.function,
-.theme-dark .mu-editor .token.class-name {
-  color: #61afef;
-}
-
-.theme-dark .mu-editor .token.regex,
-.theme-dark .mu-editor .token.important,
-.theme-dark .mu-editor .token.variable {
-  color: #c678dd;
-}
-
-.theme-dark .menu-trigger:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-.theme-dark .menu-trigger.active {
-  background-color: rgba(255, 255, 255, 0.12);
-}
-
-.theme-dark .dirty-indicator {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.theme-dark .window-control-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.theme-light .modal,
-.theme-dark .modal {
-  background-color: var(--app-modal-bg);
-}
-
-/* Editor font size */
+/* ============ Editor Font Size ============ */
 .editor-font-size-12 .mu-container { font-size: 12px; }
 .editor-font-size-13 .mu-container { font-size: 13px; }
 .editor-font-size-14 .mu-container { font-size: 14px; }
@@ -478,7 +195,7 @@
 .editor-font-size-23 .mu-container { font-size: 23px; }
 .editor-font-size-24 .mu-container { font-size: 24px; }
 
-/* Editor line height */
+/* ============ Editor Line Height ============ */
 .editor-line-height-1-2 .mu-container { line-height: 1.2; }
 .editor-line-height-1-3 .mu-container { line-height: 1.3; }
 .editor-line-height-1-4 .mu-container { line-height: 1.4; }
@@ -489,7 +206,7 @@
 .editor-line-height-1-9 .mu-container { line-height: 1.9; }
 .editor-line-height-2-0 .mu-container { line-height: 2.0; }
 
-/* Editor width */
+/* ============ Editor Width ============ */
 .editor-width-custom .mu-container {
   max-width: var(--editor-area-width, 800px);
 }

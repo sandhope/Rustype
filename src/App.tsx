@@ -13,6 +13,7 @@ import CommandPalette from './components/CommandPalette';
 import MenuBar from './components/MenuBar';
 import EditorContextMenu from './components/EditorContextMenu';
 import { useAppState, useFileOperations, useMenuActions, useKeyboardShortcuts } from './hooks';
+import { getThemeById } from './utils/themes';
 import { clearRecentlyOpened } from './utils/recentFiles';
 import { grantDirectoryAccess, readDirectoryTree, fsRename, type FileInfo } from './utils/file';
 import { join } from '@tauri-apps/api/path';
@@ -40,6 +41,7 @@ function App() {
         setRecentFolders,
         promptData,
         settings,
+        setSettings,
         settingsOpen,
         aboutOpen,
         shortcutsOpen,
@@ -140,6 +142,8 @@ function App() {
         setRenameDialogOpen,
         setRenameFileName,
         setCommandPaletteOpen,
+        settings,
+        setSettings,
     }, editorRef);
 
     useKeyboardShortcuts({
@@ -177,14 +181,25 @@ function App() {
     useEffect(() => {
         const applyTheme = () => {
             const root = document.documentElement;
-            root.classList.remove('theme-light', 'theme-dark');
+            // Remove all existing theme classes
+            const themeClasses = [...root.classList].filter(c => c.startsWith('theme-'));
+            themeClasses.forEach(c => root.classList.remove(c));
 
+            // Resolve theme id and mode
+            let themeId: string;
+            let mode: 'light' | 'dark';
             if (settings.theme === 'system') {
                 const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                root.classList.add(isDark ? 'theme-dark' : 'theme-light');
+                themeId = isDark ? 'cadmium-dark' : 'cadmium-light';
+                mode = isDark ? 'dark' : 'light';
             } else {
-                root.classList.add(`theme-${settings.theme}`);
+                themeId = settings.theme;
+                const info = getThemeById(settings.theme);
+                mode = info?.mode ?? 'light';
             }
+
+            root.classList.add(`theme-${themeId}`);
+            root.setAttribute('data-theme-mode', mode);
 
             root.classList.remove('editor-font-size-12', 'editor-font-size-13', 'editor-font-size-14',
                 'editor-font-size-15', 'editor-font-size-16', 'editor-font-size-17', 'editor-font-size-18',
@@ -306,6 +321,7 @@ function App() {
                 isInList={isInList}
                 currentLineEnding={currentLineEnding}
                 autoSave={autoSave}
+                theme={settings.theme}
                 onToggleMenu={toggleMenu}
                 onMenuItemClick={handleMenuItemClickWrapper}
                 onSetOpenSubmenu={setOpenSubmenu}

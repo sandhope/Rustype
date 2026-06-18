@@ -2,6 +2,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import logo from '../../src-tauri/icons/128x128.png';
 import type { FileInfo } from '../utils/file';
 import type { SidebarPanel } from './Sidebar';
+import { lightThemes, darkThemes } from '../utils/themes';
 import { platform } from '@tauri-apps/plugin-os';
 
 const isMac = platform() === 'macos';
@@ -24,6 +25,7 @@ interface MenuBarProps {
     isInList: boolean;
     currentLineEnding: 'crlf' | 'lf';
     autoSave: boolean;
+    theme: string;
     onToggleMenu: (menu: string) => void;
     onMenuItemClick: (action: string) => void;
     onSetOpenSubmenu: (submenu: string | null) => void;
@@ -46,6 +48,7 @@ export default function MenuBar({
     isInList,
     currentLineEnding,
     autoSave,
+    theme,
     onToggleMenu,
     onMenuItemClick,
     onSetOpenSubmenu,
@@ -592,6 +595,48 @@ export default function MenuBar({
                                 <span className="menu-item-label">全屏</span>
                                 <span className="menu-item-shortcut">F11</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                        <div
+                            className={`menu-trigger ${activeMenu === 'theme' ? 'active' : ''}`}
+                            onClick={() => onToggleMenu('theme')}
+                        >
+                            主题
+                        </div>
+                        <div className={`menu-dropdown-content ${activeMenu === 'theme' ? 'is-open' : ''}`}>
+                            <div className="menu-item" onClick={() => onMenuItemClick('setTheme:system')}>
+                                <span className="menu-item-status">{theme === 'system' ? '✓' : ''}</span>
+                                <span className="menu-item-label">跟随系统</span>
+                                <span className="menu-item-shortcut"></span>
+                            </div>
+                            <div className="menu-divider" />
+                            <div className="menu-item disabled">
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label" style={{ opacity: 0.5, fontSize: '11px' }}>浅色主题</span>
+                                <span className="menu-item-shortcut"></span>
+                            </div>
+                            {lightThemes.map(t => (
+                                <div key={t.id} className="menu-item" onClick={() => onMenuItemClick(`setTheme:${t.id}`)}>
+                                    <span className="menu-item-status">{theme === t.id ? '✓' : ''}</span>
+                                    <span className="menu-item-label">{t.name}</span>
+                                    <span className="menu-item-shortcut"></span>
+                                </div>
+                            ))}
+                            <div className="menu-divider" />
+                            <div className="menu-item disabled">
+                                <span className="menu-item-status"></span>
+                                <span className="menu-item-label" style={{ opacity: 0.5, fontSize: '11px' }}>深色主题</span>
+                                <span className="menu-item-shortcut"></span>
+                            </div>
+                            {darkThemes.map(t => (
+                                <div key={t.id} className="menu-item" onClick={() => onMenuItemClick(`setTheme:${t.id}`)}>
+                                    <span className="menu-item-status">{theme === t.id ? '✓' : ''}</span>
+                                    <span className="menu-item-label">{t.name}</span>
+                                    <span className="menu-item-shortcut"></span>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
