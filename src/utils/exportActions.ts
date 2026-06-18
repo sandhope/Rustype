@@ -1,6 +1,7 @@
 import { save } from '@tauri-apps/plugin-dialog';
 import { writeTextFile, writeFile } from '@tauri-apps/plugin-fs';
 import { message } from '@tauri-apps/plugin-dialog';
+import { invoke } from '@tauri-apps/api/core';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import type { EditorHandle } from '../components/Editor';
@@ -8,6 +9,7 @@ import type { Tab } from '../components/TabBar';
 import { getCssForOptions, getHtmlToc, type PdfCssOptions, type HtmlTocOptions, type TocEntry } from './export';
 import MarkdownPrint from '../services/printService';
 import TocConfigDialog from '../components/TocConfigDialog';
+import { platform } from '@tauri-apps/plugin-os';
 
 interface ExportActionsProps {
     tabs: Tab[];
@@ -124,6 +126,12 @@ export async function exportHtml(props: ExportActionsProps): Promise<void> {
 
 export async function exportPdf(props: ExportActionsProps): Promise<void> {
     const { tabs, activeTabId, editorRef, setActiveMenu } = props;
+    await message('开发中', { title: '提示', kind: 'info' });
+    setActiveMenu(null);
+    return;
+    if (platform() !== 'windows') {
+        return printDocument(props);
+    }
     const activeTab = tabs.find(t => t.id === activeTabId);
     if (!activeTab) {
         await message('请先打开一个文件', { title: '错误', kind: 'error' });
@@ -177,13 +185,13 @@ export async function exportPdf(props: ExportActionsProps): Promise<void> {
         });
 
         if (html) {
-            // todo: 拿到tauri后端去渲染
-            // electron win.webContents.printToPDF
-            // 考虑只在Windows支持该功能
-            // 利用 Tauri 在 Windows 上使用的 WebView2 引擎。WebView2 提供了 PrintToPdf 的原生 API。
-            // 实现思路：通过 Tauri 的插件机制或 unsafe 代码，获取底层 WebView2 的 ICoreWebView2 接口，然后调用其 PrintToPdf 方法。
-            // await writeFile(targetPath, new Uint8Array(arrayBuffer));
-            // await message('PDF 导出成功！', { title: '成功', kind: 'info' });
+            try {
+                await invoke('export_to_pdf', { html, outputPath: targetPath });
+                await message('PDF 导出成功！', { title: '成功', kind: 'info' });
+            } catch (error) {
+                console.error('PDF export failed:', error);
+                await message('PDF 导出失败', { title: '错误', kind: 'error' });
+            }
         }
     } catch (error) {
         console.error('Export PDF failed:', error);

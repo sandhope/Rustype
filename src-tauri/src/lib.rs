@@ -148,6 +148,20 @@ fn toggle_fullscreen(app_handle: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[cfg(target_os = "windows")]
+#[tauri::command]
+async fn export_to_pdf(app_handle: tauri::AppHandle, html: String, output_path: String) -> Result<(), String> {
+    println!("Export to PDF: {:?}", html);
+    println!("Output path: {:?}", output_path);
+    return Ok(());
+}
+
+#[cfg(not(target_os = "windows"))]
+#[tauri::command]
+async fn export_to_pdf(_app_handle: tauri::AppHandle, _html: String, _output_path: String) -> Result<(), String> {
+    Err("PDF export is only supported on Windows".to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -176,6 +190,7 @@ pub fn run() {
             grant_file_access,
             open_devtools,
             toggle_fullscreen,
+            export_to_pdf,
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();
