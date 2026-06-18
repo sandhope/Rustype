@@ -9,6 +9,7 @@ import AboutDialog from './components/AboutDialog';
 import ShortcutsPanel from './components/ShortcutsPanel';
 import TableInsertDialog from './components/TableInsertDialog';
 import RenameDialog from './components/RenameDialog';
+import CommandPalette from './components/CommandPalette';
 import MenuBar from './components/MenuBar';
 import EditorContextMenu from './components/EditorContextMenu';
 import { useAppState, useFileOperations, useMenuActions, useKeyboardShortcuts } from './hooks';
@@ -26,6 +27,7 @@ function App() {
     const [isInList, setIsInList] = useState(false);
     const [renameDialogOpen, setRenameDialogOpen] = useState(false);
     const [renameFileName, setRenameFileName] = useState('');
+    const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
     const {
         tabs,
@@ -137,6 +139,7 @@ function App() {
         handleTabClose,
         setRenameDialogOpen,
         setRenameFileName,
+        setCommandPaletteOpen,
     }, editorRef);
 
     useKeyboardShortcuts({
@@ -145,10 +148,12 @@ function App() {
         settingsOpen,
         aboutOpen,
         sourceMode,
+        commandPaletteOpen,
         setFindReplaceOpen,
         setActiveSidebarPanel,
         setSettingsOpen,
         setAboutOpen,
+        setCommandPaletteOpen,
         handleMenuAction: handleMenuItemClick,
     }, editorRef);
 
@@ -533,6 +538,16 @@ function App() {
                         }
                         setRenameDialogOpen(false);
                     }}
+                />
+            )}
+
+            {commandPaletteOpen && (
+                <CommandPalette
+                    onAction={(action) => {
+                        setCommandPaletteOpen(false);
+                        handleMenuItemClickWrapper(action);
+                    }}
+                    onClose={() => setCommandPaletteOpen(false)}
                 />
             )}
         </div>

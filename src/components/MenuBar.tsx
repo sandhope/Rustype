@@ -603,9 +603,9 @@ export default function MenuBar({
                             视图
                         </div>
                         <div className={`menu-dropdown-content ${activeMenu === 'view' ? 'is-open' : ''}`}>
-                            <div className="menu-item" onClick={() => onMenuItemClick('outline')}>
+                            <div className="menu-item" onClick={() => onMenuItemClick('commandPalette')}>
                                 <span className="menu-item-status"></span>
-                                <span className="menu-item-label">命令面板- 未完成</span>
+                                <span className="menu-item-label">命令面板</span>
                                 <span className="menu-item-shortcut">{COMMAND}+{SHIFT}+P</span>
                             </div>
                             <div className="menu-divider" />

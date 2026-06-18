@@ -49,6 +49,7 @@ interface UseMenuActionsProps {
     handleTabClose: (tabId: string) => void;
     setRenameDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setRenameFileName: React.Dispatch<React.SetStateAction<string>>;
+    setCommandPaletteOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface UseMenuActionsReturn {
@@ -92,6 +93,7 @@ export function useMenuActions(
         handleTabClose,
         setRenameDialogOpen,
         setRenameFileName,
+        setCommandPaletteOpen,
     } = props;
 
     const toggleMenu = useCallback((menu: string) => {
@@ -357,6 +359,10 @@ export function useMenuActions(
                     setTocItems(toc);
                 }
                 setActiveSidebarPanel(prev => prev === 'outline' ? null : 'outline');
+                setActiveMenu(null);
+                break;
+            case 'commandPalette':
+                setCommandPaletteOpen(true);
                 setActiveMenu(null);
                 break;
             case 'reloadImages':

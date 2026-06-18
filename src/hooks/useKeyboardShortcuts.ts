@@ -9,10 +9,12 @@ interface UseKeyboardShortcutsProps {
     settingsOpen: boolean;
     aboutOpen: boolean;
     sourceMode: boolean;
+    commandPaletteOpen: boolean;
     setFindReplaceOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setActiveSidebarPanel: React.Dispatch<React.SetStateAction<SidebarPanel | null>>;
     setSettingsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setAboutOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setCommandPaletteOpen: React.Dispatch<React.SetStateAction<boolean>>;
     handleMenuAction: (action: string) => void;
 }
 
@@ -42,16 +44,19 @@ export function useKeyboardShortcuts(
         settingsOpen,
         aboutOpen,
         sourceMode,
+        commandPaletteOpen,
         setFindReplaceOpen,
         setActiveSidebarPanel,
         setSettingsOpen,
         setAboutOpen,
+        setCommandPaletteOpen,
         handleMenuAction,
     } = props;
 
     // Handle Escape key
     const handleEscape = () => {
         console.log(settingsOpen);
+        if (commandPaletteOpen) setCommandPaletteOpen(false);
         if (findReplaceOpen) setFindReplaceOpen(false);
         if (activeSidebarPanel === 'outline') setActiveSidebarPanel(null);
         if (settingsOpen) setSettingsOpen(false);
@@ -61,7 +66,7 @@ export function useKeyboardShortcuts(
     useHotkeys('escape', handleEscape, {
         enableOnFormTags: true,
         enableOnContentEditable: true,
-    }, [findReplaceOpen, activeSidebarPanel, settingsOpen, aboutOpen]);
+    }, [commandPaletteOpen, findReplaceOpen, activeSidebarPanel, settingsOpen, aboutOpen]);
 
     // method 1
     const handleShortcut: HotkeyCallback = (e, handler) => {
