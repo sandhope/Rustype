@@ -145,17 +145,10 @@ function App() {
         settingsOpen,
         aboutOpen,
         sourceMode,
-        focusMode,
         setFindReplaceOpen,
         setActiveSidebarPanel,
         setSettingsOpen,
         setAboutOpen,
-        setFocusMode,
-        handleNewFile,
-        handleOpenFile,
-        handleOpenFolder,
-        handleSaveFile,
-        handleSaveAs,
         handleMenuAction: handleMenuItemClick,
     }, editorRef);
 
@@ -405,7 +398,7 @@ function App() {
                                         <span className="welcome-action-icon">📝</span>
                                         <div className="welcome-action-text">
                                             <span className="welcome-action-label">新建文件</span>
-                                            <span className="welcome-action-shortcut">Ctrl+N</span>
+                                            <span className="welcome-action-shortcut">Ctrl+T</span>
                                         </div>
                                     </button>
                                     <button className="welcome-action-btn" onClick={handleOpenFile}>

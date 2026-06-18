@@ -100,7 +100,7 @@ const shortcutsData: ShortcutItem[] = [
             { description: '高亮', keys: [COMMAND, SHIFT, 'H'] },
             { description: '行内代码', keys: [COMMAND, '`'] },
             { description: '行内数学', keys: [COMMAND, SHIFT, 'M'] },
-            { description: '删除线', keys: [COMMAND, SHIFT, 'D'] },
+            { description: '删除线', keys: [COMMAND, SHIFT, 'X'] },
             { description: '超链接', keys: [COMMAND, 'L'] },
             { description: '图片', keys: [COMMAND, ALT, 'I'] },
             { description: '清除格式', keys: [COMMAND, SHIFT, 'R'] },

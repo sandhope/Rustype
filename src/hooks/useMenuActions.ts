@@ -71,7 +71,6 @@ export function useMenuActions(
         setSourceMode,
         setFocusMode,
         setTabs,
-        setActiveTabId,
         setActiveSidebarPanel,
         setFindReplaceOpen,
         setTypewriterMode,

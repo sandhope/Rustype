@@ -150,7 +150,7 @@ fn toggle_fullscreen(app_handle: tauri::AppHandle) -> Result<(), String> {
 
 #[cfg(target_os = "windows")]
 #[tauri::command]
-async fn export_to_pdf(app_handle: tauri::AppHandle, html: String, output_path: String) -> Result<(), String> {
+async fn export_to_pdf(_app_handle: tauri::AppHandle, html: String, output_path: String) -> Result<(), String> {
     println!("Export to PDF: {:?}", html);
     println!("Output path: {:?}", output_path);
     return Ok(());

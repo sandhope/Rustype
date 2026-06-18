@@ -615,12 +615,12 @@ export default function MenuBar({
                                 <span className="menu-item-shortcut">{COMMAND}+E</span>
                             </div>
                             <div className="menu-item" onClick={() => onMenuItemClick('typewriterMode')}>
-                                <span className="menu-item-status">{focusMode ? '✓' : ''}</span>
+                                <span className="menu-item-status">{typewriterMode ? '✓' : ''}</span>
                                 <span className="menu-item-label">打字机模式</span>
                                 <span className="menu-item-shortcut">{COMMAND}+{SHIFT}+G</span>
                             </div>
                             <div className="menu-item" onClick={() => onMenuItemClick('focusMode')}>
-                                <span className="menu-item-status">{typewriterMode ? '✓' : ''}</span>
+                                <span className="menu-item-status">{focusMode ? '✓' : ''}</span>
                                 <span className="menu-item-label">专注模式</span>
                                 <span className="menu-item-shortcut">{COMMAND}+{SHIFT}+J</span>
                             </div>
