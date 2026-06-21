@@ -6,6 +6,7 @@
  */
 
 import { shortcuts } from '../constants/shortcuts';
+import { allThemes } from './themes';
 
 export interface Command {
     id: string;
@@ -124,6 +125,14 @@ const commandDefs: Omit<Command, 'shortcut'>[] = [
     { id: 'reloadImages', description: '重新加载图片', category: '视图' },
     { id: 'openDevTools', description: '开发者工具', category: '视图' },
     { id: 'reloadWindow', description: '重新加载窗口', category: '视图' },
+
+    // Theme (dynamically generated from theme registry)
+    { id: 'setTheme:system', description: '主题: 跟随系统', category: '主题' },
+    ...allThemes.map(t => ({
+        id: `setTheme:${t.id}`,
+        description: `主题: ${t.name}`,
+        category: '主题',
+    })),
 
     // Window
     { id: 'minimizeWindow', description: '最小化窗口', category: '窗口' },

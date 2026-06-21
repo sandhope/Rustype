@@ -1,0 +1,235 @@
+/* Tokyo Night Storm Theme */
+.theme-tokyo-night-storm {
+  --blockquote-border-color: #414868;
+  --blockquote-text-color: rgba(192, 202, 245, 0.6);
+
+  --button-bg-color: #1f2335;
+  --button-bg-color-hover: #343b58;
+  --button-border: 1px solid rgba(0, 0, 0, 0.2);
+  --button-border-hover: 1px solid rgba(0, 0, 0, 0.3);
+  --button-font-color: rgba(192, 202, 245, 0.6);
+  --code-block-bg-color: #1f2335;
+
+  --delete-color: #f7768e;
+
+  --editor-area-width: 750px;
+  --editor-bg-color: #24283b;
+  --editor-color: #c0caf5;
+  --editor-color-10: rgba(192, 202, 245, 0.1);
+  --editor-color-30: rgba(192, 202, 245, 0.3);
+  --editor-color-40: rgba(192, 202, 245, 0.4);
+  --editor-color-50: rgba(192, 202, 245, 0.5);
+  --editor-color-60: rgba(192, 202, 245, 0.6);
+  --editor-color-80: rgba(192, 202, 245, 0.8);
+
+  --em-color: #bb9af7;
+
+  --float-bg-color: #1f2335;
+  --float-border-color: rgba(0, 0, 0, 0.05);
+  --float-hover-color: rgba(192, 202, 245, 0.04);
+  --float-shadow: rgba(0, 0, 0, 0.2);
+  --h1-color: #bb9af7;
+
+  --h2-color: #7aa2f7;
+
+  --h3-color: #7dcfff;
+
+  --h4-color: #9ece6a;
+
+  --h5-color: #e0af68;
+
+  --h6-color: #f7768e;
+
+  --heading-color: #c0caf5;
+
+  --highlight-color: rgba(122, 162, 247, 0.6);
+
+  --hr-color: #3b4261;
+
+  --icon-color: rgba(192, 202, 245, 0.56);
+
+  --input-bg-color: #1a1b26;
+  --link-color: #7dcfff;
+
+  --list-marker-color: #7aa2f7;
+  --selection-color: rgba(52, 59, 88, 0.8);
+
+  --side-bar-bg-color: #1f2130;
+  --strong-color: #c0caf5;
+
+  --table-border-color: #1f2335;
+
+  --theme-color: #7aa2f7;
+  /* Rustype-specific variables */
+  --app-bg-color: var(--editor-bg-color);
+  --app-header-bg: var(--side-bar-bg-color);
+  --app-header-border: var(--float-border-color);
+  --app-text-color: var(--editor-color);
+  --app-text-secondary: var(--editor-color-50);
+  --app-sidebar-bg: var(--side-bar-bg-color);
+  --app-sidebar-border: var(--float-border-color);
+  --app-tab-bg: var(--editor-bg-color);
+  --app-tab-active-bg: var(--side-bar-bg-color);
+  --app-modal-bg: var(--float-bg-color);
+
+  --tab-text-color: var(--editor-color-50);
+  --tab-text-active-color: var(--editor-color);
+  --tab-bg: var(--app-tab-bg);
+  --tab-bg-hover: var(--float-hover-color);
+  --tab-close-color: var(--editor-color-30);
+  --tab-dirty-color: #ff9800;
+  --tab-external-color: #ff5252;
+  --tab-external-bg: rgba(255, 82, 82, 0.15);
+
+  --settings-bg: var(--float-bg-color);
+  --settings-shadow: rgba(0, 0, 0, 0.5);
+  --settings-header-border: var(--float-border-color);
+  --settings-title-color: var(--editor-color);
+  --settings-close-color: var(--editor-color-50);
+  --settings-close-hover-bg: var(--float-hover-color);
+  --settings-section-title-color: #dddddd;
+  --settings-section-border: var(--float-border-color);
+  --settings-label-color: var(--editor-color-80);
+  --settings-input-bg: var(--editor-bg-color);
+  --settings-input-border: var(--float-border-color);
+  --settings-input-focus: #64b5f6;
+  --settings-unit-color: var(--editor-color-50);
+  --settings-footer-border: var(--float-border-color);
+  --settings-btn-primary-bg: #1976d2;
+  --settings-btn-primary-hover: #1e88e5;
+  --settings-btn-secondary-bg: var(--float-bg-color);
+  --settings-btn-secondary-color: var(--editor-color);
+  --settings-btn-secondary-hover: #4d4d4d;
+
+  --about-bg: var(--float-bg-color);
+  --about-header-bg: linear-gradient(135deg, var(--side-bar-bg-color) 0%, var(--float-bg-color) 100%);
+  --about-title-color: var(--editor-color);
+  --about-version-color: var(--editor-color-50);
+  --about-desc-color: var(--editor-color-80);
+  --about-section-title-color: #dddddd;
+  --about-section-border: var(--float-border-color);
+  --about-list-color: var(--editor-color-80);
+
+  --shortcuts-bg: var(--float-bg-color);
+  --shortcuts-header-bg: var(--side-bar-bg-color);
+  --shortcuts-header-border: var(--float-border-color);
+  --shortcuts-title-color: var(--editor-color);
+  --shortcuts-close-color: var(--editor-color-50);
+  --shortcuts-category-color: var(--editor-color-30);
+  --shortcuts-item-hover: rgba(255, 255, 255, 0.06);
+  --shortcuts-desc-color: var(--editor-color-80);
+  --shortcuts-key-bg: var(--code-block-bg-color, var(--side-bar-bg-color));
+  --shortcuts-key-border: var(--float-border-color);
+  --shortcuts-key-shadow: #2d2d2d;
+  --shortcuts-footer-bg: var(--side-bar-bg-color);
+  --shortcuts-footer-border: var(--float-border-color);
+  --shortcuts-footer-hint: var(--editor-color-50);
+
+  --tech-tag-color: #90caf9;
+  --tech-tag-bg: #1a3a5c;
+
+  /* UI Component Variables */
+  --tab-bar-bg: var(--app-tab-bg);
+  --tab-bar-border: var(--app-header-border);
+  --app-main-bg: var(--app-bg-color);
+  --scrollbar-thumb: var(--editor-color-30);
+
+  --menu-trigger-color: var(--app-text-color);
+  --menu-trigger-hover-bg: var(--float-hover-color);
+  --menu-trigger-active-bg: var(--float-hover-color);
+  --menu-dropdown-bg: var(--float-bg-color);
+  --menu-dropdown-border: var(--float-border-color);
+  --menu-dropdown-shadow: var(--float-shadow);
+  --menu-item-color: var(--float-font-color);
+  --menu-item-hover-bg: var(--float-hover-color);
+  --menu-item-shortcut-color: var(--editor-color-40);
+  --menu-divider-color: var(--float-border-color);
+  --menu-danger-color: var(--delete-color);
+  --menu-danger-hover-bg: rgba(255, 82, 82, 0.15);
+
+  --file-item-color: var(--app-text-color);
+  --file-item-hover-bg: var(--float-hover-color);
+  --file-name-color: var(--app-text-color);
+
+  --tree-folder-color: var(--app-text-color);
+  --tree-folder-hover-bg: var(--float-hover-color);
+  --tree-folder-active-bg: var(--item-bg-color);
+  --tree-arrow-color: var(--editor-color-40);
+  --tree-file-color: var(--app-text-color);
+  --tree-file-hover-bg: var(--float-hover-color);
+  --tree-file-active-bg: var(--item-bg-color);
+  --tree-context-bg: var(--float-bg-color);
+  --tree-context-border: var(--float-border-color);
+  --tree-context-color: var(--float-font-color);
+  --tree-context-shadow: var(--float-shadow);
+  --tree-context-hover-bg: var(--float-hover-color);
+  --tree-context-danger-color: var(--delete-color);
+  --tree-context-disabled-color: var(--editor-color-30);
+  --tree-context-divider: var(--float-border-color);
+  --tree-rename-input-bg: var(--input-bg-color);
+  --tree-rename-input-border: var(--settings-input-focus, #1976d2);
+  --tree-rename-input-color: var(--app-text-color);
+
+  --editor-context-bg: var(--float-bg-color);
+  --editor-context-border: var(--float-border-color);
+  --editor-context-color: var(--float-font-color);
+  --editor-context-shadow: var(--float-shadow);
+  --editor-context-hover-bg: var(--float-hover-color);
+  --editor-context-disabled-color: var(--editor-color-30);
+  --editor-context-divider: var(--float-border-color);
+
+  --modal-bg: var(--float-bg-color);
+  --modal-title-color: var(--app-text-color);
+  --modal-text-color: var(--editor-color-80);
+  --modal-btn-secondary-bg: var(--float-hover-color);
+  --modal-btn-secondary-color: var(--app-text-color);
+  --modal-btn-secondary-hover-bg: var(--item-bg-color);
+
+  --find-replace-bg: var(--float-bg-color);
+  --find-replace-border: var(--float-border-color);
+  --find-input-bg: var(--input-bg-color);
+  --find-input-color: var(--app-text-color);
+  --find-input-border: var(--float-border-color);
+  --find-input-focus-border: var(--settings-input-focus, #1976d2);
+  --find-btn-bg: var(--float-hover-color);
+  --find-btn-color: var(--app-text-color);
+  --find-btn-border: var(--float-border-color);
+  --find-btn-hover-bg: var(--item-bg-color);
+  --find-options-color: var(--editor-color-50);
+  --find-count-color: var(--editor-color-40);
+
+  --source-mode-bg: var(--editor-bg-color);
+  --source-textarea-bg: var(--editor-bg-color);
+  --source-textarea-color: var(--editor-color);
+  --source-placeholder-color: var(--editor-color-30);
+
+  --outline-bg: var(--float-bg-color);
+  --outline-border: var(--float-border-color);
+  --outline-title-color: var(--app-text-color);
+  --outline-close-color: var(--editor-color-40);
+  --outline-close-hover-bg: var(--float-hover-color);
+  --outline-empty-color: var(--editor-color-40);
+  --outline-item-color: var(--float-font-color);
+  --outline-item-hover-bg: var(--float-hover-color);
+
+  --welcome-bg: var(--app-bg-color);
+  --welcome-action-bg: var(--float-bg-color);
+  --welcome-action-border: var(--float-border-color);
+  --welcome-action-color: var(--float-font-color);
+  --welcome-action-hover-bg: var(--float-hover-color);
+  --welcome-action-hover-border: var(--settings-input-focus, #1976d2);
+  --welcome-folder-icon-color: var(--editor-color-40);
+  --welcome-folder-title-color: var(--app-text-color);
+  --welcome-folder-subtitle-color: var(--editor-color-40);
+
+  --activity-bar-bg: var(--app-sidebar-bg);
+  --activity-bar-border: var(--app-sidebar-border);
+  --activity-bar-icon-color: var(--editor-color-40);
+  --activity-bar-icon-hover-color: var(--app-text-color);
+  --activity-bar-icon-active-color: var(--app-text-color);
+  --activity-bar-bottom-border: var(--app-sidebar-border);
+
+  --sidebar-section-title-color: var(--editor-color-40);
+  --sidebar-empty-color: var(--editor-color-30);
+
+}

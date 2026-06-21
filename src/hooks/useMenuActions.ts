@@ -50,6 +50,8 @@ interface UseMenuActionsProps {
     setRenameDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setRenameFileName: React.Dispatch<React.SetStateAction<string>>;
     setCommandPaletteOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    settings: AppSettings;
+    setSettings: React.Dispatch<React.SetStateAction<AppSettings>>;
 }
 
 export interface UseMenuActionsReturn {
@@ -94,6 +96,8 @@ export function useMenuActions(
         setRenameDialogOpen,
         setRenameFileName,
         setCommandPaletteOpen,
+        settings,
+        setSettings,
     } = props;
 
     const toggleMenu = useCallback((menu: string) => {
@@ -152,6 +156,16 @@ export function useMenuActions(
     }, [setActiveMenu, setCheckingUpdate]);
 
     const handleMenuItemClick = useCallback(async (action: string) => {
+        // Handle dynamic theme actions (setTheme:themeId)
+        if (action.startsWith('setTheme:')) {
+            const themeId = action.slice('setTheme:'.length);
+            const newSettings = { ...settings, theme: themeId };
+            await saveSettings(newSettings);
+            setSettings(newSettings);
+            setActiveMenu(null);
+            return;
+        }
+
         switch (action) {
             case 'new':
                 handleNewFile();
@@ -369,6 +383,27 @@ export function useMenuActions(
                 editorRef.current?.reloadImages();
                 setActiveMenu(null);
                 break;
+            case 'themeSystem':
+            case 'themeLight':
+            case 'themeDark': {
+                // Legacy support: map old actions to new theme ids
+                const legacyThemeId = action === 'themeSystem' ? 'system'
+                    : action === 'themeLight' ? 'cadmium-light' : 'cadmium-dark';
+                const newSettings = { ...settings, theme: legacyThemeId };
+                await saveSettings(newSettings);
+                setSettings(newSettings);
+                setActiveMenu(null);
+                break;
+            }
+            case 'setTheme': {
+                // Generic theme setter: action format "setTheme:themeId"
+                const themeId = (action as string).split(':')[1] || 'system';
+                const newSettings = { ...settings, theme: themeId };
+                await saveSettings(newSettings);
+                setSettings(newSettings);
+                setActiveMenu(null);
+                break;
+            }
             // Format actions
             case 'toggleBold':
                 editorRef.current?.format?.('strong');
@@ -600,7 +635,8 @@ export function useMenuActions(
 
     const handleSettingsUpdate = useCallback(async (newSettings: AppSettings) => {
         await saveSettings(newSettings);
-    }, []);
+        setSettings(newSettings);
+    }, [setSettings]);
 
     const handleOutlineItemClick = useCallback((item: TocItem) => {
         editorRef.current?.scrollToHeading(item.slug);
