@@ -22,6 +22,7 @@ import {
     stableSlug,
 } from '@muyajs/core';
 import ImagePathPicker from '../muya/src/ui/imagePicker';
+import { handleImageAction, resolveClipboardFilePath, resolveFilePathForFile } from '../utils/image';
 import type { IMuyaOptions } from '@muyajs/core';
 import '@muyajs/core/assets/styles/index.css';
 import '@muyajs/core/assets/styles/blockSyntax.css';
@@ -108,6 +109,9 @@ const DEFAULT_OPTIONS: Partial<IMuyaOptions> = {
     lineHeight: 1.6,
     tabSize: 4,
     listIndentation: 1,
+    imageAction: handleImageAction,
+    clipboardFilePath: resolveClipboardFilePath,
+    getPathForFile: resolveFilePathForFile,
 };
 
 let pluginsRegistered = false;
@@ -161,35 +165,7 @@ function ensurePlugins() {
                 });
             }
         },
-        imageAction: async (state: { src: unknown }) => {
-            // Muya expects imageAction to return the final src (string) to insert.
-            // Normalize common input shapes and provide safe fallbacks.
-            const src = state.src;
-            if (!src) return '';
-            if (typeof src === 'string') return src;
-
-            // If Muya passed a File object (browser fallback), create an object URL.
-            if (typeof File !== 'undefined' && src instanceof File) {
-                try {
-                    return URL.createObjectURL(src);
-                } catch (err) {
-                    return '';
-                }
-            }
-
-            // If src is an object with a path property (some environments), use it.
-            if (typeof src === 'object' && src !== null && 'path' in (src as any)) {
-                const p = (src as any).path;
-                if (typeof p === 'string') return p;
-            }
-
-            // Fallback to string coercion.
-            try {
-                return String(src);
-            } catch (err) {
-                return '';
-            }
-        },
+        imageAction: handleImageAction,
     });
     Muya.use(ImageToolBar);
     Muya.use(ImageResizeBar);

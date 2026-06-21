@@ -17,6 +17,7 @@ interface UseFileOperationsProps {
     setRecentFiles: React.Dispatch<React.SetStateAction<FileInfo[]>>;
     setRecentFolders: React.Dispatch<React.SetStateAction<FileInfo[]>>;
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
+    excludedDirs?: string[];
 }
 
 export interface UseFileOperationsReturn {
@@ -42,6 +43,7 @@ export function useFileOperations({
     setRecentFiles,
     setRecentFolders,
     setActiveMenu,
+    excludedDirs,
 }: UseFileOperationsProps): UseFileOperationsReturn {
     const handleOpenFolder = useCallback(async () => {
         const dirPath = await openFolderDialog();
@@ -56,20 +58,20 @@ export function useFileOperations({
             console.error('Failed to grant directory access:', error);
         }
 
-        const tree = await readDirectoryTree(dirPath);
+        const tree = await readDirectoryTree(dirPath, excludedDirs);
         setProjectTree(tree);
         setActiveSidebarPanel('explorer');
         setActiveMenu(null);
 
         await addRecentFolder({ path: dirPath, name: dirPath.split(/[/\\]/).pop() || dirPath });
         setRecentFolders(await getRecentFolders());
-    }, [setProjectTree, setActiveSidebarPanel, setActiveMenu, setRecentFolders]);
+    }, [setProjectTree, setActiveSidebarPanel, setActiveMenu, setRecentFolders, excludedDirs]);
 
     const handleTreeRefresh = useCallback(async () => {
         if (!projectTree) return;
-        const tree = await readDirectoryTree(projectTree.path);
+        const tree = await readDirectoryTree(projectTree.path, excludedDirs);
         setProjectTree(tree);
-    }, [projectTree, setProjectTree]);
+    }, [projectTree, setProjectTree, excludedDirs]);
 
     const closeTabsForPath = useCallback((deletedPath: string) => {
         setTabs(prev => {

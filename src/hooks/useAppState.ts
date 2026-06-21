@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { dirname } from '@tauri-apps/api/path';
 import { getRecentFiles, getRecentFolders } from '../utils/recentFiles';
 import { loadSettings, type AppSettings, DEFAULT_SETTINGS } from '../utils/settings';
+import { setZoomLevel } from '../utils/webview';
 import { loadSession, saveSession } from '../utils/session';
 import { readFileContent, getFileStat, grantDirectoryAccess, grantFileAccess, readDirectoryTree, getDefaultLineEnding, saveMarkdownFile, type FileInfo, type FileTreeNode } from '../utils/file';
 import type { Tab } from '../components/TabBar';
@@ -110,37 +111,31 @@ export function useAppState() {
     const isRestoringRef = useRef(false);
 
     useEffect(() => {
-        let cancelled = false;
         loadSettings().then((loaded) => {
-            if (!cancelled) setSettings(loaded);
+            setSettings(loaded);
+            setZoomLevel(loaded.zoomLevel);
         }).catch((err) => {
             console.error('Failed to load settings:', err);
         });
-        return () => {
-            cancelled = true;
-        };
     }, []);
 
+    // Sync standalone autoSave state with settings.autoSave (from settings panel or menu)
     useEffect(() => {
-        let cancelled = false;
+        setAutoSave(settings.autoSave);
+    }, [settings.autoSave]);
+
+    useEffect(() => {
         (async () => {
             const [files, folders] = await Promise.all([getRecentFiles(), getRecentFolders()]);
-            if (!cancelled) {
-                setRecentFiles(files);
-                setRecentFolders(folders);
-            }
+            setRecentFiles(files);
+            setRecentFolders(folders);
         })();
-        return () => {
-            cancelled = true;
-        };
     }, []);
 
     useEffect(() => {
-        let cancelled = false;
-
         const restore = async () => {
             const session = await loadSession();
-            if (!session || cancelled) return;
+            if (!session) return;
 
             isRestoringRef.current = true;
 
@@ -148,16 +143,14 @@ export function useAppState() {
                 try {
                     await grantDirectoryAccess(session.folderPath);
                     const tree = await readDirectoryTree(session.folderPath);
-                    if (!cancelled) {
-                        setProjectTree(tree);
-                        setActiveSidebarPanel('explorer');
-                    }
+                    setProjectTree(tree);
+                    setActiveSidebarPanel('explorer');
                 } catch {
                     // Folder no longer accessible, skip
                 }
             }
 
-            if (session.tabs.length > 0 && !cancelled) {
+            if (session.tabs.length > 0) {
                 const restoredTabs: Tab[] = [];
                 for (const savedTab of session.tabs) {
                     if (savedTab.file?.path) {
@@ -191,7 +184,7 @@ export function useAppState() {
                     }
                 }
 
-                if (restoredTabs.length > 0 && !cancelled) {
+                if (restoredTabs.length > 0) {
                     setTabs(restoredTabs);
                     const activeIdx = session.activeTabId
                         ? parseInt(session.activeTabId.split('-').pop() || '0', 10) - 1
@@ -210,9 +203,6 @@ export function useAppState() {
         };
 
         restore();
-        return () => {
-            cancelled = true;
-        };
     }, []);
 
     useEffect(() => {
@@ -314,10 +304,10 @@ export function useAppState() {
             } catch (error) {
                 console.error('Auto-save failed:', error);
             }
-        }, 1000);
+        }, settings.autoSaveDelay);
 
         return () => clearTimeout(debounce);
-    }, [autoSave, activeTabId, tabs]);
+    }, [autoSave, activeTabId, tabs, settings.autoSaveDelay]);
 
     const handleSourceChange = useCallback((content: string) => {
         setTabs(prev => prev.map(t =>

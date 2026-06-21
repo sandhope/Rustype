@@ -31,10 +31,12 @@ const EXCLUDED_DIRS = new Set([
  * Check if directory should be excluded from rendering
  * @param name Directory name
  * @param showHidden Whether to display hidden directories starting with dot
+ * @param extraExcluded Additional directory names to exclude (from user settings)
  * @returns True if directory needs to be excluded
  */
-function isExcludedDir(name: string, showHidden: boolean = false): boolean {
+function isExcludedDir(name: string, showHidden: boolean = false, extraExcluded?: Set<string>): boolean {
     if (EXCLUDED_DIRS.has(name)) return true;
+    if (extraExcluded?.has(name)) return true;
     if (!showHidden && name.startsWith('.')) return true;
     return false;
 }
@@ -68,7 +70,7 @@ export async function openFolderDialog(): Promise<string | null> {
  * @param showHidden Whether to show hidden dot folders
  * @returns Root tree node containing direct children
  */
-export async function readDirLevel(dirPath: string, showHidden = false): Promise<FileTreeNode> {
+export async function readDirLevel(dirPath: string, showHidden = false, extraExcluded?: Set<string>): Promise<FileTreeNode> {
     const name = dirPath.split(/[/\\]/).pop() || dirPath;
 
     const root: FileTreeNode = {
@@ -92,7 +94,7 @@ export async function readDirLevel(dirPath: string, showHidden = false): Promise
             const isDir = entry.isDirectory || (entry.isSymlink && !entry.isFile);
 
             if (isDir) {
-                if (isExcludedDir(entry.name, showHidden)) continue;
+                if (isExcludedDir(entry.name, showHidden, extraExcluded)) continue;
 
                 root.children.push({
                     name: entry.name,
@@ -121,18 +123,21 @@ export async function readDirLevel(dirPath: string, showHidden = false): Promise
  * @param dirPath Project root path
  * @returns Root file tree node
  */
-export async function readDirectoryTree(dirPath: string): Promise<FileTreeNode> {
-    return await readDirLevel(dirPath);
+export async function readDirectoryTree(dirPath: string, excludedDirs?: string[]): Promise<FileTreeNode> {
+    const extraExcluded = excludedDirs ? new Set(excludedDirs) : undefined;
+    return await readDirLevel(dirPath, false, extraExcluded);
 }
 
 /**
  * Lazy load child nodes of specified directory (used in sidebar file tree)
  * @param dirPath Target folder path to expand
  * @param showHidden Toggle display of hidden dot folders
+ * @param excludedDirs Additional directory names to exclude (from user settings)
  * @returns Array of direct child tree nodes
  */
-export async function loadChildren(dirPath: string, showHidden = false): Promise<FileTreeNode[]> {
-    const node = await readDirLevel(dirPath, showHidden);
+export async function loadChildren(dirPath: string, showHidden = false, excludedDirs?: string[]): Promise<FileTreeNode[]> {
+    const extraExcluded = excludedDirs ? new Set(excludedDirs) : undefined;
+    const node = await readDirLevel(dirPath, showHidden, extraExcluded);
     return node.children;
 }
 

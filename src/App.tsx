@@ -14,6 +14,7 @@ import MenuBar from './components/MenuBar';
 import EditorContextMenu from './components/EditorContextMenu';
 import { useAppState, useFileOperations, useMenuActions, useKeyboardShortcuts } from './hooks';
 import { getThemeById } from './utils/themes';
+import { updateImageConfig } from './utils/image';
 import { clearRecentlyOpened } from './utils/recentFiles';
 import { grantDirectoryAccess, readDirectoryTree, fsRename, type FileInfo } from './utils/file';
 import { join } from '@tauri-apps/api/path';
@@ -106,9 +107,10 @@ function App() {
         setRecentFiles,
         setRecentFolders,
         setActiveMenu,
+        excludedDirs: settings.excludedDirs,
     });
 
-    const { toggleMenu, handleMenuItemClick, handleSettingsUpdate, handleOutlineItemClick } = useMenuActions({
+    const { toggleMenu, handleMenuItemClick, handleOutlineItemClick } = useMenuActions({
         sourceMode,
         focusMode,
         activeTabId,
@@ -188,13 +190,18 @@ function App() {
             // Resolve theme id and mode
             let themeId: string;
             let mode: 'light' | 'dark';
-            if (settings.theme === 'system') {
+
+            // Legacy theme value migration
+            const legacyMap: Record<string, string> = { 'light': 'cadmium-light' };
+            const resolvedTheme = legacyMap[settings.theme] || settings.theme;
+
+            if (resolvedTheme === 'system') {
                 const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                themeId = isDark ? 'cadmium-dark' : 'cadmium-light';
+                themeId = isDark ? settings.darkModeTheme : settings.lightModeTheme;
                 mode = isDark ? 'dark' : 'light';
             } else {
-                themeId = settings.theme;
-                const info = getThemeById(settings.theme);
+                themeId = resolvedTheme;
+                const info = getThemeById(resolvedTheme);
                 mode = info?.mode ?? 'light';
             }
 
@@ -214,6 +221,8 @@ function App() {
             root.classList.add(`editor-line-height-${lh / 10}-${lh % 10}`);
 
             root.style.setProperty('--editor-area-width', settings.editorLineWidth || '800px');
+            root.style.setProperty('--editor-font-family', settings.editorFontFamily || '');
+            root.style.setProperty('--code-font-family', settings.codeFontFamily || '');
         };
 
         applyTheme();
@@ -225,6 +234,42 @@ function App() {
         mediaQuery.addEventListener('change', handler);
         return () => mediaQuery.removeEventListener('change', handler);
     }, [settings]);
+
+    // Sync editor options to Muya when settings change
+    useEffect(() => {
+        if (!editorRef.current) return;
+        editorRef.current.setOptions({
+            preferLooseListItem: settings.preferLooseListItem,
+            hideQuickInsertHint: settings.hideQuickInsertHint,
+            hideLinkPopup: settings.hideLinkPopup,
+            autoPairBracket: settings.autoPairBracket,
+            autoPairMarkdownSyntax: settings.autoPairMarkdownSyntax,
+            autoPairQuote: settings.autoPairQuote,
+            bulletListMarker: settings.bulletListMarker,
+            orderListDelimiter: settings.orderListDelimiter,
+            tabSize: settings.tabSize,
+            listIndentation: settings.listIndentation,
+        }, true);
+        // Set code font size CSS variable
+        document.documentElement.style.setProperty('--code-font-size', `${settings.codeFontSize}px`);
+    }, [settings.preferLooseListItem, settings.hideQuickInsertHint, settings.hideLinkPopup,
+        settings.autoPairBracket, settings.autoPairMarkdownSyntax, settings.autoPairQuote,
+        settings.bulletListMarker, settings.orderListDelimiter, settings.tabSize,
+        settings.listIndentation, settings.codeFontSize]);
+
+    // Keep image handler config in sync with settings and active file
+    useEffect(() => {
+        const filePath = activeTab?.file?.path ?? '';
+        const lastSep = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+        const fileDir = lastSep > 0 ? filePath.slice(0, lastSep) : '';
+
+        updateImageConfig({
+            action: settings.imageInsertAction,
+            folderPath: settings.imageFolderPath,
+            projectRoot: projectTree?.path ?? '',
+            fileDir,
+        });
+    }, [settings.imageInsertAction, settings.imageFolderPath, projectTree?.path, activeTab?.file?.path]);
 
     useEffect(() => {
         const tab = tabs.find(t => t.id === activeTabId);
@@ -267,10 +312,10 @@ function App() {
         setActiveMenu(null);
         setOpenSubmenu(null);
         await grantDirectoryAccess(folder.path);
-        const tree = await readDirectoryTree(folder.path);
+        const tree = await readDirectoryTree(folder.path, settings.excludedDirs);
         setProjectTree(tree);
         setActiveSidebarPanel('explorer');
-    }, [setActiveMenu, setOpenSubmenu, setProjectTree, setActiveSidebarPanel]);
+    }, [setActiveMenu, setOpenSubmenu, setProjectTree, setActiveSidebarPanel, settings.excludedDirs]);
 
     const handleClearRecentlyOpened = useCallback(async () => {
         await clearRecentlyOpened();
@@ -343,6 +388,7 @@ function App() {
                     onTocItemClick={handleOutlineItemClick}
                     onTreeRefresh={handleTreeRefresh}
                     onCloseTabsForPath={closeTabsForPath}
+                    excludedDirs={settings.excludedDirs}
                 />
 
                 <div className="app-content">
@@ -448,7 +494,7 @@ function App() {
                                                     title={file.path}
                                                     onClick={() => {
                                                         if (file.isDir) {
-                                                            readDirectoryTree(file.path).then(tree => {
+                                                            readDirectoryTree(file.path, settings.excludedDirs).then(tree => {
                                                                 setProjectTree(tree);
                                                                 setActiveSidebarPanel('explorer');
                                                             });
@@ -509,7 +555,7 @@ function App() {
             {settingsOpen && (
                 <SettingsPanel
                     settings={settings}
-                    onUpdate={handleSettingsUpdate}
+                    setSettings={setSettings}
                     onClose={handleSettingsClose}
                 />
             )}

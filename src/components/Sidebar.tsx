@@ -38,6 +38,7 @@ interface SidebarProps {
     onTocItemClick: (item: { content: string; lvl: number; slug: string; githubSlug: string }) => void;
     onTreeRefresh: () => void;
     onCloseTabsForPath: (path: string) => void;
+    excludedDirs?: string[];
 }
 
 /* ==================== Clipboard state (module-level, shared across components) ==================== */
@@ -564,6 +565,7 @@ export default function Sidebar({
     onTocItemClick,
     onTreeRefresh,
     onCloseTabsForPath,
+    excludedDirs,
 }: SidebarProps) {
     const [contextMenu, setContextMenu] = useState<ContextMenuState>({
         visible: false,
@@ -787,8 +789,8 @@ export default function Sidebar({
     }, [projectTree?.path, bumpRefresh]);
 
     const handleLoadChildren = useCallback(async (dirPath: string): Promise<FileTreeNode[]> => {
-        return await loadChildren(dirPath);
-    }, []);
+        return await loadChildren(dirPath, false, excludedDirs);
+    }, [excludedDirs]);
 
     const handleIconClick = (panel: SidebarPanel) => {
         onPanelChange(activePanel === panel ? null : panel);

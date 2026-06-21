@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { save } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
@@ -57,7 +57,6 @@ interface UseMenuActionsProps {
 export interface UseMenuActionsReturn {
     toggleMenu: (menu: string) => void;
     handleMenuItemClick: (action: string) => Promise<void>;
-    handleSettingsUpdate: (newSettings: AppSettings) => Promise<void>;
     handleOutlineItemClick: (item: TocItem) => void;
 }
 
@@ -99,6 +98,10 @@ export function useMenuActions(
         settings,
         setSettings,
     } = props;
+
+    // 使用 ref 存储最新 settings，避免添加到 useCallback 依赖数组
+    const settingsRef = useRef(settings);
+    settingsRef.current = settings;
 
     const toggleMenu = useCallback((menu: string) => {
         setActiveMenu(prev => prev === menu ? null : menu);
@@ -159,7 +162,7 @@ export function useMenuActions(
         // Handle dynamic theme actions (setTheme:themeId)
         if (action.startsWith('setTheme:')) {
             const themeId = action.slice('setTheme:'.length);
-            const newSettings = { ...settings, theme: themeId };
+            const newSettings = { ...settingsRef.current, theme: themeId };
             await saveSettings(newSettings);
             setSettings(newSettings);
             setActiveMenu(null);
@@ -190,10 +193,15 @@ export function useMenuActions(
             case 'saveAs':
                 handleSaveAs();
                 break;
-            case 'autoSave':
-                setAutoSave(prev => !prev);
+            case 'autoSave': {
+                const newAutoSave = !autoSave;
+                setAutoSave(newAutoSave);
+                const newSettings = { ...settingsRef.current, autoSave: newAutoSave };
+                await saveSettings(newSettings);
+                setSettings(newSettings);
                 setActiveMenu(null);
                 break;
+            }
             case 'moveTo': {
                 const activeTab = tabs.find(t => t.id === activeTabId);
                 if (activeTab?.file) {
@@ -389,7 +397,7 @@ export function useMenuActions(
                 // Legacy support: map old actions to new theme ids
                 const legacyThemeId = action === 'themeSystem' ? 'system'
                     : action === 'themeLight' ? 'cadmium-light' : 'cadmium-dark';
-                const newSettings = { ...settings, theme: legacyThemeId };
+                const newSettings = { ...settingsRef.current, theme: legacyThemeId };
                 await saveSettings(newSettings);
                 setSettings(newSettings);
                 setActiveMenu(null);
@@ -398,7 +406,7 @@ export function useMenuActions(
             case 'setTheme': {
                 // Generic theme setter: action format "setTheme:themeId"
                 const themeId = (action as string).split(':')[1] || 'system';
-                const newSettings = { ...settings, theme: themeId };
+                const newSettings = { ...settingsRef.current, theme: themeId };
                 await saveSettings(newSettings);
                 setSettings(newSettings);
                 setActiveMenu(null);
@@ -555,15 +563,27 @@ export function useMenuActions(
                 });
                 setActiveMenu(null);
                 break;
-            case 'zoomIn':
-                zoomIn();
+            case 'zoomIn': {
+                const level = await zoomIn(settingsRef.current.zoomLevel);
+                const newSettings = { ...settingsRef.current, zoomLevel: level };
+                setSettings(newSettings);
+                saveSettings(newSettings);
                 break;
-            case 'zoomOut':
-                zoomOut();
+            }
+            case 'zoomOut': {
+                const level = await zoomOut(settingsRef.current.zoomLevel);
+                const newSettings = { ...settingsRef.current, zoomLevel: level };
+                setSettings(newSettings);
+                saveSettings(newSettings);
                 break;
-            case 'zoomReset':
-                zoomReset();
+            }
+            case 'zoomReset': {
+                const level = await zoomReset();
+                const newSettings = { ...settingsRef.current, zoomLevel: level };
+                setSettings(newSettings);
+                saveSettings(newSettings);
                 break;
+            }
             case 'toggleFullscreen':
                 invoke('toggle_fullscreen');
                 setActiveMenu(null);
@@ -633,11 +653,6 @@ export function useMenuActions(
         editorRef,
     ]);
 
-    const handleSettingsUpdate = useCallback(async (newSettings: AppSettings) => {
-        await saveSettings(newSettings);
-        setSettings(newSettings);
-    }, [setSettings]);
-
     const handleOutlineItemClick = useCallback((item: TocItem) => {
         editorRef.current?.scrollToHeading(item.slug);
     }, [editorRef]);
@@ -645,7 +660,6 @@ export function useMenuActions(
     return {
         toggleMenu,
         handleMenuItemClick,
-        handleSettingsUpdate,
         handleOutlineItemClick,
     };
 }

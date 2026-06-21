@@ -3,6 +3,8 @@ import { LazyStore } from '@tauri-apps/plugin-store';
 export interface AppSettings {
   // Theme (theme id like 'cadmium-light', 'dracula', or 'system')
   theme: string;
+  lightModeTheme: string;
+  darkModeTheme: string;
 
   // Editor
   fontSize: number;
@@ -21,6 +23,7 @@ export interface AppSettings {
   bulletListMarker: '-' | '*' | '+';
   orderListDelimiter: '.' | ')';
   preferLooseListItem: boolean;
+  listIndentation: number | string;
 
   // Editor behavior
   autoPairBracket: boolean;
@@ -35,11 +38,32 @@ export interface AppSettings {
   sourceCodeModeEnabled: boolean;
   typewriterMode: boolean;
   focusMode: boolean;
+
+  // Zoom
+  zoomLevel: number;
+
+  // File
+  excludedDirs: string[];
+  defaultEncoding: string;
+  autoGuessEncoding: boolean;
+  endOfLine: string;
+
+  // Image
+  imageInsertAction: string;
+  imageFolderPath: string;
+
+  // Startup
+  startUpAction: string;
+
+  // Language
+  language: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
   // Theme
   theme: 'system',
+  lightModeTheme: 'cadmium-light',
+  darkModeTheme: 'cadmium-dark',
 
   // Editor
   fontSize: 16,
@@ -58,6 +82,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   bulletListMarker: '-',
   orderListDelimiter: '.',
   preferLooseListItem: true,
+  listIndentation: 1,
 
   // Editor behavior
   autoPairBracket: true,
@@ -72,6 +97,25 @@ export const DEFAULT_SETTINGS: AppSettings = {
   sourceCodeModeEnabled: false,
   typewriterMode: false,
   focusMode: false,
+
+  // Zoom
+  zoomLevel: 1.0,
+
+  // File
+  excludedDirs: ['node_modules', 'dist', 'build', 'out', 'target', '.git', '.svn', '.hg', '__pycache__', '.pytest_cache', 'venv', '.venv', '.vscode', '.idea', '.vs', '.next', '.nuxt', '.asar'],
+  defaultEncoding: 'utf8',
+  autoGuessEncoding: true,
+  endOfLine: 'default',
+
+  // Image
+  imageInsertAction: 'path',
+  imageFolderPath: 'assets/images',
+
+  // Startup
+  startUpAction: 'restore',
+
+  // Language
+  language: 'zh-CN',
 };
 
 const SETTINGS_STORE_KEY = 'settings';
