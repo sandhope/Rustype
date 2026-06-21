@@ -605,7 +605,7 @@ export default function MenuBar({
                         >
                             主题
                         </div>
-                        <div className={`menu-dropdown-content ${activeMenu === 'theme' ? 'is-open' : ''}`}>
+                        <div className={`menu-dropdown-content ${activeMenu === 'theme' ? 'is-open scrollable' : ''}`}>
                             <div className="menu-item" onClick={() => onMenuItemClick('setTheme:system')}>
                                 <span className="menu-item-status">{theme === 'system' ? '✓' : ''}</span>
                                 <span className="menu-item-label">跟随系统</span>
