@@ -10,6 +10,7 @@ import { getCssForOptions, getHtmlToc, type PdfCssOptions, type HtmlTocOptions, 
 import MarkdownPrint from '../services/printService';
 import TocConfigDialog from '../components/TocConfigDialog';
 import { platform } from '@tauri-apps/plugin-os';
+import { t } from '../utils/i18n';
 
 interface ExportActionsProps {
     tabs: Tab[];
@@ -62,7 +63,7 @@ export async function exportHtml(props: ExportActionsProps): Promise<void> {
     const { tabs, activeTabId, editorRef, setActiveMenu } = props;
     const activeTab = tabs.find(t => t.id === activeTabId);
     if (!activeTab) {
-        await message('请先打开一个文件', { title: '错误', kind: 'error' });
+        await message(t('messages.openFileFirst'), { title: t('messages.error'), kind: 'error' });
         setActiveMenu(null);
         return;
     }
@@ -114,11 +115,11 @@ export async function exportHtml(props: ExportActionsProps): Promise<void> {
 
         if (htmlContent) {
             await writeTextFile(targetPath, htmlContent);
-            await message('HTML 导出成功！', { title: '成功', kind: 'info' });
+            await message(t('messages.exportHtmlSuccess'), { title: t('messages.success'), kind: 'info' });
         }
     } catch (error) {
         console.error('Export HTML failed:', error);
-        await message('HTML 导出失败', { title: '错误', kind: 'error' });
+        await message(t('messages.exportHtmlFailed'), { title: t('messages.error'), kind: 'error' });
     }
 
     setActiveMenu(null);
@@ -126,7 +127,7 @@ export async function exportHtml(props: ExportActionsProps): Promise<void> {
 
 export async function exportPdf(props: ExportActionsProps): Promise<void> {
     const { tabs, activeTabId, editorRef, setActiveMenu } = props;
-    await message('开发中', { title: '提示', kind: 'info' });
+    await message(t('messages.inDevelopment'), { title: t('messages.info'), kind: 'info' });
     setActiveMenu(null);
     return;
     if (platform() !== 'windows') {
@@ -134,7 +135,7 @@ export async function exportPdf(props: ExportActionsProps): Promise<void> {
     }
     const activeTab = tabs.find(t => t.id === activeTabId);
     if (!activeTab) {
-        await message('请先打开一个文件', { title: '错误', kind: 'error' });
+        await message(t('messages.openFileFirst'), { title: t('messages.error'), kind: 'error' });
         setActiveMenu(null);
         return;
     }
@@ -187,15 +188,15 @@ export async function exportPdf(props: ExportActionsProps): Promise<void> {
         if (html) {
             try {
                 await invoke('export_to_pdf', { html, outputPath: targetPath });
-                await message('PDF 导出成功！', { title: '成功', kind: 'info' });
+                await message(t('messages.exportPdfSuccess'), { title: t('messages.success'), kind: 'info' });
             } catch (error) {
                 console.error('PDF export failed:', error);
-                await message('PDF 导出失败', { title: '错误', kind: 'error' });
+                await message(t('messages.exportPdfFailed'), { title: t('messages.error'), kind: 'error' });
             }
         }
     } catch (error) {
         console.error('Export PDF failed:', error);
-        await message('PDF 导出失败', { title: '错误', kind: 'error' });
+        await message(t('messages.exportPdfFailed'), { title: t('messages.error'), kind: 'error' });
     }
 
     setActiveMenu(null);
@@ -205,7 +206,7 @@ export async function printDocument(props: ExportActionsProps): Promise<void> {
     const { tabs, activeTabId, editorRef, setActiveMenu } = props;
     const activeTab = tabs.find(t => t.id === activeTabId);
     if (!activeTab) {
-        await message('请先打开一个文件', { title: '错误', kind: 'error' });
+        await message(t('messages.openFileFirst'), { title: t('messages.error'), kind: 'error' });
         setActiveMenu(null);
         return;
     }
@@ -249,7 +250,7 @@ export async function printDocument(props: ExportActionsProps): Promise<void> {
         }
     } catch (error) {
         console.error('Print failed:', error);
-        await message('打印失败', { title: '错误', kind: 'error' });
+        await message(t('messages.printFailed'), { title: t('messages.error'), kind: 'error' });
     } finally {
         setTimeout(() => {
             printer.clearup();

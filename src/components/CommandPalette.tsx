@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useI18n } from '../utils/i18n';
 import { getAllCommands, type Command } from '../utils/commands';
 
 interface CommandPaletteProps {
@@ -7,6 +8,7 @@ interface CommandPaletteProps {
 }
 
 export default function CommandPalette({ onAction, onClose }: CommandPaletteProps) {
+    const { t } = useI18n();
     const allCommands = useMemo(() => getAllCommands(), []);
     const [query, setQuery] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -82,7 +84,7 @@ export default function CommandPalette({ onAction, onClose }: CommandPaletteProp
                         ref={inputRef}
                         className="command-palette-input"
                         type="text"
-                        placeholder="输入命令..."
+                        placeholder={t('commandPalette.placeholder')}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={handleKeyDown}

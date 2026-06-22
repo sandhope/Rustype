@@ -15,6 +15,7 @@ import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
 import type { TocItem } from './useAppState';
 import { exportHtml, exportPdf, printDocument } from '../utils/exportActions';
+import { t } from '../utils/i18n';
 
 interface UseMenuActionsProps {
     sourceMode: boolean;
@@ -117,7 +118,11 @@ export function useMenuActions(
             if (update) {
                 console.log(`发现更新 ${update.version} 发布于 ${update.date} 更新日志: ${update.body}`);
 
-                const shouldInstall = confirm(`发现新版本 ${update.version}！\n\n发布日期：${update.date}\n\n更新日志：\n${update.body || '暂无更新日志'}\n\n是否立即安装？`);
+                const shouldInstall = confirm(t('messages.updateAvailable', {
+                    version: update.version,
+                    date: update.date,
+                    body: update.body || t('messages.noChangelog'),
+                }));
 
                 if (shouldInstall) {
                     let downloaded = 0;
@@ -144,15 +149,15 @@ export function useMenuActions(
                         await relaunch();
                     } catch (installError) {
                         console.error('Failed to install update:', installError);
-                        alert('更新安装失败，请手动前往 GitHub 下载最新版本');
+                        alert(t('messages.updateInstallFailed'));
                     }
                 }
             } else {
-                alert('当前已是最新版本');
+                alert(t('messages.noUpdate'));
             }
         } catch (error) {
             console.error('Failed to check for updates:', error);
-            alert('检查更新失败，请稍后重试');
+            alert(t('messages.checkUpdateFailed'));
         } finally {
             setCheckingUpdate(false);
         }
@@ -218,10 +223,10 @@ export function useMenuActions(
                         }
                     } catch (error) {
                         console.error('Failed to move file:', error);
-                        alert('移动文件失败');
+                        alert(t('messages.moveFileFailed'));
                     }
                 } else {
-                    alert('请先打开一个文件');
+                    alert(t('messages.openFileFirst'));
                 }
                 setActiveMenu(null);
                 break;
@@ -232,7 +237,7 @@ export function useMenuActions(
                     setRenameFileName(activeTab.file.name);
                     setRenameDialogOpen(true);
                 } else {
-                    alert('请先打开一个文件');
+                    alert(t('messages.openFileFirst'));
                 }
                 setActiveMenu(null);
                 break;

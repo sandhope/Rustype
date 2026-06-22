@@ -3,6 +3,7 @@ import type { AppSettings } from '../utils/settings';
 import { DEFAULT_SETTINGS, saveSettings } from '../utils/settings';
 import { lightThemes, darkThemes } from '../utils/themes';
 import * as webview from '../utils/webview';
+import { useI18n } from '../utils/i18n';
 
 interface SettingsPanelProps {
     settings: AppSettings;
@@ -40,6 +41,8 @@ const LANGUAGE_OPTIONS = [
 ];
 
 export default function SettingsPanel({ settings, setSettings, onClose }: SettingsPanelProps) {
+    const { t } = useI18n();
+
     // Local state for text inputs that need debounce
     const [lineWidthInput, setLineWidthInput] = useState(settings.editorLineWidth);
     const [editorFontInput, setEditorFontInput] = useState(settings.editorFontFamily);
@@ -109,10 +112,10 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
     // Active theme highlighting
     const activeLightTheme = settings.theme === 'system'
         ? settings.lightModeTheme
-        : (lightThemes.some(t => t.id === settings.theme) ? settings.theme : settings.lightModeTheme);
+        : (lightThemes.some(theme => theme.id === settings.theme) ? settings.theme : settings.lightModeTheme);
     const activeDarkTheme = settings.theme === 'system'
         ? settings.darkModeTheme
-        : (darkThemes.some(t => t.id === settings.theme) ? settings.theme : settings.darkModeTheme);
+        : (darkThemes.some(theme => theme.id === settings.theme) ? settings.theme : settings.darkModeTheme);
 
     // Excluded dirs management
     const addExcludedDir = useCallback(() => {
@@ -155,16 +158,49 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
         <div className="settings-overlay" onClick={onClose}>
             <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
                 <div className="settings-header">
-                    <h2>设置</h2>
+                    <h2>{t('settings.title')}</h2>
                     <button className="settings-close" onClick={onClose}>×</button>
                 </div>
 
                 <div className="settings-content">
+                    {/* ===== Language ===== */}
+                    <section className="settings-section">
+                        <h3>{t('settings.language.title')}</h3>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.language.label')}</label>
+                            <select
+                                className="settings-select"
+                                value={settings.language}
+                                onChange={(e) => handleChange('language', e.target.value)}
+                            >
+                                {LANGUAGE_OPTIONS.map(o => (
+                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </section>
+
+                    {/* ===== Startup ===== */}
+                    <section className="settings-section">
+                        <h3>{t('settings.startup.title')}</h3>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.startup.label')}</label>
+                            <select
+                                className="settings-select"
+                                value={settings.startUpAction}
+                                onChange={(e) => handleChange('startUpAction', e.target.value)}
+                            >
+                                <option value="restore">{t('settings.startup.restore')}</option>
+                                <option value="blank">{t('settings.startup.blank')}</option>
+                            </select>
+                        </div>
+                    </section>
+
                     {/* ===== Theme ===== */}
                     <section className="settings-section">
-                        <h3>主题</h3>
+                        <h3>{t('settings.theme.title')}</h3>
                         <div className="settings-row">
-                            <label className="settings-label">主题模式</label>
+                            <label className="settings-label">{t('settings.theme.mode')}</label>
                             <select
                                 className="settings-select"
                                 value={settings.theme === 'system' ? 'system' : 'custom'}
@@ -176,284 +212,77 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
                                     }
                                 }}
                             >
-                                <option value="system">跟随系统</option>
-                                <option value="custom">手动选择</option>
+                                <option value="system">{t('settings.theme.followSystem')}</option>
+                                <option value="custom">{t('settings.theme.manual')}</option>
                             </select>
                         </div>
                         {settings.theme === 'system' && (
                             <>
                                 <div className="settings-row">
-                                    <label className="settings-label">亮色模式主题</label>
+                                    <label className="settings-label">{t('settings.theme.lightModeTheme')}</label>
                                     <select
                                         className="settings-select"
                                         value={settings.lightModeTheme}
                                         onChange={(e) => handleChange('lightModeTheme', e.target.value)}
                                     >
-                                        {lightThemes.map(t => (
-                                            <option key={t.id} value={t.id}>{t.name}</option>
+                                        {lightThemes.map(theme => (
+                                            <option key={theme.id} value={theme.id}>{theme.name}</option>
                                         ))}
                                     </select>
                                 </div>
                                 <div className="settings-row">
-                                    <label className="settings-label">暗色模式主题</label>
+                                    <label className="settings-label">{t('settings.theme.darkModeTheme')}</label>
                                     <select
                                         className="settings-select"
                                         value={settings.darkModeTheme}
                                         onChange={(e) => handleChange('darkModeTheme', e.target.value)}
                                     >
-                                        {darkThemes.map(t => (
-                                            <option key={t.id} value={t.id}>{t.name}</option>
+                                        {darkThemes.map(theme => (
+                                            <option key={theme.id} value={theme.id}>{theme.name}</option>
                                         ))}
                                     </select>
                                 </div>
                             </>
                         )}
                         <div className="settings-theme-group">
-                            <div className="settings-theme-group-label">浅色主题</div>
+                            <div className="settings-theme-group-label">{t('settings.theme.lightThemes')}</div>
                             <div className="settings-theme-grid">
-                                {lightThemes.map(t => (
+                                {lightThemes.map(theme => (
                                     <button
-                                        key={t.id}
-                                        className={`settings-theme-card ${activeLightTheme === t.id ? 'active' : ''}`}
-                                        onClick={() => handleThemeClick(t.id, 'light')}
-                                        title={t.name}
+                                        key={theme.id}
+                                        className={`settings-theme-card ${activeLightTheme === theme.id ? 'active' : ''}`}
+                                        onClick={() => handleThemeClick(theme.id, 'light')}
+                                        title={theme.name}
                                     >
                                         <span className="settings-theme-swatch light" />
-                                        <span className="settings-theme-name">{t.name}</span>
+                                        <span className="settings-theme-name">{theme.name}</span>
                                     </button>
                                 ))}
                             </div>
                         </div>
                         <div className="settings-theme-group">
-                            <div className="settings-theme-group-label">深色主题</div>
+                            <div className="settings-theme-group-label">{t('settings.theme.darkThemes')}</div>
                             <div className="settings-theme-grid">
-                                {darkThemes.map(t => (
+                                {darkThemes.map(theme => (
                                     <button
-                                        key={t.id}
-                                        className={`settings-theme-card ${activeDarkTheme === t.id ? 'active' : ''}`}
-                                        onClick={() => handleThemeClick(t.id, 'dark')}
-                                        title={t.name}
+                                        key={theme.id}
+                                        className={`settings-theme-card ${activeDarkTheme === theme.id ? 'active' : ''}`}
+                                        onClick={() => handleThemeClick(theme.id, 'dark')}
+                                        title={theme.name}
                                     >
                                         <span className="settings-theme-swatch dark" />
-                                        <span className="settings-theme-name">{t.name}</span>
+                                        <span className="settings-theme-name">{theme.name}</span>
                                     </button>
                                 ))}
                             </div>
                         </div>
                     </section>
 
-                    {/* ===== Zoom ===== */}
-                    <section className="settings-section">
-                        <h3>缩放</h3>
-                        <div className="settings-row">
-                            <label className="settings-label">界面缩放</label>
-                            <div className="settings-zoom-control">
-                                <button className="settings-zoom-btn" onClick={zoomOut} disabled={settings.zoomLevel <= 0.5}>−</button>
-                                <span className="settings-zoom-value" onClick={zoomReset} title="点击重置为 100%">
-                                    {zoomPercent}%
-                                </span>
-                                <button className="settings-zoom-btn" onClick={zoomIn} disabled={settings.zoomLevel >= 2.0}>+</button>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* ===== Editor ===== */}
-                    <section className="settings-section">
-                        <h3>编辑器</h3>
-                        <div className="settings-row">
-                            <label className="settings-label">字体大小</label>
-                            <input
-                                type="number"
-                                className="settings-input"
-                                min={12}
-                                max={32}
-                                value={settings.fontSize}
-                                onChange={(e) => handleChange('fontSize', parseInt(e.target.value) || settings.fontSize)}
-                            />
-                            <span className="settings-unit">px</span>
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">编辑器字体</label>
-                            <input
-                                type="text"
-                                className="settings-input settings-input-wide"
-                                placeholder="Open Sans, -apple-system, sans-serif"
-                                value={editorFontInput}
-                                onChange={(e) => setEditorFontInput(e.target.value)}
-                            />
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">行高</label>
-                            <input
-                                type="number"
-                                className="settings-input"
-                                min={1.2}
-                                max={2.0}
-                                step={0.1}
-                                value={settings.lineHeight}
-                                onChange={(e) => handleChange('lineHeight', parseFloat(e.target.value) || settings.lineHeight)}
-                            />
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">编辑器宽度</label>
-                            <input
-                                type="text"
-                                className="settings-input"
-                                placeholder="800px"
-                                value={lineWidthInput}
-                                onChange={(e) => setLineWidthInput(e.target.value)}
-                            />
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">隐藏链接提示</label>
-                            <input
-                                type="checkbox"
-                                className="settings-checkbox"
-                                checked={settings.hideLinkPopup}
-                                onChange={(e) => handleChange('hideLinkPopup', e.target.checked)}
-                            />
-                        </div>
-                    </section>
-
-                    {/* ===== Code Block ===== */}
-                    <section className="settings-section">
-                        <h3>代码块</h3>
-                        <div className="settings-row">
-                            <label className="settings-label">字体大小</label>
-                            <input
-                                type="number"
-                                className="settings-input"
-                                min={10}
-                                max={28}
-                                value={settings.codeFontSize}
-                                onChange={(e) => handleChange('codeFontSize', parseInt(e.target.value) || settings.codeFontSize)}
-                            />
-                            <span className="settings-unit">px</span>
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">代码字体</label>
-                            <input
-                                type="text"
-                                className="settings-input settings-input-wide"
-                                placeholder="SF Mono, Consolas, monospace"
-                                value={codeFontInput}
-                                onChange={(e) => setCodeFontInput(e.target.value)}
-                            />
-                        </div>
-                    </section>
-
-                    {/* ===== Editor Behavior ===== */}
-                    <section className="settings-section">
-                        <h3>编辑行为</h3>
-                        <div className="settings-row">
-                            <label className="settings-label">自动补全括号</label>
-                            <input
-                                type="checkbox"
-                                className="settings-checkbox"
-                                checked={settings.autoPairBracket}
-                                onChange={(e) => handleChange('autoPairBracket', e.target.checked)}
-                            />
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">自动补全 Markdown 语法</label>
-                            <input
-                                type="checkbox"
-                                className="settings-checkbox"
-                                checked={settings.autoPairMarkdownSyntax}
-                                onChange={(e) => handleChange('autoPairMarkdownSyntax', e.target.checked)}
-                            />
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">自动补全引号</label>
-                            <input
-                                type="checkbox"
-                                className="settings-checkbox"
-                                checked={settings.autoPairQuote}
-                                onChange={(e) => handleChange('autoPairQuote', e.target.checked)}
-                            />
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">隐藏快速插入提示</label>
-                            <input
-                                type="checkbox"
-                                className="settings-checkbox"
-                                checked={settings.hideQuickInsertHint}
-                                onChange={(e) => handleChange('hideQuickInsertHint', e.target.checked)}
-                            />
-                        </div>
-                    </section>
-
-                    {/* ===== Markdown ===== */}
-                    <section className="settings-section">
-                        <h3>Markdown</h3>
-                        <div className="settings-row">
-                            <label className="settings-label">Tab 大小</label>
-                            <input
-                                type="number"
-                                className="settings-input"
-                                min={1}
-                                max={8}
-                                value={settings.tabSize}
-                                onChange={(e) => handleChange('tabSize', parseInt(e.target.value) || settings.tabSize)}
-                            />
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">无序列表标记</label>
-                            <select
-                                className="settings-select"
-                                value={settings.bulletListMarker}
-                                onChange={(e) => handleChange('bulletListMarker', e.target.value as '-' | '*' | '+')}
-                            >
-                                <option value="-">- (连字符)</option>
-                                <option value="*">* (星号)</option>
-                                <option value="+">+ (加号)</option>
-                            </select>
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">有序列表分隔符</label>
-                            <select
-                                className="settings-select"
-                                value={settings.orderListDelimiter}
-                                onChange={(e) => handleChange('orderListDelimiter', e.target.value as '.' | ')')}
-                            >
-                                <option value=".">. (点)</option>
-                                <option value=")">) (右括号)</option>
-                            </select>
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">宽松列表项</label>
-                            <input
-                                type="checkbox"
-                                className="settings-checkbox"
-                                checked={settings.preferLooseListItem}
-                                onChange={(e) => handleChange('preferLooseListItem', e.target.checked)}
-                            />
-                        </div>
-                        <div className="settings-row">
-                            <label className="settings-label">列表缩进</label>
-                            <select
-                                className="settings-select"
-                                value={String(settings.listIndentation)}
-                                onChange={(e) => {
-                                    const v = e.target.value;
-                                    handleChange('listIndentation', v === 'dfm' || v === 'tab' ? v : parseInt(v));
-                                }}
-                            >
-                                <option value="1">1 空格</option>
-                                <option value="2">2 空格</option>
-                                <option value="3">3 空格</option>
-                                <option value="4">4 空格</option>
-                                <option value="tab">Tab</option>
-                                <option value="dfm">DFM (4 空格)</option>
-                            </select>
-                        </div>
-                    </section>
-
                     {/* ===== Auto Save ===== */}
                     <section className="settings-section">
-                        <h3>自动保存</h3>
+                        <h3>{t('settings.autoSave.title')}</h3>
                         <div className="settings-row">
-                            <label className="settings-label">启用自动保存</label>
+                            <label className="settings-label">{t('settings.autoSave.enable')}</label>
                             <input
                                 type="checkbox"
                                 className="settings-checkbox"
@@ -463,7 +292,7 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
                         </div>
                         {settings.autoSave && (
                             <div className="settings-row">
-                                <label className="settings-label">保存延迟</label>
+                                <label className="settings-label">{t('settings.autoSave.delay')}</label>
                                 <input
                                     type="number"
                                     className="settings-input"
@@ -477,12 +306,219 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
                             </div>
                         )}
                     </section>
+                    
+                    {/* ===== Zoom ===== */}
+                    <section className="settings-section">
+                        <h3>{t('settings.zoom.title')}</h3>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.zoom.label')}</label>
+                            <div className="settings-zoom-control">
+                                <button className="settings-zoom-btn" onClick={zoomOut} disabled={settings.zoomLevel <= 0.5}>−</button>
+                                <span className="settings-zoom-value" onClick={zoomReset} title={t('settings.zoom.resetHint')}>
+                                    {zoomPercent}%
+                                </span>
+                                <button className="settings-zoom-btn" onClick={zoomIn} disabled={settings.zoomLevel >= 2.0}>+</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* ===== Editor ===== */}
+                    <section className="settings-section">
+                        <h3>{t('settings.editor.title')}</h3>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.editor.fontSize')}</label>
+                            <input
+                                type="number"
+                                className="settings-input"
+                                min={12}
+                                max={32}
+                                value={settings.fontSize}
+                                onChange={(e) => handleChange('fontSize', parseInt(e.target.value) || settings.fontSize)}
+                            />
+                            <span className="settings-unit">px</span>
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.editor.editorFont')}</label>
+                            <input
+                                type="text"
+                                className="settings-input settings-input-wide"
+                                placeholder="Open Sans, -apple-system, sans-serif"
+                                value={editorFontInput}
+                                onChange={(e) => setEditorFontInput(e.target.value)}
+                            />
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.editor.lineHeight')}</label>
+                            <input
+                                type="number"
+                                className="settings-input"
+                                min={1.2}
+                                max={2.0}
+                                step={0.1}
+                                value={settings.lineHeight}
+                                onChange={(e) => handleChange('lineHeight', parseFloat(e.target.value) || settings.lineHeight)}
+                            />
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.editor.editorWidth')}</label>
+                            <input
+                                type="text"
+                                className="settings-input"
+                                placeholder="800px"
+                                value={lineWidthInput}
+                                onChange={(e) => setLineWidthInput(e.target.value)}
+                            />
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.editor.hideLinkPopup')}</label>
+                            <input
+                                type="checkbox"
+                                className="settings-checkbox"
+                                checked={settings.hideLinkPopup}
+                                onChange={(e) => handleChange('hideLinkPopup', e.target.checked)}
+                            />
+                        </div>
+                    </section>
+
+                    {/* ===== Editor Behavior ===== */}
+                    <section className="settings-section">
+                        <h3>{t('settings.editorBehavior.title')}</h3>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.editorBehavior.autoPairBracket')}</label>
+                            <input
+                                type="checkbox"
+                                className="settings-checkbox"
+                                checked={settings.autoPairBracket}
+                                onChange={(e) => handleChange('autoPairBracket', e.target.checked)}
+                            />
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.editorBehavior.autoPairMarkdownSyntax')}</label>
+                            <input
+                                type="checkbox"
+                                className="settings-checkbox"
+                                checked={settings.autoPairMarkdownSyntax}
+                                onChange={(e) => handleChange('autoPairMarkdownSyntax', e.target.checked)}
+                            />
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.editorBehavior.autoPairQuote')}</label>
+                            <input
+                                type="checkbox"
+                                className="settings-checkbox"
+                                checked={settings.autoPairQuote}
+                                onChange={(e) => handleChange('autoPairQuote', e.target.checked)}
+                            />
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.editorBehavior.hideQuickInsertHint')}</label>
+                            <input
+                                type="checkbox"
+                                className="settings-checkbox"
+                                checked={settings.hideQuickInsertHint}
+                                onChange={(e) => handleChange('hideQuickInsertHint', e.target.checked)}
+                            />
+                        </div>
+                    </section>
+
+                    {/* ===== Markdown ===== */}
+                    <section className="settings-section">
+                        <h3>{t('settings.markdown.title')}</h3>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.markdown.tabSize')}</label>
+                            <input
+                                type="number"
+                                className="settings-input"
+                                min={1}
+                                max={8}
+                                value={settings.tabSize}
+                                onChange={(e) => handleChange('tabSize', parseInt(e.target.value) || settings.tabSize)}
+                            />
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.markdown.bulletListMarker')}</label>
+                            <select
+                                className="settings-select"
+                                value={settings.bulletListMarker}
+                                onChange={(e) => handleChange('bulletListMarker', e.target.value as '-' | '*' | '+')}
+                            >
+                                <option value="-">{t('settings.markdown.hyphen')}</option>
+                                <option value="*">{t('settings.markdown.asterisk')}</option>
+                                <option value="+">{t('settings.markdown.plus')}</option>
+                            </select>
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.markdown.orderListDelimiter')}</label>
+                            <select
+                                className="settings-select"
+                                value={settings.orderListDelimiter}
+                                onChange={(e) => handleChange('orderListDelimiter', e.target.value as '.' | ')')}
+                            >
+                                <option value=".">{t('settings.markdown.dot')}</option>
+                                <option value=")">{t('settings.markdown.rightParen')}</option>
+                            </select>
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.markdown.preferLooseListItem')}</label>
+                            <input
+                                type="checkbox"
+                                className="settings-checkbox"
+                                checked={settings.preferLooseListItem}
+                                onChange={(e) => handleChange('preferLooseListItem', e.target.checked)}
+                            />
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.markdown.listIndentation')}</label>
+                            <select
+                                className="settings-select"
+                                value={String(settings.listIndentation)}
+                                onChange={(e) => {
+                                    const v = e.target.value;
+                                    handleChange('listIndentation', v === 'dfm' || v === 'tab' ? v : parseInt(v));
+                                }}
+                            >
+                                <option value="1">{t('settings.markdown.spaces', { n: '1' })}</option>
+                                <option value="2">{t('settings.markdown.spaces', { n: '2' })}</option>
+                                <option value="3">{t('settings.markdown.spaces', { n: '3' })}</option>
+                                <option value="4">{t('settings.markdown.spaces', { n: '4' })}</option>
+                                <option value="tab">{t('settings.markdown.tab')}</option>
+                                <option value="dfm">{t('settings.markdown.dfm')}</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    {/* ===== Code Block ===== */}
+                    <section className="settings-section">
+                        <h3>{t('settings.codeBlock.title')}</h3>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.codeBlock.fontSize')}</label>
+                            <input
+                                type="number"
+                                className="settings-input"
+                                min={10}
+                                max={28}
+                                value={settings.codeFontSize}
+                                onChange={(e) => handleChange('codeFontSize', parseInt(e.target.value) || settings.codeFontSize)}
+                            />
+                            <span className="settings-unit">px</span>
+                        </div>
+                        <div className="settings-row">
+                            <label className="settings-label">{t('settings.codeBlock.codeFont')}</label>
+                            <input
+                                type="text"
+                                className="settings-input settings-input-wide"
+                                placeholder="SF Mono, Consolas, monospace"
+                                value={codeFontInput}
+                                onChange={(e) => setCodeFontInput(e.target.value)}
+                            />
+                        </div>
+                    </section>
 
                     {/* ===== File ===== */}
                     <section className="settings-section">
-                        <h3>文件</h3>
+                        <h3>{t('settings.file.title')}</h3>
                         <div className="settings-row">
-                            <label className="settings-label">默认编码</label>
+                            <label className="settings-label">{t('settings.file.defaultEncoding')}</label>
                             <select
                                 className="settings-select"
                                 value={settings.defaultEncoding}
@@ -494,7 +530,7 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
                             </select>
                         </div>
                         <div className="settings-row">
-                            <label className="settings-label">自动猜测编码</label>
+                            <label className="settings-label">{t('settings.file.autoGuessEncoding')}</label>
                             <input
                                 type="checkbox"
                                 className="settings-checkbox"
@@ -503,19 +539,19 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
                             />
                         </div>
                         <div className="settings-row">
-                            <label className="settings-label">行尾符</label>
+                            <label className="settings-label">{t('settings.file.lineEnding')}</label>
                             <select
                                 className="settings-select"
                                 value={settings.endOfLine}
                                 onChange={(e) => handleChange('endOfLine', e.target.value)}
                             >
-                                <option value="default">默认</option>
+                                <option value="default">{t('settings.file.lineEndingDefault')}</option>
                                 <option value="lf">LF (Unix/macOS)</option>
                                 <option value="crlf">CRLF (Windows)</option>
                             </select>
                         </div>
                         <div className="settings-subsection">
-                            <div className="settings-subsection-label">忽略目录</div>
+                            <div className="settings-subsection-label">{t('settings.file.excludedDirs')}</div>
                             <div className="settings-tags">
                                 {settings.excludedDirs.map(dir => (
                                     <span key={dir} className="settings-tag">
@@ -523,7 +559,7 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
                                         <button
                                             className="settings-tag-remove"
                                             onClick={() => removeExcludedDir(dir)}
-                                            title="移除"
+                                            title={t('settings.file.remove')}
                                         >×</button>
                                     </span>
                                 ))}
@@ -532,7 +568,7 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
                                 <input
                                     type="text"
                                     className="settings-input settings-input-wide"
-                                    placeholder="输入目录名称"
+                                    placeholder={t('settings.file.dirNamePlaceholder')}
                                     value={newExcludedDir}
                                     onChange={(e) => setNewExcludedDir(e.target.value)}
                                     onKeyDown={(e) => {
@@ -543,28 +579,28 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
                                     className="settings-btn settings-btn-secondary settings-btn-small"
                                     onClick={addExcludedDir}
                                     disabled={!newExcludedDir.trim()}
-                                >添加</button>
+                                >{t('settings.file.add')}</button>
                             </div>
                         </div>
                     </section>
 
                     {/* ===== Image ===== */}
                     <section className="settings-section">
-                        <h3>图片</h3>
+                        <h3>{t('settings.image.title')}</h3>
                         <div className="settings-row">
-                            <label className="settings-label">插入图片时</label>
+                            <label className="settings-label">{t('settings.image.insertAction')}</label>
                             <select
                                 className="settings-select"
                                 value={settings.imageInsertAction}
                                 onChange={(e) => handleChange('imageInsertAction', e.target.value)}
                             >
-                                <option value="path">仅插入路径</option>
-                                <option value="folder">复制到指定文件夹</option>
+                                <option value="path">{t('settings.image.pathOnly')}</option>
+                                <option value="folder">{t('settings.image.copyToFolder')}</option>
                             </select>
                         </div>
                         {settings.imageInsertAction === 'folder' && (
                             <div className="settings-row">
-                                <label className="settings-label">目标文件夹</label>
+                                <label className="settings-label">{t('settings.image.targetFolder')}</label>
                                 <input
                                     type="text"
                                     className="settings-input settings-input-wide"
@@ -576,43 +612,11 @@ export default function SettingsPanel({ settings, setSettings, onClose }: Settin
                         )}
                     </section>
 
-                    {/* ===== Startup ===== */}
-                    <section className="settings-section">
-                        <h3>启动</h3>
-                        <div className="settings-row">
-                            <label className="settings-label">启动时</label>
-                            <select
-                                className="settings-select"
-                                value={settings.startUpAction}
-                                onChange={(e) => handleChange('startUpAction', e.target.value)}
-                            >
-                                <option value="restore">恢复上次编辑状态</option>
-                                <option value="blank">打开空白页</option>
-                            </select>
-                        </div>
-                    </section>
-
-                    {/* ===== Language ===== */}
-                    <section className="settings-section">
-                        <h3>语言</h3>
-                        <div className="settings-row">
-                            <label className="settings-label">界面语言</label>
-                            <select
-                                className="settings-select"
-                                value={settings.language}
-                                onChange={(e) => handleChange('language', e.target.value)}
-                            >
-                                {LANGUAGE_OPTIONS.map(o => (
-                                    <option key={o.value} value={o.value}>{o.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </section>
                 </div>
 
                 <div className="settings-footer">
                     <button className="settings-btn settings-btn-secondary" onClick={handleReset}>
-                        重置默认
+                        {t('settings.resetDefaults')}
                     </button>
                 </div>
             </div>

@@ -1,10 +1,12 @@
 import appIcon from '../../src-tauri/icons/128x128.png';
+import { useI18n } from '../utils/i18n';
 
 interface AboutDialogProps {
     onClose: () => void;
 }
 
 export default function AboutDialog({ onClose }: AboutDialogProps) {
+    const { t } = useI18n();
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="about-dialog" onClick={(e) => e.stopPropagation()}>
@@ -13,27 +15,27 @@ export default function AboutDialog({ onClose }: AboutDialogProps) {
                         <img src={appIcon} alt="Rustype Logo" width="64" height="64" />
                     </div>
                     <h2>Rustype</h2>
-                    <p className="about-version">版本 0.1.0</p>
+                    <p className="about-version">{t('dialogs.about.version', { version: '0.1.0' })}</p>
                 </div>
 
                 <div className="about-content">
                     <p className="about-description">
-                        轻量级高性能 Markdown 编辑器，基于 Tauri + React + muya 构建。
+                        {t('dialogs.about.description')}
                     </p>
 
                     <div className="about-section">
-                        <h4>功能特性</h4>
+                        <h4>{t('dialogs.about.features')}</h4>
                         <ul>
-                            <li>所见即所得 (WYSIWYG) 编辑</li>
-                            <li>GitHub Flavored Markdown 支持</li>
-                            <li>数学公式、代码块、表格</li>
-                            <li>多种编辑模式（聚焦、打字机、源码）</li>
-                            <li>实时大纲导航</li>
+                            <li>{t('dialogs.about.feature1')}</li>
+                            <li>{t('dialogs.about.feature2')}</li>
+                            <li>{t('dialogs.about.feature3')}</li>
+                            <li>{t('dialogs.about.feature4')}</li>
+                            <li>{t('dialogs.about.feature5')}</li>
                         </ul>
                     </div>
 
                     <div className="about-section">
-                        <h4>技术栈</h4>
+                        <h4>{t('dialogs.about.techStack')}</h4>
                         <p className="tech-stack">
                             <span className="tech-tag">Tauri</span>
                             <span className="tech-tag">React 18</span>
@@ -45,7 +47,7 @@ export default function AboutDialog({ onClose }: AboutDialogProps) {
 
                 <div className="about-footer">
                     <button className="about-close-btn" onClick={onClose}>
-                        确定
+                        {t('dialogs.about.confirm')}
                     </button>
                 </div>
             </div>

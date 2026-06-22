@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useI18n } from '../utils/i18n';
 
 interface RenameDialogProps {
     currentName: string;
@@ -7,6 +8,7 @@ interface RenameDialogProps {
 }
 
 export default function RenameDialog({ currentName, onClose, onConfirm }: RenameDialogProps) {
+    const { t } = useI18n();
     const [newName, setNewName] = useState(currentName);
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -26,7 +28,7 @@ export default function RenameDialog({ currentName, onClose, onConfirm }: Rename
         <div className="modal-overlay" onClick={onClose}>
             <div className="rename-dialog" onClick={(e) => e.stopPropagation()}>
                 <div className="rename-header">
-                    <h3>重命名</h3>
+                    <h3>{t('dialogs.rename.title')}</h3>
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="rename-input-container">
@@ -36,15 +38,15 @@ export default function RenameDialog({ currentName, onClose, onConfirm }: Rename
                             className="rename-input"
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
-                            placeholder="输入新文件名"
+                            placeholder={t('dialogs.rename.placeholder')}
                         />
                     </div>
                     <div className="rename-footer">
                         <button type="button" className="rename-cancel-btn" onClick={onClose}>
-                            取消
+                            {t('dialogs.rename.cancel')}
                         </button>
                         <button type="submit" className="rename-confirm-btn">
-                            确定
+                            {t('dialogs.rename.confirm')}
                         </button>
                     </div>
                 </form>

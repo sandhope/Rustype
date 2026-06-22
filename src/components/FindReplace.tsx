@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useI18n } from '../utils/i18n';
 import type { EditorHandle } from './Editor';
 
 interface FindReplaceProps {
@@ -7,6 +8,7 @@ interface FindReplaceProps {
 }
 
 export default function FindReplace({ editorRef, onClose }: FindReplaceProps) {
+    const { t } = useI18n();
     const [findValue, setFindValue] = useState('');
     const [replaceValue, setReplaceValue] = useState('');
     const [caseSensitive, setCaseSensitive] = useState(false);
@@ -93,20 +95,20 @@ export default function FindReplace({ editorRef, onClose }: FindReplaceProps) {
                     ref={findInputRef}
                     type="text"
                     className="find-input"
-                    placeholder="查找"
+                    placeholder={t('findReplace.findPlaceholder')}
                     value={findValue}
                     onChange={handleFindChange}
                 />
-                <button className="fr-btn" onClick={handleFindPrevious} title="上一个 (Shift+Enter)">
+                <button className="fr-btn" onClick={handleFindPrevious} title={t('findReplace.previous')}>
                     ↑
                 </button>
-                <button className="fr-btn" onClick={handleFindNext} title="下一个 (Enter)">
+                <button className="fr-btn" onClick={handleFindNext} title={t('findReplace.next')}>
                     ↓
                 </button>
-                <button className="fr-btn" onClick={() => setShowReplace(prev => !prev)} title="替换">
-                    {showReplace ? '隐藏' : '替换'}
+                <button className="fr-btn" onClick={() => setShowReplace(prev => !prev)} title={showReplace ? t('findReplace.hide') : t('findReplace.replace')}>
+                    {showReplace ? t('findReplace.hide') : t('findReplace.replace')}
                 </button>
-                <button className="fr-btn fr-close" onClick={onClose} title="关闭 (Esc)">
+                <button className="fr-btn fr-close" onClick={onClose} title={t('findReplace.close')}>
                     ×
                 </button>
             </div>
@@ -115,15 +117,15 @@ export default function FindReplace({ editorRef, onClose }: FindReplaceProps) {
                     <input
                         type="text"
                         className="find-input"
-                        placeholder="替换为"
+                        placeholder={t('findReplace.replacePlaceholder')}
                         value={replaceValue}
                         onChange={(e) => setReplaceValue(e.target.value)}
                     />
-                    <button className="fr-btn" onClick={handleReplace} title="替换当前">
-                        替换
+                    <button className="fr-btn" onClick={handleReplace} title={t('findReplace.replaceCurrent')}>
+                        {t('findReplace.replace')}
                     </button>
-                    <button className="fr-btn" onClick={handleReplaceAll} title="替换全部">
-                        全部
+                    <button className="fr-btn" onClick={handleReplaceAll} title={t('findReplace.replaceAll')}>
+                        {t('findReplace.replaceAll')}
                     </button>
                 </div>
             )}
@@ -137,7 +139,7 @@ export default function FindReplace({ editorRef, onClose }: FindReplaceProps) {
                             if (findValue) runSearch(findValue);
                         }}
                     />
-                    <span>区分大小写</span>
+                    <span>{t('findReplace.caseSensitive')}</span>
                 </label>
                 <label className="fr-option">
                     <input
@@ -148,7 +150,7 @@ export default function FindReplace({ editorRef, onClose }: FindReplaceProps) {
                             if (findValue) runSearch(findValue);
                         }}
                     />
-                    <span>全字匹配</span>
+                    <span>{t('findReplace.wholeWord')}</span>
                 </label>
                 <label className="fr-option">
                     <input
@@ -159,9 +161,9 @@ export default function FindReplace({ editorRef, onClose }: FindReplaceProps) {
                             if (findValue) runSearch(findValue);
                         }}
                     />
-                    <span>正则表达式</span>
+                    <span>{t('findReplace.regex')}</span>
                 </label>
-                {findValue && <span className="fr-count">{matchCount} 个匹配</span>}
+                {findValue && <span className="fr-count">{t('findReplace.matchCount', { count: matchCount })}</span>}
             </div>
         </div>
     );

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { platform } from '@tauri-apps/plugin-os';
+import { useI18n } from '../utils/i18n';
 
 interface ShortcutsPanelProps {
     onClose: () => void;
@@ -20,135 +21,139 @@ const COMMAND = isMac ? '⌘' : 'Ctrl'
 const SHIFT = isMac ? '⇧' : 'Shift'
 const ALT = isMac ? '⌥' : 'Alt'
 
-const shortcutsData: ShortcutItem[] = [
-    {
-        category: '文件',
-        shortcuts: [
-            { description: '新建标签页', keys: [COMMAND, 'T'] },
-            { description: '新建窗口', keys: [COMMAND, 'N'] },
-            { description: '打开文件', keys: [COMMAND, 'O'] },
-            { description: '打开文件夹', keys: [COMMAND, SHIFT, 'O'] },
-            { description: '保存', keys: [COMMAND, 'S'] },
-            { description: '另存为', keys: [COMMAND, SHIFT, 'S'] },
-            { description: '自动保存', keys: [] },
-            { description: '移动到', keys: [] },
-            { description: '重命名', keys: [] },
-            { description: '导出为HTML', keys: [] },
-            { description: '导出为PDF', keys: [COMMAND, ALT, 'E'] },
-            { description: '打印', keys: [COMMAND, 'P'] },
-            { description: '设置', keys: [COMMAND, ','] },
-            { description: '关闭标签页', keys: [COMMAND, 'W'] },
-            { description: '关闭窗口', keys: [COMMAND, SHIFT, 'W'] },
-            { description: '退出', keys: [COMMAND, 'Q'] },
-        ],
-    },
-    {
-        category: '编辑',
-        shortcuts: [
-            { description: '撤销', keys: [COMMAND, 'Z'] },
-            { description: '重做', keys: [COMMAND, SHIFT, 'Z'] },
-            { description: '剪切', keys: [COMMAND, 'X'] },
-            { description: '复制', keys: [COMMAND, 'C'] },
-            { description: '粘贴', keys: [COMMAND, 'V'] },
-            { description: '复制为富文本', keys: [COMMAND, SHIFT, 'C'] },
-            { description: '复制为HTML', keys: [] },
-            { description: '粘贴为纯文本', keys: [COMMAND, SHIFT, 'V'] },
-            { description: '全选', keys: [COMMAND, 'A'] },
-            { description: '创建副本', keys: [COMMAND, ALT, 'D'] },
-            { description: '创建段落', keys: [COMMAND, SHIFT, 'N'] },
-            { description: '删除段落', keys: [COMMAND, SHIFT, 'D'] },
-            { description: '查找', keys: [COMMAND, 'F'] },
-            { description: '查找下一个', keys: ['F3'] },
-            { description: '查找上一个', keys: [SHIFT, 'F3'] },    
-            { description: '替换', keys: [COMMAND, 'H'] },
-            { description: '在文件夹中查找', keys: [COMMAND, SHIFT, 'F'] },
-        ],
-    },
-    {
-        category: '段落',
-        shortcuts: [
-            { description: '标题1', keys: [COMMAND, '1'] },
-            { description: '标题2', keys: [COMMAND, '2'] },
-            { description: '标题3', keys: [COMMAND, '3'] },
-            { description: '标题4', keys: [COMMAND, '4'] },
-            { description: '标题5', keys: [COMMAND, '5'] },
-            { description: '标题6', keys: [COMMAND, '6'] },
-            { description: '提升标题级别', keys: [COMMAND, ALT, '+'] },
-            { description: '降低标题级别', keys: [COMMAND, ALT, '-'] },
-            { description: '表格', keys: [COMMAND, SHIFT, 'T'] },
-            { description: '代码围栏', keys: [COMMAND, SHIFT, 'K'] },
-            { description: '引用块', keys: [COMMAND, SHIFT, 'Q'] },
-            { description: '数学块', keys: [COMMAND, 'M'] },
-            { description: 'HTML块', keys: [COMMAND, ALT, 'H'] },
-            { description: '有序列表', keys: [COMMAND, 'G'] },
-            { description: '无序列表', keys: [COMMAND, SHIFT, 'L'] },
-            { description: '任务列表', keys: [COMMAND, ALT, 'X'] },
-            { description: '宽松列表项', keys: [COMMAND, ALT, 'L'] },
-            { description: '段落', keys: [COMMAND, SHIFT, '0'] },
-            { description: '水平分割线', keys: [COMMAND, SHIFT, 'U'] },
-            { description: '前置元数据', keys: [COMMAND, ALT, 'Y'] },
-        ],
-    },
-    {
-        category: '格式',
-        shortcuts: [
-            { description: '粗体', keys: [COMMAND, 'B'] },
-            { description: '斜体', keys: [COMMAND, 'I'] },
-            { description: '下划线', keys: [COMMAND, 'U'] },
-            { description: '上标', keys: [COMMAND, SHIFT, '+'] },
-            { description: '下标', keys: [COMMAND, SHIFT, '-'] },
-            { description: '高亮', keys: [COMMAND, SHIFT, 'H'] },
-            { description: '行内代码', keys: [COMMAND, '`'] },
-            { description: '行内数学', keys: [COMMAND, SHIFT, 'M'] },
-            { description: '删除线', keys: [COMMAND, SHIFT, 'X'] },
-            { description: '超链接', keys: [COMMAND, 'L'] },
-            { description: '图片', keys: [COMMAND, ALT, 'I'] },
-            { description: '清除格式', keys: [COMMAND, SHIFT, 'R'] },
-        ],
-    },
-    {
-        category: '窗口',
-        shortcuts: [
-            { description: '最小化', keys: [COMMAND, ALT, 'M'] },
-            { description: '总是在最前', keys: [COMMAND, ALT, 'T'] },
-            { description: '放大文字', keys: [COMMAND, '+'] },
-            { description: '缩小文字', keys: [COMMAND, '-'] },
-            { description: '重置文字', keys: [COMMAND, '0'] },
-            { description: '全屏', keys: ['F11'] },
-        ],
-    },
-    {
-        category: '视图',
-        shortcuts: [
-            { description: '命令面板', keys: [COMMAND, SHIFT, 'P'] },
-            { description: '源代码模式', keys: [COMMAND, 'E'] },
-            { description: '打字机模式', keys: [COMMAND, SHIFT, 'G'] },
-            { description: '专注模式', keys: [COMMAND, SHIFT, 'J'] },
-            { description: '打开侧边栏', keys: [COMMAND, 'J'] },
-            { description: '显示大纲', keys: [COMMAND, 'K'] },
-            { description: '重新加载图片', keys: ['F5'] },
-            { description: '开发者工具', keys: [COMMAND, SHIFT, 'I'] },
-            { description: '重新加载窗口', keys: [COMMAND, 'F5'] },
-        ],
-    },
-    {
-        category: '帮助',
-        shortcuts: [
-            { description: '更新日志', keys: [] },
-            { description: '支持Rustype', keys: [] },
-            { description: '查看源码', keys: [] },
-            { description: '报告错误', keys: [] },
-            { description: '许可证', keys: [] },
-            { description: '检查更新', keys: [] },
-            { description: '键盘快捷键', keys: [] },
-            { description: '关于Rustype', keys: [] },
-        ],
-    },
-];
+function getShortcutsData(t: (key: string) => string): ShortcutItem[] {
+    return [
+        {
+            category: t('shortcutCategories.file'),
+            shortcuts: [
+                { description: t('shortcuts.newTab'), keys: [COMMAND, 'T'] },
+                { description: t('shortcuts.newWindow'), keys: [COMMAND, 'N'] },
+                { description: t('shortcuts.openFile'), keys: [COMMAND, 'O'] },
+                { description: t('shortcuts.openFolder'), keys: [COMMAND, SHIFT, 'O'] },
+                { description: t('shortcuts.save'), keys: [COMMAND, 'S'] },
+                { description: t('shortcuts.saveAs'), keys: [COMMAND, SHIFT, 'S'] },
+                { description: t('shortcuts.autoSave'), keys: [] },
+                { description: t('shortcuts.moveTo'), keys: [] },
+                { description: t('shortcuts.rename'), keys: [] },
+                { description: t('shortcuts.exportHtml'), keys: [] },
+                { description: t('shortcuts.exportPdf'), keys: [COMMAND, ALT, 'E'] },
+                { description: t('shortcuts.print'), keys: [COMMAND, 'P'] },
+                { description: t('shortcuts.settings'), keys: [COMMAND, ','] },
+                { description: t('shortcuts.closeTab'), keys: [COMMAND, 'W'] },
+                { description: t('shortcuts.closeWindow'), keys: [COMMAND, SHIFT, 'W'] },
+                { description: t('shortcuts.quit'), keys: [COMMAND, 'Q'] },
+            ],
+        },
+        {
+            category: t('shortcutCategories.edit'),
+            shortcuts: [
+                { description: t('shortcuts.undo'), keys: [COMMAND, 'Z'] },
+                { description: t('shortcuts.redo'), keys: [COMMAND, SHIFT, 'Z'] },
+                { description: t('shortcuts.cut'), keys: [COMMAND, 'X'] },
+                { description: t('shortcuts.copy'), keys: [COMMAND, 'C'] },
+                { description: t('shortcuts.paste'), keys: [COMMAND, 'V'] },
+                { description: t('shortcuts.copyAsRich'), keys: [COMMAND, SHIFT, 'C'] },
+                { description: t('shortcuts.copyAsHtml'), keys: [] },
+                { description: t('shortcuts.pasteAsPlainText'), keys: [COMMAND, SHIFT, 'V'] },
+                { description: t('shortcuts.selectAll'), keys: [COMMAND, 'A'] },
+                { description: t('shortcuts.duplicate'), keys: [COMMAND, ALT, 'D'] },
+                { description: t('shortcuts.createParagraph'), keys: [COMMAND, SHIFT, 'N'] },
+                { description: t('shortcuts.deleteParagraph'), keys: [COMMAND, SHIFT, 'D'] },
+                { description: t('shortcuts.find'), keys: [COMMAND, 'F'] },
+                { description: t('shortcuts.findNext'), keys: ['F3'] },
+                { description: t('shortcuts.findPrevious'), keys: [SHIFT, 'F3'] },
+                { description: t('shortcuts.replace'), keys: [COMMAND, 'H'] },
+                { description: t('shortcuts.findInFolder'), keys: [COMMAND, SHIFT, 'F'] },
+            ],
+        },
+        {
+            category: t('shortcutCategories.paragraph'),
+            shortcuts: [
+                { description: t('shortcuts.heading1'), keys: [COMMAND, '1'] },
+                { description: t('shortcuts.heading2'), keys: [COMMAND, '2'] },
+                { description: t('shortcuts.heading3'), keys: [COMMAND, '3'] },
+                { description: t('shortcuts.heading4'), keys: [COMMAND, '4'] },
+                { description: t('shortcuts.heading5'), keys: [COMMAND, '5'] },
+                { description: t('shortcuts.heading6'), keys: [COMMAND, '6'] },
+                { description: t('shortcuts.promoteHeading'), keys: [COMMAND, ALT, '+'] },
+                { description: t('shortcuts.demoteHeading'), keys: [COMMAND, ALT, '-'] },
+                { description: t('shortcuts.table'), keys: [COMMAND, SHIFT, 'T'] },
+                { description: t('shortcuts.codeFences'), keys: [COMMAND, SHIFT, 'K'] },
+                { description: t('shortcuts.quoteBlock'), keys: [COMMAND, SHIFT, 'Q'] },
+                { description: t('shortcuts.mathBlock'), keys: [COMMAND, 'M'] },
+                { description: t('shortcuts.htmlBlock'), keys: [COMMAND, ALT, 'H'] },
+                { description: t('shortcuts.orderedList'), keys: [COMMAND, 'G'] },
+                { description: t('shortcuts.bulletList'), keys: [COMMAND, SHIFT, 'L'] },
+                { description: t('shortcuts.taskList'), keys: [COMMAND, ALT, 'X'] },
+                { description: t('shortcuts.looseListItem'), keys: [COMMAND, ALT, 'L'] },
+                { description: t('shortcuts.paragraph'), keys: [COMMAND, SHIFT, '0'] },
+                { description: t('shortcuts.horizontalRule'), keys: [COMMAND, SHIFT, 'U'] },
+                { description: t('shortcuts.frontMatter'), keys: [COMMAND, ALT, 'Y'] },
+            ],
+        },
+        {
+            category: t('shortcutCategories.format'),
+            shortcuts: [
+                { description: t('shortcuts.bold'), keys: [COMMAND, 'B'] },
+                { description: t('shortcuts.italic'), keys: [COMMAND, 'I'] },
+                { description: t('shortcuts.underline'), keys: [COMMAND, 'U'] },
+                { description: t('shortcuts.superscript'), keys: [COMMAND, SHIFT, '+'] },
+                { description: t('shortcuts.subscript'), keys: [COMMAND, SHIFT, '-'] },
+                { description: t('shortcuts.highlight'), keys: [COMMAND, SHIFT, 'H'] },
+                { description: t('shortcuts.inlineCode'), keys: [COMMAND, '`'] },
+                { description: t('shortcuts.inlineMath'), keys: [COMMAND, SHIFT, 'M'] },
+                { description: t('shortcuts.strikethrough'), keys: [COMMAND, SHIFT, 'X'] },
+                { description: t('shortcuts.link'), keys: [COMMAND, 'L'] },
+                { description: t('shortcuts.image'), keys: [COMMAND, ALT, 'I'] },
+                { description: t('shortcuts.clearFormatting'), keys: [COMMAND, SHIFT, 'R'] },
+            ],
+        },
+        {
+            category: t('shortcutCategories.window'),
+            shortcuts: [
+                { description: t('shortcuts.minimize'), keys: [COMMAND, ALT, 'M'] },
+                { description: t('shortcuts.alwaysOnTop'), keys: [COMMAND, ALT, 'T'] },
+                { description: t('shortcuts.zoomIn'), keys: [COMMAND, '+'] },
+                { description: t('shortcuts.zoomOut'), keys: [COMMAND, '-'] },
+                { description: t('shortcuts.zoomReset'), keys: [COMMAND, '0'] },
+                { description: t('shortcuts.fullscreen'), keys: ['F11'] },
+            ],
+        },
+        {
+            category: t('shortcutCategories.view'),
+            shortcuts: [
+                { description: t('shortcuts.commandPalette'), keys: [COMMAND, SHIFT, 'P'] },
+                { description: t('shortcuts.sourceMode'), keys: [COMMAND, 'E'] },
+                { description: t('shortcuts.typewriterMode'), keys: [COMMAND, SHIFT, 'G'] },
+                { description: t('shortcuts.focusMode'), keys: [COMMAND, SHIFT, 'J'] },
+                { description: t('shortcuts.openSidebar'), keys: [COMMAND, 'J'] },
+                { description: t('shortcuts.outline'), keys: [COMMAND, 'K'] },
+                { description: t('shortcuts.reloadImages'), keys: ['F5'] },
+                { description: t('shortcuts.devTools'), keys: [COMMAND, SHIFT, 'I'] },
+                { description: t('shortcuts.reloadWindow'), keys: [COMMAND, 'F5'] },
+            ],
+        },
+        {
+            category: t('shortcutCategories.help'),
+            shortcuts: [
+                { description: t('shortcuts.releaseNotes'), keys: [] },
+                { description: t('shortcuts.support'), keys: [] },
+                { description: t('shortcuts.viewSource'), keys: [] },
+                { description: t('shortcuts.reportIssue'), keys: [] },
+                { description: t('shortcuts.license'), keys: [] },
+                { description: t('shortcuts.checkUpdate'), keys: [] },
+                { description: t('shortcuts.keyboardShortcuts'), keys: [] },
+                { description: t('shortcuts.about'), keys: [] },
+            ],
+        },
+    ];
+}
 
 export default function ShortcutsPanel({ onClose }: ShortcutsPanelProps) {
+    const { t } = useI18n();
     const [isMaximized, setIsMaximized] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const shortcutsData = getShortcutsData(t);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -174,7 +179,7 @@ export default function ShortcutsPanel({ onClose }: ShortcutsPanelProps) {
                 onDoubleClick={handleDoubleClick}
             >
                 <div className="shortcuts-header">
-                    <h2>键盘快捷键</h2>
+                    <h2>{t('dialogs.shortcuts.title')}</h2>
                     <button className="shortcuts-close-btn" onClick={onClose}>
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
                             <line x1="18" y1="6" x2="6" y2="18" />
@@ -206,7 +211,7 @@ export default function ShortcutsPanel({ onClose }: ShortcutsPanelProps) {
                 </div>
 
                 <div className="shortcuts-footer">
-                    <span className="footer-hint">双击窗口可最大化</span>
+                    <span className="footer-hint">{t('dialogs.shortcuts.dblClickHint')}</span>
                 </div>
             </div>
         </div>

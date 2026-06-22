@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useI18n } from '../utils/i18n';
 
 interface TocConfigDialogProps {
     onClose: () => void;
@@ -6,6 +7,7 @@ interface TocConfigDialogProps {
 }
 
 export default function TocConfigDialog({ onClose, onConfirm }: TocConfigDialogProps) {
+    const { t } = useI18n();
     const [tocIncludeTopHeading, setTocIncludeTopHeading] = useState(true);
     const [tocTitle, setTocTitle] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
@@ -23,7 +25,7 @@ export default function TocConfigDialog({ onClose, onConfirm }: TocConfigDialogP
         <div className="modal-overlay" onClick={onClose}>
             <div className="rename-dialog" onClick={(e) => e.stopPropagation()}>
                 <div className="rename-header">
-                    <h3>目录配置</h3>
+                    <h3>{t('dialogs.toc.title')}</h3>
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="rename-input-container">
@@ -34,26 +36,26 @@ export default function TocConfigDialog({ onClose, onConfirm }: TocConfigDialogP
                                 onChange={(e) => setTocIncludeTopHeading(e.target.checked)}
                                 className="rename-checkbox"
                             />
-                            包含顶层标题
+                            {t('dialogs.toc.includeTopHeading')}
                         </label>
                     </div>
                     <div className="rename-input-container">
-                        <label className="rename-label">目录标题：</label>
+                        <label className="rename-label">{t('dialogs.toc.tocTitle')}</label>
                         <input
                             ref={inputRef}
                             type="text"
                             className="rename-input"
                             value={tocTitle}
                             onChange={(e) => setTocTitle(e.target.value)}
-                            placeholder="留空显示默认标题: Table of Contents"
+                            placeholder={t('dialogs.toc.titlePlaceholder')}
                         />
                     </div>
                     <div className="rename-footer">
                         <button type="button" className="rename-cancel-btn" onClick={onClose}>
-                            取消
+                            {t('dialogs.toc.cancel')}
                         </button>
                         <button type="submit" className="rename-confirm-btn">
-                            确定
+                            {t('dialogs.toc.confirm')}
                         </button>
                     </div>
                 </form>

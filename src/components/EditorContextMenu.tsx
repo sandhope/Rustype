@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
+import { useI18n } from '../utils/i18n';
 import { readText as readClipboardText } from '@tauri-apps/plugin-clipboard-manager';
 import type { EditorHandle } from './Editor';
 
@@ -19,6 +20,7 @@ export default function EditorContextMenu({
     editorRef,
     onClose,
 }: EditorContextMenuProps) {
+    const { t } = useI18n();
     const savedSelectionRangeRef = useRef<Range | null>(null);
 
     useEffect(() => {
@@ -132,28 +134,28 @@ export default function EditorContextMenu({
             onMouseDown={(e) => e.stopPropagation()}
         >
             <div className="editor-context-item" onClick={() => handleAction('insert-before')}>
-                在前面插入段落
+                {t('editorContextMenu.insertBefore')}
             </div>
             <div className="editor-context-item" onClick={() => handleAction('insert-after')}>
-                在后面插入段落
+                {t('editorContextMenu.insertAfter')}
             </div>
             <div className="editor-context-divider" />
             <div
                 className={`editor-context-item${hasSelection ? '' : ' disabled'}`}
                 onClick={() => hasSelection && handleAction('cut')}
             >
-                <span>剪切</span>
+                <span>{t('editorContextMenu.cut')}</span>
                 <span className="editor-context-shortcut">Ctrl+X</span>
             </div>
             <div
                 className={`editor-context-item${hasSelection ? '' : ' disabled'}`}
                 onClick={() => hasSelection && handleAction('copy')}
             >
-                <span>复制</span>
+                <span>{t('editorContextMenu.copy')}</span>
                 <span className="editor-context-shortcut">Ctrl+C</span>
             </div>
             <div className="editor-context-item" onClick={() => handleAction('paste')}>
-                <span>粘贴</span>
+                <span>{t('editorContextMenu.paste')}</span>
                 <span className="editor-context-shortcut">Ctrl+V</span>
             </div>
             <div className="editor-context-divider" />
@@ -161,16 +163,16 @@ export default function EditorContextMenu({
                 className={`editor-context-item${hasSelection ? '' : ' disabled'}`}
                 onClick={() => hasSelection && handleAction('copy-rich')}
             >
-                复制为富文本
+                {t('editorContextMenu.copyAsRich')}
             </div>
             <div
                 className={`editor-context-item${hasSelection ? '' : ' disabled'}`}
                 onClick={() => hasSelection && handleAction('copy-html')}
             >
-                复制为 HTML
+                {t('editorContextMenu.copyAsHtml')}
             </div>
             <div className="editor-context-item" onClick={() => handleAction('paste-plain')}>
-                粘贴为纯文本
+                {t('editorContextMenu.pasteAsPlainText')}
             </div>
         </div>
     );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useI18n } from '../utils/i18n';
 
 interface TableInsertDialogProps {
     onClose: () => void;
@@ -6,6 +7,7 @@ interface TableInsertDialogProps {
 }
 
 export default function TableInsertDialog({ onClose, onConfirm }: TableInsertDialogProps) {
+    const { t } = useI18n();
     const [rows, setRows] = useState(4);
     const [columns, setColumns] = useState(3);
 
@@ -18,11 +20,11 @@ export default function TableInsertDialog({ onClose, onConfirm }: TableInsertDia
         <div className="modal-overlay" onClick={onClose}>
             <div className="table-dialog" onClick={(e) => e.stopPropagation()}>
                 <div className="dialog-header">
-                    <h3>插入表格</h3>
+                    <h3>{t('dialogs.table.title')}</h3>
                 </div>
                 <div className="dialog-body">
                     <div className="form-row">
-                        <label>行</label>
+                        <label>{t('dialogs.table.rows')}</label>
                         <div className="number-input-group">
                             <button 
                                 className="number-input-btn" 
@@ -47,7 +49,7 @@ export default function TableInsertDialog({ onClose, onConfirm }: TableInsertDia
                         </div>
                     </div>
                     <div className="form-row">
-                        <label>列</label>
+                        <label>{t('dialogs.table.columns')}</label>
                         <div className="number-input-group">
                             <button 
                                 className="number-input-btn" 
@@ -74,10 +76,10 @@ export default function TableInsertDialog({ onClose, onConfirm }: TableInsertDia
                 </div>
                 <div className="dialog-footer">
                     <button className="dialog-btn dialog-btn-secondary" onClick={onClose}>
-                        取消
+                        {t('dialogs.table.cancel')}
                     </button>
                     <button className="dialog-btn dialog-btn-primary" onClick={handleConfirm}>
-                        确定
+                        {t('dialogs.table.confirm')}
                     </button>
                 </div>
             </div>

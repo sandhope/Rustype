@@ -14,6 +14,7 @@ import MenuBar from './components/MenuBar';
 import EditorContextMenu from './components/EditorContextMenu';
 import { useAppState, useFileOperations, useMenuActions, useKeyboardShortcuts } from './hooks';
 import { getThemeById } from './utils/themes';
+import { useI18n } from './utils/i18n';
 import { updateImageConfig } from './utils/image';
 import { clearRecentlyOpened } from './utils/recentFiles';
 import { grantDirectoryAccess, readDirectoryTree, fsRename, type FileInfo } from './utils/file';
@@ -23,6 +24,7 @@ import './App.css';
 import './styles/themes.css';
 
 function App() {
+    const { t, setLanguage } = useI18n();
     const editorRef = useRef<EditorHandle>(null);
     const hasSelectionRef = useRef(false);
     const [tableDialogOpen, setTableDialogOpen] = useState(false);
@@ -271,6 +273,11 @@ function App() {
         });
     }, [settings.imageInsertAction, settings.imageFolderPath, projectTree?.path, activeTab?.file?.path]);
 
+    // Sync i18n language with settings
+    useEffect(() => {
+        setLanguage(settings.language);
+    }, [settings.language]);
+
     useEffect(() => {
         const tab = tabs.find(t => t.id === activeTabId);
         if (tab && editorRef.current) {
@@ -434,20 +441,20 @@ function App() {
                                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                                     </svg>
                                     <h2 className="welcome-folder-title">{projectTree.name}</h2>
-                                    <p className="welcome-folder-subtitle">从侧边栏选择文件开始编辑</p>
+                                    <p className="welcome-folder-subtitle">{t('welcome.selectFile')}</p>
                                 </div>
                                 <div className="welcome-actions">
                                     <button className="welcome-action-btn" onClick={handleNewFile}>
                                         <span className="welcome-action-icon">📝</span>
                                         <div className="welcome-action-text">
-                                            <span className="welcome-action-label">新建文件</span>
+                                            <span className="welcome-action-label">{t('welcome.newFile')}</span>
                                             <span className="welcome-action-shortcut">Ctrl+N</span>
                                         </div>
                                     </button>
                                     <button className="welcome-action-btn" onClick={handleOpenFile}>
                                         <span className="welcome-action-icon">📂</span>
                                         <div className="welcome-action-text">
-                                            <span className="welcome-action-label">打开文件</span>
+                                            <span className="welcome-action-label">{t('welcome.openFile')}</span>
                                             <span className="welcome-action-shortcut">Ctrl+O</span>
                                         </div>
                                     </button>
@@ -459,33 +466,33 @@ function App() {
                             <div className="welcome-content">
                                 <img src={logo} alt="Rustype" className="welcome-logo" />
                                 <h1 className="welcome-title">Rustype</h1>
-                                <p className="welcome-subtitle">高性能 Markdown 编辑器</p>
+                                <p className="welcome-subtitle">{t('welcome.subtitle')}</p>
                                 <div className="welcome-actions">
                                     <button className="welcome-action-btn" onClick={handleNewFile}>
                                         <span className="welcome-action-icon">📝</span>
                                         <div className="welcome-action-text">
-                                            <span className="welcome-action-label">新建文件</span>
+                                            <span className="welcome-action-label">{t('welcome.newFile')}</span>
                                             <span className="welcome-action-shortcut">Ctrl+T</span>
                                         </div>
                                     </button>
                                     <button className="welcome-action-btn" onClick={handleOpenFile}>
                                         <span className="welcome-action-icon">📂</span>
                                         <div className="welcome-action-text">
-                                            <span className="welcome-action-label">打开文件</span>
+                                            <span className="welcome-action-label">{t('welcome.openFile')}</span>
                                             <span className="welcome-action-shortcut">Ctrl+O</span>
                                         </div>
                                     </button>
                                     <button className="welcome-action-btn" onClick={handleOpenFolder}>
                                         <span className="welcome-action-icon">📁</span>
                                         <div className="welcome-action-text">
-                                            <span className="welcome-action-label">打开文件夹</span>
+                                            <span className="welcome-action-label">{t('welcome.openFolder')}</span>
                                             <span className="welcome-action-shortcut">Ctrl+Shift+O</span>
                                         </div>
                                     </button>
                                 </div>
                                 {recentFiles.length > 0 && (
                                     <div className="welcome-recent">
-                                        <h3 className="welcome-recent-title">最近使用</h3>
+                                        <h3 className="welcome-recent-title">{t('welcome.recentFiles')}</h3>
                                         <ul className="welcome-recent-list">
                                             {recentFiles.slice(0, 5).map((file, index) => (
                                                 <li
@@ -527,15 +534,15 @@ function App() {
             {promptData && (
                 <div className="modal-overlay" onClick={() => setPromptData(null)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
-                        <h3>文件已被外部修改</h3>
+                        <h3>{t('dialogs.reload.title')}</h3>
                         <p>{promptData.filePath}</p>
-                        <p style={{ color: '#666', fontSize: '13px' }}>是否重新加载文件？当前的未保存更改将丢失。</p>
+                        <p style={{ color: '#666', fontSize: '13px' }}>{t('dialogs.reload.message')}</p>
                         <div className="modal-actions">
                             <button
                                 className="modal-button modal-button-secondary"
                                 onClick={() => setPromptData(null)}
                             >
-                                取消
+                                {t('dialogs.reload.cancel')}
                             </button>
                             <button
                                 className="modal-button modal-button-primary"
@@ -545,7 +552,7 @@ function App() {
                                     setPromptData(null);
                                 }}
                             >
-                                重新加载
+                                {t('dialogs.reload.confirm')}
                             </button>
                         </div>
                     </div>
@@ -595,7 +602,7 @@ function App() {
                                 ));
                             } catch (error) {
                                 console.error('Failed to rename file:', error);
-                                alert('重命名失败');
+                                alert(t('messages.renameFailed'));
                             }
                         }
                         setRenameDialogOpen(false);

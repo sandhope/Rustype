@@ -23,6 +23,7 @@ import {
     type SearchMatch as FolderSearchMatch,
 } from '../utils/search';
 import { loadSidebarWidth, saveSidebarWidth, getDefaultSidebarWidth } from '../utils/uiState';
+import { useI18n } from '../utils/i18n';
 
 export type SidebarPanel = 'explorer' | 'search' | 'outline';
 
@@ -111,6 +112,7 @@ function ContextMenu({
     onReveal: () => void;
 }) {
     const menuRef = useRef<HTMLDivElement>(null);
+    const { t } = useI18n();
 
     useEffect(() => {
         if (!state.visible) return;
@@ -152,19 +154,19 @@ function ContextMenu({
             style={{ left: state.x, top: state.y }}
         >
             <div className="tree-context-item" onClick={() => { onNewFile(); onClose(); }}>
-                新建文件
+                {t('contextMenu.newFile')}
             </div>
             <div className="tree-context-item" onClick={() => { onNewDir(); onClose(); }}>
-                新建目录
+                {t('contextMenu.newFolder')}
             </div>
             <div className="tree-context-divider" />
             {!isBlankArea && (
                 <>
                     <div className="tree-context-item" onClick={() => { onCopy(); onClose(); }}>
-                        复制
+                        {t('contextMenu.copy')}
                     </div>
                     <div className="tree-context-item" onClick={() => { onCut(); onClose(); }}>
-                        剪切
+                        {t('contextMenu.cut')}
                     </div>
                 </>
             )}
@@ -172,22 +174,22 @@ function ContextMenu({
                 className={`tree-context-item${canPaste ? '' : ' disabled'}`}
                 onClick={() => { if (canPaste) { onPaste(); onClose(); } }}
             >
-                粘贴
+                {t('contextMenu.paste')}
             </div>
             <div className="tree-context-divider" />
             {!isBlankArea && (
                 <>
                     <div className="tree-context-item" onClick={() => { onRename(); onClose(); }}>
-                        重命名
+                        {t('contextMenu.rename')}
                     </div>
                     <div className="tree-context-item tree-context-danger" onClick={() => { onTrash(); onClose(); }}>
-                        移动到废纸篓
+                        {t('contextMenu.moveToTrash')}
                     </div>
                     <div className="tree-context-divider" />
                 </>
             )}
             <div className="tree-context-item" onClick={() => { onReveal(); onClose(); }}>
-                在文件夹中显示
+                {t('contextMenu.revealInFolder')}
             </div>
         </div>
     );
@@ -326,6 +328,7 @@ function FolderTreeNode({
     const [expanded, setExpanded] = useState(false);
     const [children, setChildren] = useState<FileTreeNode[]>(node.children);
     const [loading, setLoading] = useState(false);
+    const { t } = useI18n();
 
     // When refreshKey changes, reload children if the directory is expanded
     useEffect(() => {
@@ -461,7 +464,7 @@ function FolderTreeNode({
                                 style={{ paddingLeft: `${(depth + 1) * 16 + 28}px` }}
                             >
                                 <InlineCreate
-                                    placeholder="新文件名"
+                                    placeholder={t('sidebar.newFileName')}
                                     onConfirm={handleNewFile}
                                     onCancel={onActionDone}
                                 />
@@ -477,7 +480,7 @@ function FolderTreeNode({
                                     <img src={folderIcon} width="16" height="16" alt="Folder" />
                                 </span>
                                 <InlineCreate
-                                    placeholder="新目录名"
+                                    placeholder={t('sidebar.newFolderName')}
                                     onConfirm={handleNewDir}
                                     onCancel={onActionDone}
                                 />
@@ -576,6 +579,7 @@ export default function Sidebar({
     });
     const [nodeAction, setNodeAction] = useState<NodeAction>({ type: 'none' });
     const [refreshKey, setRefreshKey] = useState(0);
+    const { t } = useI18n();
 
     // -----------------------------------------------------------------------
     // Search panel state
@@ -926,9 +930,9 @@ export default function Sidebar({
         }
     }, [contextMenu.node, projectTree]);
 
-    const panelTitle = activePanel === 'explorer' ? '资源管理器'
-        : activePanel === 'search' ? '搜索'
-        : activePanel === 'outline' ? '大纲'
+    const panelTitle = activePanel === 'explorer' ? t('sidebar.explorer')
+        : activePanel === 'search' ? t('sidebar.search')
+        : activePanel === 'outline' ? t('sidebar.outline')
         : '';
 
     return (
@@ -939,7 +943,7 @@ export default function Sidebar({
                     <button
                         className={`activity-bar-icon ${activePanel === 'explorer' ? 'active' : ''}`}
                         onClick={() => handleIconClick('explorer')}
-                        title="资源管理器"
+                        title={t('sidebar.explorer')}
                     >
                         <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
                             <path d="M17.5 0h-9L7 1.5V6H2.5L1 7.5v15.07L2.5 24h12.07L16 22.57V18h4.7l1.3-1.43V4.5L17.5 0zm0 2.12l2.38 2.38H17.5V2.12zm-3 20.38h-12v-15H7v9.07L8.5 18h6v4.5zm6-6h-12v-15H16V6h4.5v10.5z"/>
@@ -948,7 +952,7 @@ export default function Sidebar({
                     <button
                         className={`activity-bar-icon ${activePanel === 'search' ? 'active' : ''}`}
                         onClick={() => handleIconClick('search')}
-                        title="搜索"
+                        title={t('sidebar.search')}
                     >
                         <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
                             <path d="M15.25 0a8.25 8.25 0 0 0-6.18 13.72L1 21.79l1.42 1.42 8.07-8.07A8.25 8.25 0 1 0 15.25.01V0zm0 14.5a6.25 6.25 0 1 1 0-12.5 6.25 6.25 0 0 1 0 12.5z"/>
@@ -957,7 +961,7 @@ export default function Sidebar({
                     <button
                         className={`activity-bar-icon ${activePanel === 'outline' ? 'active' : ''}`}
                         onClick={() => handleIconClick('outline')}
-                        title="大纲"
+                        title={t('sidebar.outline')}
                     >
                         <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
                             <path d="M3 3h8v2H3V3zm0 4h8v2H3V7zm0 4h8v2H3v-2zm0 4h8v2H3v-2zm10-12h2v2h-2V3zm0 4h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2zm4-12h4v2h-4V3zm0 4h4v2h-4V7zm0 4h4v2h-4v-2zm0 4h4v2h-4v-2z"/>
@@ -968,7 +972,7 @@ export default function Sidebar({
                     <button
                         className="activity-bar-icon"
                         onClick={onOpenSettings}
-                        title="设置"
+                        title={t('menu.file.settings')}
                     >
                         <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
                             <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/>
@@ -1004,7 +1008,7 @@ export default function Sidebar({
                                                 style={{ paddingLeft: `28px` }}
                                             >
                                                 <InlineCreate
-                                                    placeholder="新文件名"
+                                                    placeholder={t('sidebar.newFileName')}
                                                     onConfirm={async (name: string) => {
                                                         try {
                                                             // Add file name with .md suffix
@@ -1031,7 +1035,7 @@ export default function Sidebar({
                                                     <img src={folderIcon} width="16" height="16" alt="Folder" />
                                                 </span>
                                                 <InlineCreate
-                                                    placeholder="新目录名"
+                                                    placeholder={t('sidebar.newFolderName')}
                                                     onConfirm={async (name: string) => {
                                                         try {
                                                             const newPath = await join(projectTree.path, name);
@@ -1065,8 +1069,8 @@ export default function Sidebar({
                                         ) : (
                                             <div className="sidebar-empty">
                                                 <div className="sidebar-empty-icon">📋</div>
-                                                <div className="sidebar-empty-text">空项目</div>
-                                                <button className="sidebar-empty-action" onClick={handleContextNewFile}>新建文件</button>
+                                                <div className="sidebar-empty-text">{t('sidebar.emptyProject')}</div>
+                                                <button className="sidebar-empty-action" onClick={handleContextNewFile}>{t('sidebar.newFile')}</button>
                                             </div>
                                         )}
                                     </div>
@@ -1074,7 +1078,7 @@ export default function Sidebar({
                             ) : (
                                 <div className="sidebar-empty">
                                     <div className="sidebar-empty-icon">📂</div>
-                                    <button className="sidebar-empty-action" onClick={onOpenFolder}>打开文件夹</button>
+                                    <button className="sidebar-empty-action" onClick={onOpenFolder}>{t('sidebar.openFolder')}</button>
                                 </div>
                             )
                         )}
@@ -1088,7 +1092,7 @@ export default function Sidebar({
                                         className="search-input"
                                         type="text"
                                         value={keyword}
-                                        placeholder={projectTree ? '在文件夹中搜索…' : '请先打开文件夹…'}
+                                        placeholder={projectTree ? t('sidebar.searchPlaceholder') : t('sidebar.searchPlaceholderNoFolder')}
                                         onChange={(e) => setKeyword(e.target.value)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Escape') setKeyword('');
@@ -1097,21 +1101,21 @@ export default function Sidebar({
                                     <div className="search-controls">
                                         <span
                                             className={`search-toggle ${isCaseSensitive ? 'active' : ''}`}
-                                            title="大小写敏感"
+                                            title={t('findReplace.caseSensitive')}
                                             onClick={() => setIsCaseSensitive((v) => !v)}
                                         >
                                             Aa
                                         </span>
                                         <span
                                             className={`search-toggle ${isWholeWord ? 'active' : ''}`}
-                                            title="全字匹配"
+                                            title={t('findReplace.wholeWord')}
                                             onClick={() => setIsWholeWord((v) => !v)}
                                         >
                                             W
                                         </span>
                                         <span
                                             className={`search-toggle ${isRegexp ? 'active' : ''}`}
-                                            title="使用正则表达式"
+                                            title={t('findReplace.regex')}
                                             onClick={() => setIsRegexp((v) => !v)}
                                         >
                                             .*
@@ -1123,31 +1127,31 @@ export default function Sidebar({
                                 {!projectTree && (
                                     <div className="search-empty">
                                         <div className="sidebar-empty-icon">🔍</div>
-                                        <div className="sidebar-empty-text">请先打开一个文件夹</div>
+                                        <div className="sidebar-empty-text">{t('sidebar.openFolderFirst')}</div>
                                         <button
                                             className="sidebar-empty-action"
                                             onClick={handleRequestOpenFolder}
                                         >
-                                            打开文件夹
+                                            {t('sidebar.openFolder')}
                                         </button>
                                     </div>
                                 )}
 
                                 {projectTree && keyword && isSearching && (
-                                    <div className="search-status">正在搜索…</div>
+                                    <div className="search-status">{t('sidebar.searching')}</div>
                                 )}
 
                                 {projectTree && keyword && !isSearching && searchResults.length === 0 && (
                                     <div className="search-empty">
                                         <div className="sidebar-empty-icon">🔍</div>
-                                        <div className="sidebar-empty-text">没有找到 "{keyword}"</div>
+                                        <div className="sidebar-empty-text">{t('sidebar.noResults', { keyword })}</div>
                                     </div>
                                 )}
 
                                 {/* Search result info */}
                                 {projectTree && searchResults.length > 0 && (
                                     <div className="search-result-info">
-                                        在 {searchResults.length} 个文件中找到 {totalMatches} 处匹配
+                                        {t('sidebar.matchCount', { files: searchResults.length, matches: totalMatches })}
                                     </div>
                                 )}
 
@@ -1194,7 +1198,7 @@ export default function Sidebar({
                                                         })}
                                                         {matchCount > 20 && (
                                                             <div className="search-more-hint">
-                                                                还有 {matchCount - 20} 处匹配…
+                                                                {t('sidebar.moreMatches', { count: matchCount - 20 })}
                                                             </div>
                                                         )}
                                                     </div>
@@ -1209,7 +1213,7 @@ export default function Sidebar({
                         {activePanel === 'outline' && (
                             <div className="sidebar-section">
                                 {tocItems.length === 0 ? (
-                                    <div className="sidebar-empty">文档中没有标题</div>
+                                    <div className="sidebar-empty">{t('sidebar.noHeadings')}</div>
                                 ) : (
                                     <ul className="outline-list">
                                         {tocItems.map((item, index) => (
@@ -1218,7 +1222,7 @@ export default function Sidebar({
                                                 className={`outline-item outline-level-${item.lvl}`}
                                                 onClick={() => onTocItemClick(item)}
                                             >
-                                                {item.content || '(空)'}
+                                                {item.content || t('sidebar.empty')}
                                             </li>
                                         ))}
                                     </ul>
@@ -1229,7 +1233,7 @@ export default function Sidebar({
                     <div
                         className="sidebar-resizer"
                         onMouseDown={handleResizeStart}
-                        title="拖拽调整宽度"
+                        title={t('sidebar.dragResize')}
                     />
                 </div>
             )}

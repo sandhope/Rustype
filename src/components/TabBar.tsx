@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useI18n } from '../utils/i18n';
 import { type FileInfo } from '../utils/file';
 
 export interface Tab {
@@ -21,6 +22,7 @@ interface TabBarProps {
 }
 
 export default function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onTabReorder, onNewFile }: TabBarProps) {
+    const { t } = useI18n();
     const [dragIndex, setDragIndex] = useState<number | null>(null);
 
     const handleDragStart = (index: number) => {
@@ -57,7 +59,7 @@ export default function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onT
                         onDragOver={(e) => handleDragOver(e, index)}
                         onDragEnd={handleDragEnd}
                         onClick={() => onTabSelect(tab.id)}
-                        title={tab.externallyModified ? '文件已被外部程序修改' : tab.file?.path || 'Untitled'}
+                        title={tab.externallyModified ? t('tab.externallyModified') : tab.file?.path || t('tab.untitled')}
                     >
                         <span className="tab-name">
                             {tab.file?.name || 'Untitled'}

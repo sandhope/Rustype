@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useI18n } from '../utils/i18n';
 
 interface SourceModeProps {
     content: string;
@@ -6,6 +7,7 @@ interface SourceModeProps {
 }
 
 export default function SourceMode({ content, onChange }: SourceModeProps) {
+    const { t } = useI18n();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
@@ -46,7 +48,7 @@ export default function SourceMode({ content, onChange }: SourceModeProps) {
                 defaultValue={content}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
-                placeholder="输入 Markdown..."
+                placeholder={t('sourceMode.placeholder')}
                 spellCheck={false}
             />
         </div>
