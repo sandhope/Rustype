@@ -2,60 +2,29 @@
  * 应用常量文本
  */
 
-export const WELCOME_MARKDOWN = `# 欢迎使用 Rustype
+import { getLanguage } from '../utils/i18n';
+import { WELCOME_MARKDOWN_ZH_CN } from './welcome_zh_CN';
+import { WELCOME_MARKDOWN_EN } from './welcome_en';
+import { WELCOME_MARKDOWN_ZH_TW } from './welcome_zh_TW';
+import { WELCOME_MARKDOWN_JA } from './welcome_ja';
+import { WELCOME_MARKDOWN_KO } from './welcome_ko';
+import { WELCOME_MARKDOWN_FR } from './welcome_fr';
+import { WELCOME_MARKDOWN_DE } from './welcome_de';
+import { WELCOME_MARKDOWN_ES } from './welcome_es';
+import { WELCOME_MARKDOWN_PT } from './welcome_pt';
 
-Rustype 是一款**高性能 Markdown 编辑器**，基于 [muya](https://github.com/marktext/muya) 编辑器引擎。
+const WELCOME_MAP: Record<string, string> = {
+    'zh-CN': WELCOME_MARKDOWN_ZH_CN,
+    'zh-TW': WELCOME_MARKDOWN_ZH_TW,
+    'en': WELCOME_MARKDOWN_EN,
+    'ja': WELCOME_MARKDOWN_JA,
+    'ko': WELCOME_MARKDOWN_KO,
+    'fr': WELCOME_MARKDOWN_FR,
+    'de': WELCOME_MARKDOWN_DE,
+    'es': WELCOME_MARKDOWN_ES,
+    'pt': WELCOME_MARKDOWN_PT,
+};
 
-## 功能特性
-
-- 所见即所得 (WYSIWYG) 编辑
-- 支持 **GFM** (GitHub Flavored Markdown)
-- 支持数学公式 $\\sqrt{3x-1}+(1+x)^2$
-- 支持代码块
-
-\`\`\`javascript
-function greet(name) {
-  console.log(\`Hello, \\${name}!\`);
+export function getWelcomeMarkdown(): string {
+    return WELCOME_MAP[getLanguage()] ?? WELCOME_MARKDOWN_EN;
 }
-\`\`\`
-
-- 支持表格
-
-| 快捷键 | 功能 |
-| --- | --- |
-| Ctrl+B | **粗体** |
-| Ctrl+I | *斜体* |
-| Ctrl+Z | 撤销 |
-
-- 支持脚注[^1]
-
-- - -
-
-> 提示：你可以直接在上方开始编辑！
-
-[^1]: 这是一个脚注示例。
-
-`;
-
-/**
- * 应用名称
- */
-export const APP_NAME = 'Rustype';
-
-/**
- * 应用描述
- */
-export const APP_DESCRIPTION = '高性能 Markdown 编辑器';
-
-/**
- * GitHub 链接
- */
-export const GITHUB_URL = 'https://github.com/sandhope/Rustype';
-export const GITHUB_ISSUES_URL = 'https://github.com/sandhope/Rustype/issues';
-export const GITHUB_RELEASES_URL = 'https://github.com/sandhope/Rustype/releases';
-export const LICENSE_URL = 'https://github.com/sandhope/Rustype/blob/main/LICENSE';
-
-/**
- * 赞助链接
- */
-export const OPEN_COLLECTIVE_URL = 'https://opencollective.com/sandhope';

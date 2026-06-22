@@ -7,12 +7,12 @@ import { loadSession, saveSession } from '../utils/session';
 import { readFileContent, getFileStat, grantDirectoryAccess, grantFileAccess, readDirectoryTree, getDefaultLineEnding, saveMarkdownFile, type FileInfo, type FileTreeNode } from '../utils/file';
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
-import { WELCOME_MARKDOWN } from '../constants';
+import { getWelcomeMarkdown } from '../constants';
 
 let tabIdCounter = 0;
 export const getNextTabId = () => `tab-${++tabIdCounter}`;
 
-function createNewTab(file: FileInfo | null = null, content: string = WELCOME_MARKDOWN, lineEnding: 'crlf' | 'lf' = getDefaultLineEnding()): Tab {
+function createNewTab(file: FileInfo | null = null, content: string = getWelcomeMarkdown(), lineEnding: 'crlf' | 'lf' = getDefaultLineEnding()): Tab {
     return {
         id: getNextTabId(),
         file,
@@ -177,7 +177,7 @@ export function useAppState() {
                             id: tabId,
                             file: null,
                             content: savedTab.content,
-                            dirty: savedTab.content !== WELCOME_MARKDOWN,
+                            dirty: savedTab.content !== getWelcomeMarkdown(),
                             externallyModified: false,
                             lineEnding: savedTab.lineEnding ?? 'lf',
                         });
