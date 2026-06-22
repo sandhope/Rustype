@@ -1,8 +1,7 @@
 import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import type { FileTreeNode } from '../utils/file';
 import { watch } from '@tauri-apps/plugin-fs';
-import folderIcon from '../assets/folder.svg';
-import folderOpenIcon from '../assets/folder_open.svg';
+
 
 import {
     loadChildren,
@@ -433,9 +432,14 @@ function FolderTreeNode({
                     </span>
                     <span className="tree-folder-icon">
                         {expanded ? (
-                            <img src={folderOpenIcon} width="16" height="16" alt="Open Folder" />
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4.42782 7.2487C4.43495 6.97194 4.65009 6.75 4.91441 6.75H13.5293C13.7935 6.75 14.007 6.97194 13.9998 7.2487C13.9628 8.6885 13.7533 12.75 12.5721 12.75H3.375C4.55631 12.75 4.3907 8.6885 4.42782 7.2487Z" fill="currentColor" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+                                <path d="M5.19598 12.625H3.66515C3.42618 12.625 3.22289 12.4453 3.18626 12.2017L1.94333 3.93602C1.89776 3.63295 2.12496 3.35938 2.42223 3.35938H5.78585C6.11241 3.35938 6.41702 3.52903 6.59618 3.81071L6.94517 4.35938H9.92811C10.4007 4.35938 10.8044 4.71102 10.8836 5.1917L11.1251 6.65624" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
                         ) : (
-                            <img src={folderIcon} width="16" height="16" alt="Folder" />
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12.8 13C13.1183 13 13.4235 12.8761 13.6486 12.6554C13.8735 12.4349 14 12.1356 14 11.8236V5.94118C14 5.62916 13.8735 5.32992 13.6486 5.10929C13.4235 4.88866 13.1183 4.76471 12.8 4.76471H8.06C7.8593 4.76664 7.66133 4.71919 7.48418 4.6267C7.30703 4.53421 7.15637 4.39964 7.046 4.2353L6.56 3.52941C6.45073 3.36675 6.30199 3.23322 6.1271 3.14082C5.95221 3.04842 5.75666 3.00004 5.558 3H3.2C2.88174 3 2.57651 3.12395 2.35148 3.34458C2.12643 3.56521 2 3.86445 2 4.17647V11.8236C2 12.1356 2.12643 12.4349 2.35148 12.6554C2.57651 12.8761 2.88174 13 3.2 13H12.8Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
                         )}
                     </span>
                     {isRenaming ? (
@@ -477,7 +481,9 @@ function FolderTreeNode({
                             >
                                 <span className="tree-arrow" />
                                 <span className="tree-folder-icon">
-                                    <img src={folderIcon} width="16" height="16" alt="Folder" />
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12.8 13C13.1183 13 13.4235 12.8761 13.6486 12.6554C13.8735 12.4349 14 12.1356 14 11.8236V5.94118C14 5.62916 13.8735 5.32992 13.6486 5.10929C13.4235 4.88866 13.1183 4.76471 12.8 4.76471H8.06C7.8593 4.76664 7.66133 4.71919 7.48418 4.6267C7.30703 4.53421 7.15637 4.39964 7.046 4.2353L6.56 3.52941C6.45073 3.36675 6.30199 3.23322 6.1271 3.14082C5.95221 3.04842 5.75666 3.00004 5.558 3H3.2C2.88174 3 2.57651 3.12395 2.35148 3.34458C2.12643 3.56521 2 3.86445 2 4.17647V11.8236C2 12.1356 2.12643 12.4349 2.35148 12.6554C2.57651 12.8761 2.88174 13 3.2 13H12.8Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
                                 </span>
                                 <InlineCreate
                                     placeholder={t('sidebar.newFolderName')}
@@ -1032,7 +1038,9 @@ function Sidebar({
                                             >
                                                 <span className="tree-arrow" />
                                                 <span className="tree-folder-icon">
-                                                    <img src={folderIcon} width="16" height="16" alt="Folder" />
+                                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M12.8 13C13.1183 13 13.4235 12.8761 13.6486 12.6554C13.8735 12.4349 14 12.1356 14 11.8236V5.94118C14 5.62916 13.8735 5.32992 13.6486 5.10929C13.4235 4.88866 13.1183 4.76471 12.8 4.76471H8.06C7.8593 4.76664 7.66133 4.71919 7.48418 4.6267C7.30703 4.53421 7.15637 4.39964 7.046 4.2353L6.56 3.52941C6.45073 3.36675 6.30199 3.23322 6.1271 3.14082C5.95221 3.04842 5.75666 3.00004 5.558 3H3.2C2.88174 3 2.57651 3.12395 2.35148 3.34458C2.12643 3.56521 2 3.86445 2 4.17647V11.8236C2 12.1356 2.12643 12.4349 2.35148 12.6554C2.57651 12.8761 2.88174 13 3.2 13H12.8Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                    </svg>
                                                 </span>
                                                 <InlineCreate
                                                     placeholder={t('sidebar.newFolderName')}

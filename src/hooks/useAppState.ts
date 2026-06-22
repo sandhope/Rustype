@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { dirname } from '@tauri-apps/api/path';
 import { getRecentFiles, getRecentFolders } from '../utils/recentFiles';
 import { loadSettings, type AppSettings, DEFAULT_SETTINGS } from '../utils/settings';
@@ -110,6 +110,10 @@ export function useAppState() {
     const [autoSave, setAutoSave] = useState(false);
 
     const isRestoringRef = useRef(false);
+    const tabsRef = useRef<Tab[]>(tabs);
+    tabsRef.current = tabs;
+    const activeTabIdRef = useRef<string>(activeTabId);
+    activeTabIdRef.current = activeTabId;
 
     useEffect(() => {
         loadSettings().then((loaded) => {
@@ -220,17 +224,7 @@ export function useAppState() {
                 activeTabId,
             });
         }
-    }, [projectTree?.path, activeTabId]);
-
-    useEffect(() => {
-        if (!isRestoringRef.current) {
-            saveSession({
-                folderPath: projectTree?.path ?? null,
-                tabs: tabs.map(t => ({ file: t.file, content: t.content, lastModified: t.lastModified, lineEnding: t.lineEnding })),
-                activeTabId,
-            });
-        }
-    }, [tabs]);
+    }, [projectTree?.path, activeTabId, tabs]);
 
     const handleNewFile = useCallback(() => {
         const newTab = createNewTab();
@@ -240,13 +234,13 @@ export function useAppState() {
     }, []);
 
     const handleTabSelect = useCallback((tabId: string) => {
-        const tab = tabs.find(t => t.id === tabId);
+        const tab = tabsRef.current.find(t => t.id === tabId);
         if (tab && tab.externallyModified) {
             setPromptData({ tabId, filePath: tab.file!.path });
         } else {
             setActiveTabId(tabId);
         }
-    }, [tabs]);
+    }, []);
 
     const handleTabClose = useCallback((tabId: string) => {
         setTabs(prevTabs => {
@@ -295,18 +289,24 @@ export function useAppState() {
 
     useEffect(() => {
         if (!autoSave) return;
-        
+
         const currentTab = tabs.find(t => t.id === activeTabId);
         if (!currentTab || !currentTab.file || !currentTab.dirty) return;
 
         const debounce = setTimeout(async () => {
             try {
-                const markdown = currentTab.content;
-                const lineEnding = currentTab.lineEnding;
-                await saveMarkdownFile(markdown, currentTab.file.path, lineEnding);
-                const stat = await getFileStat(currentTab.file.path);
+                const latestTabs = tabsRef.current;
+                const latestActiveTabId = activeTabIdRef.current;
+                const tab = latestTabs.find(t => t.id === latestActiveTabId);
+                
+                if (!tab || !tab.file || !tab.dirty) return;
+                
+                const markdown = tab.content;
+                const lineEnding = tab.lineEnding;
+                await saveMarkdownFile(markdown, tab.file.path, lineEnding);
+                const stat = await getFileStat(tab.file.path);
                 setTabs(prev => prev.map(t =>
-                    t.id === activeTabId ? { ...t, content: markdown, dirty: false, lastModified: stat?.mtime, externallyModified: false } : t
+                    t.id === latestActiveTabId ? { ...t, content: markdown, dirty: false, lastModified: stat?.mtime, externallyModified: false } : t
                 ));
             } catch (error) {
                 console.error('Auto-save failed:', error);
@@ -314,7 +314,7 @@ export function useAppState() {
         }, settings.autoSaveDelay);
 
         return () => clearTimeout(debounce);
-    }, [autoSave, activeTabId, tabs, settings.autoSaveDelay]);
+    }, [autoSave, activeTabId, settings.autoSaveDelay]);
 
     const handleSourceChange = useCallback((content: string) => {
         setTabs(prev => prev.map(t =>
@@ -322,9 +322,9 @@ export function useAppState() {
         ));
     }, [activeTabId]);
 
-    const activeTab = tabs.find(t => t.id === activeTabId) || null;
-    const hasOpenFile = tabs.length > 0 && activeTab !== null;
-    const currentLineEnding = activeTab?.lineEnding ?? 'lf';
+    const activeTab = useMemo(() => tabs.find(t => t.id === activeTabId) || null, [tabs, activeTabId]);
+    const hasOpenFile = useMemo(() => tabs.length > 0 && activeTab !== null, [tabs, activeTab]);
+    const currentLineEnding = useMemo(() => activeTab?.lineEnding ?? 'lf', [activeTab]);
 
     const setCurrentLineEnding = useCallback((lineEnding: 'crlf' | 'lf') => {
         setTabs(prev => prev.map(t =>

@@ -254,12 +254,8 @@ function App() {
             tabSize: settings.tabSize,
             listIndentation: settings.listIndentation,
         }, true);
-        // Set code font size CSS variable
         document.documentElement.style.setProperty('--code-font-size', `${settings.codeFontSize}px`);
-    }, [settings.preferLooseListItem, settings.hideQuickInsertHint, settings.hideLinkPopup,
-        settings.autoPairBracket, settings.autoPairMarkdownSyntax, settings.autoPairQuote,
-        settings.bulletListMarker, settings.orderListDelimiter, settings.tabSize,
-        settings.listIndentation, settings.codeFontSize]);
+    }, [settings]);
 
     // Keep image handler config in sync with settings and active file
     useEffect(() => {
