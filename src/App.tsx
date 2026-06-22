@@ -84,6 +84,10 @@ function App() {
         handleTabSelect,
         handleTabClose,
         handleTabReorder,
+        handleCloseOtherTabs,
+        handleCloseTabsToRight,
+        handleCloseAllTabs,
+        handleCloseSavedTabs,
         handleChange,
         handleSourceChange,
         activeTab,
@@ -301,6 +305,7 @@ function App() {
 
     const handleEditorContextMenu = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         setEditorCtxMenu({
             visible: true,
             x: e.clientX,
@@ -356,7 +361,7 @@ function App() {
     ].filter(Boolean).join(' ');
 
     return (
-        <div className={appRootClass} onClick={() => setActiveMenu(null)}>
+        <div className={appRootClass} onClick={() => setActiveMenu(null)} onContextMenu={(e) => e.preventDefault()}>
             <MenuBar
                 activeMenu={activeMenu}
                 openSubmenu={openSubmenu}
@@ -405,6 +410,10 @@ function App() {
                             onTabClose={handleTabClose}
                             onTabReorder={handleTabReorder}
                             onNewFile={handleNewFile}
+                            onCloseOtherTabs={handleCloseOtherTabs}
+                            onCloseTabsToRight={handleCloseTabsToRight}
+                            onCloseSavedTabs={handleCloseSavedTabs}
+                            onCloseAllTabs={handleCloseAllTabs}
                         />
                     )}
                     {hasOpenFile ? (

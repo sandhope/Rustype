@@ -95,6 +95,46 @@
   background-color: var(--float-border-color);
 }
 
+/* ==================== Tab right-click menu ==================== */
+.tab-context-menu {
+  position: fixed;
+  z-index: 10000;
+  min-width: 180px;
+  padding: 4px 0;
+  background-color: var(--float-bg-color);
+  border: 1px solid var(--float-border-color);
+  border-radius: 6px;
+  box-shadow: var(--float-shadow);
+  font-size: 13px;
+  color: var(--app-text-color);
+  user-select: none;
+}
+
+.tab-context-item {
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.tab-context-item:hover {
+  background-color: var(--float-hover-color);
+}
+
+.tab-context-item.disabled {
+  color: var(--app-text-secondary);
+  cursor: default;
+}
+
+.tab-context-item.disabled:hover {
+  background-color: transparent;
+}
+
+.tab-context-divider {
+  height: 1px;
+  margin: 4px 8px;
+  background-color: var(--float-border-color);
+}
+
 .tree-rename-input {
   flex: 1;
   min-width: 0;

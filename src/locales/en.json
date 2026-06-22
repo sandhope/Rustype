@@ -320,6 +320,12 @@
     "untitled": "Untitled",
     "externallyModified": "File modified externally"
   },
+  "tabContextMenu": {
+    "closeOther": "Close Other Tabs",
+    "closeRight": "Close Tabs to the Right",
+    "closeSaved": "Close Saved Tabs",
+    "closeAll": "Close All Tabs"
+  },
   "sourceMode": {
     "placeholder": "Type Markdown..."
   },

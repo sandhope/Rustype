@@ -320,6 +320,12 @@
     "untitled": "Untitled",
     "externallyModified": "文件已被外部程序修改"
   },
+  "tabContextMenu": {
+    "closeOther": "关闭其他标签页",
+    "closeRight": "关闭右侧标签页",
+    "closeSaved": "关闭已保存的标签",
+    "closeAll": "关闭全部标签页"
+  },
   "sourceMode": {
     "placeholder": "输入 Markdown..."
   },

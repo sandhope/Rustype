@@ -79,6 +79,10 @@ export interface UseAppStateReturn {
     handleTabSelect: (tabId: string) => void;
     handleTabClose: (tabId: string) => void;
     handleTabReorder: (fromIndex: number, toIndex: number) => void;
+    handleCloseOtherTabs: (keepTabId: string) => void;
+    handleCloseTabsToRight: (currentTabId: string) => void;
+    handleCloseAllTabs: () => void;
+    handleCloseSavedTabs: () => void;
     handleChange: (content: string) => void;
     handleSourceChange: (content: string) => void;
     activeTab: Tab | null;
@@ -281,6 +285,67 @@ export function useAppState() {
         });
     }, []);
 
+    const handleCloseOtherTabs = useCallback((keepTabId: string) => {
+        setTabs(prevTabs => {
+            const keepTab = prevTabs.find(t => t.id === keepTabId);
+            if (!keepTab) return prevTabs;
+
+            const dirtyTabs = prevTabs.filter(t => t.id !== keepTabId && t.dirty);
+            if (dirtyTabs.length > 0) {
+                const confirmed = window.confirm(t('messages.unsavedChanges', { name: `${dirtyTabs.length} ${t('tab.untitled')}` }));
+                if (!confirmed) return prevTabs;
+            }
+
+            setActiveTabId(keepTabId);
+            return [keepTab];
+        });
+    }, []);
+
+    const handleCloseTabsToRight = useCallback((currentTabId: string) => {
+        setTabs(prevTabs => {
+            const currentIndex = prevTabs.findIndex(t => t.id === currentTabId);
+            if (currentIndex === -1 || currentIndex === prevTabs.length - 1) return prevTabs;
+
+            const tabsToClose = prevTabs.slice(currentIndex + 1);
+            const dirtyTabs = tabsToClose.filter(t => t.dirty);
+            if (dirtyTabs.length > 0) {
+                const confirmed = window.confirm(t('messages.unsavedChanges', { name: `${dirtyTabs.length} ${t('tab.untitled')}` }));
+                if (!confirmed) return prevTabs;
+            }
+
+            return prevTabs.slice(0, currentIndex + 1);
+        });
+    }, []);
+
+    const handleCloseAllTabs = useCallback(() => {
+        setTabs(prevTabs => {
+            const dirtyTabs = prevTabs.filter(t => t.dirty);
+            if (dirtyTabs.length > 0) {
+                const confirmed = window.confirm(t('messages.unsavedChanges', { name: `${dirtyTabs.length} ${t('tab.untitled')}` }));
+                if (!confirmed) return prevTabs;
+            }
+
+            setActiveTabId('');
+            return [];
+        });
+    }, []);
+
+    const handleCloseSavedTabs = useCallback(() => {
+        setTabs(prevTabs => {
+            const savedTabs = prevTabs.filter(t => !t.dirty);
+            if (savedTabs.length === 0) return prevTabs;
+
+            const newTabs = prevTabs.filter(t => t.dirty);
+            if (newTabs.length === 0) {
+                setActiveTabId('');
+            } else if (!newTabs.find(t => t.id === activeTabId)) {
+                setActiveTabId(newTabs[0].id);
+            }
+
+            return newTabs;
+        });
+    }, [activeTabId]);
+
     const handleChange = useCallback((content: string) => {
         setTabs(prev => prev.map(t =>
             t.id === activeTabId ? { ...t, content, dirty: true } : t
@@ -381,6 +446,10 @@ export function useAppState() {
         handleTabSelect,
         handleTabClose,
         handleTabReorder,
+        handleCloseOtherTabs,
+        handleCloseTabsToRight,
+        handleCloseAllTabs,
+        handleCloseSavedTabs,
         handleChange,
         handleSourceChange,
         activeTab,

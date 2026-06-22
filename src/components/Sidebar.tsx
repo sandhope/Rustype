@@ -997,6 +997,7 @@ function Sidebar({
                     <div className="sidebar-content" onContextMenu={(e) => {
                         // Intercept all sidebar-content right-clicks, preventing system default menu
                         e.preventDefault();
+                        e.stopPropagation();
                         // Show empty area menu if right-click is not on a node element
                         if (!(e.target as HTMLElement).closest('.tree-folder, .tree-file')) {
                             setContextMenu({ visible: true, x: e.clientX, y: e.clientY, node: null, rootPath: projectTree?.path ?? null });
