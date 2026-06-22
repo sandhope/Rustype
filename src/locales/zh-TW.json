@@ -340,7 +340,11 @@
     "error": "錯誤",
     "success": "成功",
     "info": "資訊",
-    "renameFailed": "重新命名失敗"
+    "renameFailed": "重新命名失敗",
+    "unsavedChanges": "{name} 有未儲存的變更，確定要關閉嗎？",
+    "cannotReadFile": "無法讀取檔案",
+    "cannotReloadFile": "無法重新載入檔案",
+    "fileNotExistOrUnreadable": "檔案已不存在或無法讀取"
   },
   "welcome": {
     "subtitle": "高效能 Markdown 編輯器",

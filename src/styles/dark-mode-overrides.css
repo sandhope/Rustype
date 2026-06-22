@@ -91,3 +91,25 @@
 [data-theme-mode="dark"] .window-control-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+/* Search panel dark mode overrides */
+[data-theme-mode="dark"] .search-toggle {
+  border-color: var(--float-border-color);
+}
+
+[data-theme-mode="dark"] .search-toggle:hover {
+  background-color: var(--float-hover-color);
+}
+
+[data-theme-mode="dark"] .search-match-line:hover {
+  background-color: var(--float-hover-color);
+}
+
+[data-theme-mode="dark"] .search-match-line-num {
+  color: var(--app-text-secondary);
+}
+
+[data-theme-mode="dark"] .search-match-count {
+  background-color: var(--float-hover-color);
+  color: var(--editor-color-50);
+}

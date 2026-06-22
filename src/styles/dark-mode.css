@@ -1,0 +1,301 @@
+/* ============ Dark Mode ============ */
+/* Dark mode component overrides (works with any dark theme) */
+html[data-theme-mode="dark"] {
+    color: var(--app-text-color);
+    background-color: var(--app-bg-color);
+  }
+html[data-theme-mode="dark"] .app-header {
+    background-color: var(--app-header-bg);
+    border-bottom-color: var(--app-header-border);
+  }
+html[data-theme-mode="dark"] .menu-trigger {
+    color: var(--menu-trigger-color);
+  }
+html[data-theme-mode="dark"] .menu-trigger:hover {
+    background-color: var(--menu-trigger-hover-bg);
+  }
+html[data-theme-mode="dark"] .menu-trigger.active {
+    background-color: var(--menu-trigger-active-bg);
+  }
+html[data-theme-mode="dark"] .menu-dropdown-content {
+    background: var(--menu-dropdown-bg);
+    border-color: var(--menu-dropdown-border);
+    box-shadow: 0 4px 12px var(--menu-dropdown-shadow);
+  }
+html[data-theme-mode="dark"] .menu-item {
+    color: var(--menu-item-color);
+  }
+html[data-theme-mode="dark"] .menu-item:hover {
+    background-color: var(--menu-item-hover-bg);
+  }
+html[data-theme-mode="dark"] .menu-item.danger {
+    color: var(--menu-danger-color);
+  }
+html[data-theme-mode="dark"] .menu-item.danger:hover {
+    background-color: var(--menu-danger-hover-bg);
+  }
+html[data-theme-mode="dark"] .menu-item-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+html[data-theme-mode="dark"] .menu-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+html[data-theme-mode="dark"] .menu-item-shortcut {
+    color: var(--menu-item-shortcut-color);
+  }
+html[data-theme-mode="dark"] .menu-divider {
+    background-color: var(--menu-divider-color);
+  }
+html[data-theme-mode="dark"] .file-info .file-name {
+    color: var(--file-name-color);
+  }
+html[data-theme-mode="dark"] .dirty-indicator {
+    color: var(--tab-dirty-color);
+  }
+html[data-theme-mode="dark"] .app-main {
+    background-color: var(--app-main-bg);
+  }
+html[data-theme-mode="dark"] .tab-bar {
+    background-color: var(--tab-bar-bg);
+    border-bottom-color: var(--tab-bar-border);
+  }
+html[data-theme-mode="dark"] .tab {
+    background-color: var(--tab-bg);
+    border-right-color: var(--app-header-border);
+    color: var(--tab-text-color);
+  }
+html[data-theme-mode="dark"] .tab:hover {
+    background-color: var(--tab-bg-hover);
+  }
+html[data-theme-mode="dark"] .tab.active {
+    background-color: var(--app-tab-active-bg);
+    color: var(--tab-text-active-color);
+  }
+html[data-theme-mode="dark"] .tab-close {
+    color: var(--tab-close-color);
+  }
+html[data-theme-mode="dark"] .tab-close:hover {
+    background-color: var(--tab-bg-hover);
+    color: var(--app-text-color);
+  }
+html[data-theme-mode="dark"] .sidebar-wrapper {
+    background-color: var(--app-sidebar-bg);
+  }
+html[data-theme-mode="dark"] .activity-bar {
+    background-color: var(--activity-bar-bg);
+    border-right-color: var(--activity-bar-border);
+  }
+html[data-theme-mode="dark"] .activity-bar-icon {
+    color: var(--activity-bar-icon-color);
+  }
+html[data-theme-mode="dark"] .activity-bar-icon:hover {
+    color: var(--activity-bar-icon-hover-color);
+  }
+html[data-theme-mode="dark"] .activity-bar-icon.active {
+    color: var(--activity-bar-icon-active-color);
+  }
+html[data-theme-mode="dark"] .activity-bar-icon.active::before {
+    background-color: var(--activity-bar-icon-active-color);
+  }
+html[data-theme-mode="dark"] .activity-bar-bottom {
+    border-top-color: var(--activity-bar-bottom-border);
+  }
+html[data-theme-mode="dark"] .sidebar {
+    background-color: var(--app-sidebar-bg);
+    border-right-color: var(--app-sidebar-border);
+  }
+html[data-theme-mode="dark"] .sidebar-header {
+    border-bottom-color: var(--app-sidebar-border);
+  }
+html[data-theme-mode="dark"] .sidebar-title {
+    color: var(--app-text-color);
+  }
+html[data-theme-mode="dark"] .sidebar-content {
+    background-color: var(--app-sidebar-bg);
+  }
+html[data-theme-mode="dark"] .sidebar-section-title {
+    color: var(--sidebar-section-title-color);
+  }
+html[data-theme-mode="dark"] .sidebar-empty {
+    color: var(--sidebar-empty-color);
+  }
+html[data-theme-mode="dark"] .tree-folder-header {
+    color: var(--tree-folder-color);
+  }
+html[data-theme-mode="dark"] .tree-folder-header:hover {
+    background-color: var(--tree-folder-hover-bg);
+  }
+html[data-theme-mode="dark"] .tree-arrow {
+    color: var(--tree-arrow-color);
+  }
+html[data-theme-mode="dark"] .tree-file {
+    color: var(--tree-file-color);
+  }
+html[data-theme-mode="dark"] .tree-file:hover {
+    background-color: var(--tree-file-hover-bg);
+  }
+html[data-theme-mode="dark"] .tree-file.active {
+    background-color: var(--tree-file-active-bg);
+  }
+html[data-theme-mode="dark"] .tree-context-menu {
+    background-color: var(--tree-context-bg);
+    border-color: var(--tree-context-border);
+    color: var(--tree-context-color);
+    box-shadow: 0 4px 12px var(--tree-context-shadow);
+  }
+html[data-theme-mode="dark"] .tree-context-item:hover {
+    background-color: var(--tree-context-hover-bg);
+  }
+html[data-theme-mode="dark"] .tree-context-danger {
+    color: var(--tree-context-danger-color);
+  }
+html[data-theme-mode="dark"] .tree-context-danger:hover {
+    background-color: var(--menu-danger-hover-bg);
+  }
+html[data-theme-mode="dark"] .tree-context-item.disabled {
+    color: var(--tree-context-disabled-color);
+  }
+html[data-theme-mode="dark"] .tree-context-item.disabled:hover {
+    background-color: transparent;
+  }
+html[data-theme-mode="dark"] .tree-context-divider {
+    background-color: var(--tree-context-divider);
+  }
+html[data-theme-mode="dark"] .editor-context-menu {
+    background-color: var(--editor-context-bg);
+    border-color: var(--editor-context-border);
+    color: var(--editor-context-color);
+    box-shadow: 0 4px 12px var(--editor-context-shadow);
+  }
+html[data-theme-mode="dark"] .editor-context-item:hover {
+    background-color: var(--editor-context-hover-bg);
+  }
+html[data-theme-mode="dark"] .editor-context-item.disabled {
+    color: var(--editor-context-disabled-color);
+  }
+html[data-theme-mode="dark"] .editor-context-item.disabled:hover {
+    background-color: transparent;
+  }
+html[data-theme-mode="dark"] .editor-context-divider {
+    background-color: var(--editor-context-divider);
+  }
+html[data-theme-mode="dark"] .tree-rename-input {
+    background-color: var(--tree-rename-input-bg);
+    border-color: var(--tree-rename-input-border);
+    color: var(--tree-rename-input-color);
+  }
+html[data-theme-mode="dark"] .file-item {
+    color: var(--file-item-color);
+  }
+html[data-theme-mode="dark"] .file-item:hover {
+    background-color: var(--file-item-hover-bg);
+  }
+html[data-theme-mode="dark"] .modal {
+    background: var(--modal-bg);
+  }
+html[data-theme-mode="dark"] .modal h3 {
+    color: var(--modal-title-color);
+  }
+html[data-theme-mode="dark"] .modal p {
+    color: var(--modal-text-color);
+  }
+html[data-theme-mode="dark"] .modal-button-secondary {
+    background-color: var(--modal-btn-secondary-bg);
+    color: var(--modal-btn-secondary-color);
+  }
+html[data-theme-mode="dark"] .modal-button-secondary:hover {
+    background-color: var(--modal-btn-secondary-hover-bg);
+  }
+html[data-theme-mode="dark"] .find-replace-panel {
+    background: var(--find-replace-bg);
+    border-color: var(--find-replace-border);
+  }
+html[data-theme-mode="dark"] .find-input {
+    background: var(--find-input-bg);
+    color: var(--find-input-color);
+    border-color: var(--find-input-border);
+  }
+html[data-theme-mode="dark"] .find-input:focus {
+    border-color: var(--find-input-focus-border);
+  }
+html[data-theme-mode="dark"] .fr-btn {
+    background: var(--find-btn-bg);
+    color: var(--find-btn-color);
+    border-color: var(--find-btn-border);
+  }
+html[data-theme-mode="dark"] .fr-btn:hover {
+    background: var(--find-btn-hover-bg);
+    color: var(--app-text-color);
+  }
+html[data-theme-mode="dark"] .find-replace-options {
+    color: var(--find-options-color);
+    border-top-color: var(--find-replace-border);
+  }
+html[data-theme-mode="dark"] .fr-count {
+    color: var(--find-count-color);
+  }
+html[data-theme-mode="dark"] .source-mode {
+    background: var(--source-mode-bg);
+  }
+html[data-theme-mode="dark"] .source-textarea {
+    background: var(--source-textarea-bg);
+    color: var(--source-textarea-color);
+  }
+html[data-theme-mode="dark"] .source-textarea::placeholder {
+    color: var(--source-placeholder-color);
+  }
+html[data-theme-mode="dark"] .outline-panel {
+    background: var(--outline-bg);
+    border-color: var(--outline-border);
+  }
+html[data-theme-mode="dark"] .outline-panel .outline-title {
+    color: var(--outline-title-color);
+  }
+html[data-theme-mode="dark"] .outline-panel .outline-close {
+    color: var(--outline-close-color);
+  }
+html[data-theme-mode="dark"] .outline-panel .outline-close:hover {
+    background: var(--outline-close-hover-bg);
+    color: var(--app-text-color);
+  }
+html[data-theme-mode="dark"] .outline-panel .outline-empty {
+    color: var(--outline-empty-color);
+  }
+html[data-theme-mode="dark"] .outline-item {
+    color: var(--outline-item-color);
+  }
+html[data-theme-mode="dark"] .outline-item:hover {
+    background: var(--outline-item-hover-bg);
+  }
+html[data-theme-mode="dark"] .outline-level-2 {
+    color: var(--editor-color-80);
+  }
+html[data-theme-mode="dark"] .outline-level-6 {
+    color: var(--editor-color-60);
+  }
+html[data-theme-mode="dark"] .welcome-view {
+    background-color: var(--welcome-bg);
+  }
+html[data-theme-mode="dark"] .welcome-action-btn {
+    border-color: var(--welcome-action-border);
+    background: var(--welcome-action-bg);
+    color: var(--welcome-action-color);
+  }
+html[data-theme-mode="dark"] .welcome-action-btn:hover {
+    background: var(--welcome-action-hover-bg);
+    border-color: var(--welcome-action-hover-border);
+  }
+html[data-theme-mode="dark"] .welcome-folder-icon {
+    color: var(--welcome-folder-icon-color);
+  }
+html[data-theme-mode="dark"] .welcome-folder-title {
+    color: var(--welcome-folder-title-color);
+  }
+html[data-theme-mode="dark"] .welcome-folder-subtitle {
+    color: var(--welcome-folder-subtitle-color);
+  }
+

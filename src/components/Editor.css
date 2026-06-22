@@ -1,0 +1,7 @@
+/* ============ Editor Container ============ */
+.editor-container {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+

@@ -1,0 +1,14 @@
+/* ============ Focus & Typewriter Modes ============ */
+.app-root.focus-mode-active .rustype-editor .mu-block {
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+
+.app-root.focus-mode-active .rustype-editor .mu-block.mu-active {
+  opacity: 1;
+}
+
+.app-root.typewriter-mode .rustype-editor .mu-editor {
+  scroll-padding-top: 50vh;
+}
+

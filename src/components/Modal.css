@@ -1,0 +1,72 @@
+/* ============ Modal ============ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal {
+  background: var(--app-modal-bg);
+  border-radius: 8px;
+  padding: 24px;
+  min-width: 360px;
+  max-width: 480px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.modal h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-color);
+  margin: 0 0 12px 0;
+}
+
+.modal p {
+  font-size: 14px;
+  color: var(--app-text-secondary);
+  margin: 0 0 8px 0;
+  word-break: break-all;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.modal-button {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.modal-button-primary {
+  background-color: var(--settings-btn-primary-bg);
+  color: #fff;
+}
+
+.modal-button-primary:hover {
+  background-color: var(--settings-btn-primary-hover);
+}
+
+.modal-button-secondary {
+  background-color: var(--settings-btn-secondary-bg);
+  color: var(--settings-btn-secondary-color);
+}
+
+.modal-button-secondary:hover {
+  background-color: var(--settings-btn-secondary-hover);
+}
+

@@ -1,10 +1,10 @@
 import { readTextFile, readDir, type DirEntry } from '@tauri-apps/plugin-fs';
 
 // ---------------------------------------------------------------------------
-// 类型定义（对齐 marktext 中 Sidebar 的 SearchResult/SearchMatch 形状）
+// Type definitions (aligned with marktext Sidebar's SearchResult/SearchMatch shape)
 // ---------------------------------------------------------------------------
 
-/** [[startLine, startCh], [endLine, endCh]] —— 行号从 0 开始 */
+/** [[startLine, startCh], [endLine, endCh]] -- line numbers are 0-based */
 export type SearchRange = [[number, number], [number, number]];
 
 export interface SearchMatch {
@@ -21,16 +21,16 @@ export interface SearchOptions {
     isCaseSensitive?: boolean;
     isWholeWord?: boolean;
     isRegexp?: boolean;
-    /** 最多返回多少个文件的结果（避免过多结果阻塞 UI），默认 100 */
+    /** Max number of files to return results for (prevents UI blocking), default 100 */
     maxFileResults?: number;
-    /** 单个文件内最多返回多少条匹配，默认 200 */
+    /** Max matches per file, default 200 */
     maxMatchesPerFile?: number;
-    /** 可选的进度回调：已处理文件数 / 总文件数 */
+    /** Optional progress callback: processed files / total files */
     onProgress?: (done: number, total: number) => void;
 }
 
 // ---------------------------------------------------------------------------
-// 目录排除 & 文件过滤（与 file.ts 保持一致的规则）
+// Directory exclusion & file filtering (rules aligned with file.ts)
 // ---------------------------------------------------------------------------
 
 const EXCLUDED_DIRS = new Set([
@@ -51,7 +51,7 @@ function isMarkdownFile(name: string): boolean {
     return ['md', 'markdown', 'mdown', 'mkd', 'mkdn', 'mdwn', 'mdtxt', 'mdtext'].includes(ext);
 }
 
-/** 递归收集所有需要搜索的 Markdown 文件路径 */
+/** Recursively collect all Markdown file paths to search */
 async function collectMarkdownFiles(rootPath: string): Promise<string[]> {
     const results: string[] = [];
     const stack: string[] = [rootPath];
@@ -70,8 +70,8 @@ async function collectMarkdownFiles(rootPath: string): Promise<string[]> {
                 }
             }
         } catch (err) {
-            // 权限/访问错误，继续处理其他目录
-            console.warn(`无法读取目录 ${currentPath}:`, err);
+            // Permission/access error, continue processing other directories
+            console.warn(`Failed to read directory ${currentPath}:`, err);
         }
     }
 
@@ -79,34 +79,34 @@ async function collectMarkdownFiles(rootPath: string): Promise<string[]> {
 }
 
 // ---------------------------------------------------------------------------
-// 单个文件内执行匹配
+// Execute matching within a single file
 // ---------------------------------------------------------------------------
 
 /**
- * 对给定内容执行搜索，返回所有匹配项。
- * 逐行扫描 —— 返回的 lineText 会去除末尾换行符以保持展示整洁。
+ * Search given content and return all matches.
+ * Line-by-line scan -- trailing newlines stripped from lineText for display.
  */
 function searchInContent(content: string, keyword: string, options: SearchOptions): SearchMatch[] {
     const matches: SearchMatch[] = [];
     const maxMatches = options.maxMatchesPerFile ?? 200;
     if (!keyword) return matches;
 
-    // 根据选项构建搜索 RegExp
+    // Build search RegExp from options
     let pattern: RegExp;
     try {
         if (options.isRegexp) {
             const flags = options.isCaseSensitive ? 'g' : 'gi';
             pattern = new RegExp(keyword, flags);
         } else {
-            // 非正则：对关键字中的元字符进行转义
+            // Non-regex: escape metacharacters in keyword
             const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const wrapped = options.isWholeWord ? `\\b${escaped}\\b` : escaped;
             const flags = options.isCaseSensitive ? 'g' : 'gi';
             pattern = new RegExp(wrapped, flags);
         }
     } catch (err) {
-        // 非法正则（例如未闭合的括号）—— 返回空列表
-        console.warn('搜索关键字非法：', err);
+        // Invalid regex (e.g. unclosed parenthesis) -- return empty list
+        console.warn('Invalid search keyword:', err);
         return matches;
     }
 
@@ -125,7 +125,7 @@ function searchInContent(content: string, keyword: string, options: SearchOption
                 lineText: line,
                 range: [[lineIdx, start], [lineIdx, end]],
             });
-            // 零宽匹配时手动前进，避免无限循环
+            // Advance manually on zero-width match to avoid infinite loop
             if (m[0].length === 0) pattern.lastIndex++;
         }
     }
@@ -134,20 +134,20 @@ function searchInContent(content: string, keyword: string, options: SearchOption
 }
 
 // ---------------------------------------------------------------------------
-// 对外暴露的入口函数
+// Public entry point
 // ---------------------------------------------------------------------------
 
 export interface SearchSession {
     cancel: () => void;
-    /** 以 Promise 形式返回最终结果，便于使用方 await */
+    /** Returns final results as a Promise for awaiting */
     promise: Promise<SearchResult[]>;
 }
 
 /**
- * 在给定目录下递归搜索所有 Markdown 文件中包含 keyword 的内容。
+ * Recursively search all Markdown files under the given directory for keyword.
  *
- * 注意：为避免阻塞 UI，这里是串行读取文件（也可改为分块异步）。
- * 调用方可以通过 session.cancel() 中途取消搜索（例如用户修改了关键字）。
+ * File reads are serial to avoid blocking the UI (can be changed to chunked async).
+ * Caller can cancel mid-search via session.cancel() (e.g. when keyword changes).
  */
 export function searchInFolder(
     rootPath: string,
@@ -160,7 +160,7 @@ export function searchInFolder(
     const promise: Promise<SearchResult[]> = (async () => {
         if (!keyword || !rootPath) return [];
 
-        // 第一步：先列出候选文件清单
+        // Step 1: collect candidate file list
         const files = await collectMarkdownFiles(rootPath);
         if (cancelled) return [];
 
@@ -180,8 +180,8 @@ export function searchInFolder(
                     resultList.push({ filePath, matches });
                 }
             } catch (err) {
-                // 个别文件读取失败不阻断整体搜索
-                console.warn(`读取文件失败 ${filePath}:`, err);
+                // Individual file read failure does not block overall search
+                console.warn(`Failed to read file ${filePath}:`, err);
             }
 
             try {

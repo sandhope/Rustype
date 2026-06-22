@@ -1,5 +1,5 @@
 /**
- * 应用常量文本
+ * Application constant texts
  */
 
 import { getLanguage } from '../utils/i18n';

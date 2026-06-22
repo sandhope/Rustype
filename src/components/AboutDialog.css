@@ -1,0 +1,132 @@
+/* ============ About Dialog ============ */
+.about-dialog {
+  background: var(--about-bg);
+  border-radius: 12px;
+  width: 480px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.about-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px 24px;
+  background: var(--about-header-bg);
+}
+
+.about-logo {
+  margin-bottom: 12px;
+}
+
+.about-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--about-title-color);
+  margin: 0 0 4px 0;
+}
+
+.about-version {
+  font-size: 14px;
+  color: var(--about-version-color);
+  margin: 0;
+}
+
+.about-content {
+  padding: 20px 24px;
+}
+
+.about-description {
+  font-size: 14px;
+  color: var(--about-desc-color);
+  line-height: 1.6;
+  text-align: center;
+  margin: 0 0 20px 0;
+}
+
+.about-section {
+  margin-bottom: 20px;
+}
+
+.about-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--about-section-title-color);
+  margin: 0 0 10px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--about-section-border);
+}
+
+.about-section ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: var(--about-list-color);
+  line-height: 1.8;
+}
+
+.about-shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--about-list-color);
+}
+
+.shortcut-row kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 12px;
+  color: var(--shortcuts-desc-color);
+  background: var(--shortcuts-key-bg);
+  border: 1px solid var(--shortcuts-key-border);
+  border-radius: 4px;
+  box-shadow: 0 1px 0 var(--shortcuts-key-shadow);
+}
+
+.tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+
+.tech-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--tech-tag-color);
+  background: var(--tech-tag-bg);
+  border-radius: 12px;
+}
+
+.about-footer {
+  display: flex;
+  justify-content: center;
+  padding: 16px 24px 24px;
+}
+
+.about-close-btn {
+  padding: 8px 32px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: var(--settings-btn-primary-bg);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.about-close-btn:hover {
+  background: var(--settings-btn-primary-hover);
+}
+

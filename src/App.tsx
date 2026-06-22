@@ -1,17 +1,19 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Editor, { type EditorHandle } from './components/Editor';
 import TabBar from './components/TabBar';
 import Sidebar from './components/Sidebar';
 import FindReplace from './components/FindReplace';
 import SourceMode from './components/SourceMode';
-import SettingsPanel from './components/SettingsPanel';
-import AboutDialog from './components/AboutDialog';
-import ShortcutsPanel from './components/ShortcutsPanel';
-import TableInsertDialog from './components/TableInsertDialog';
-import RenameDialog from './components/RenameDialog';
-import CommandPalette from './components/CommandPalette';
 import MenuBar from './components/MenuBar';
 import EditorContextMenu from './components/EditorContextMenu';
+
+// Lazy-loaded dialogs (rarely opened, reduces initial bundle size)
+const SettingsPanel = lazy(() => import('./components/SettingsPanel'));
+const AboutDialog = lazy(() => import('./components/AboutDialog'));
+const ShortcutsPanel = lazy(() => import('./components/ShortcutsPanel'));
+const TableInsertDialog = lazy(() => import('./components/TableInsertDialog'));
+const RenameDialog = lazy(() => import('./components/RenameDialog'));
+const CommandPalette = lazy(() => import('./components/CommandPalette'));
 import { useAppState, useFileOperations, useMenuActions, useKeyboardShortcuts } from './hooks';
 import { getThemeById } from './utils/themes';
 import { useI18n } from './utils/i18n';
@@ -560,32 +562,41 @@ function App() {
             )}
 
             {settingsOpen && (
-                <SettingsPanel
-                    settings={settings}
-                    setSettings={setSettings}
-                    onClose={handleSettingsClose}
-                />
+                <Suspense fallback={null}>
+                    <SettingsPanel
+                        settings={settings}
+                        setSettings={setSettings}
+                        onClose={handleSettingsClose}
+                    />
+                </Suspense>
             )}
 
             {aboutOpen && (
-                <AboutDialog onClose={() => setAboutOpen(false)} />
+                <Suspense fallback={null}>
+                    <AboutDialog onClose={() => setAboutOpen(false)} />
+                </Suspense>
             )}
 
             {shortcutsOpen && (
-                <ShortcutsPanel onClose={() => setShortcutsOpen(false)} />
+                <Suspense fallback={null}>
+                    <ShortcutsPanel onClose={() => setShortcutsOpen(false)} />
+                </Suspense>
             )}
 
             {tableDialogOpen && (
-                <TableInsertDialog
-                    onClose={() => setTableDialogOpen(false)}
-                    onConfirm={(rows, columns) => {
-                        editorRef.current?.createTable?.(rows, columns);
-                    }}
-                />
+                <Suspense fallback={null}>
+                    <TableInsertDialog
+                        onClose={() => setTableDialogOpen(false)}
+                        onConfirm={(rows, columns) => {
+                            editorRef.current?.createTable?.(rows, columns);
+                        }}
+                    />
+                </Suspense>
             )}
 
             {renameDialogOpen && (
-                <RenameDialog
+                <Suspense fallback={null}>
+                    <RenameDialog
                     currentName={renameFileName}
                     onClose={() => setRenameDialogOpen(false)}
                     onConfirm={async (newName) => {
@@ -607,17 +618,20 @@ function App() {
                         }
                         setRenameDialogOpen(false);
                     }}
-                />
+                    />
+                </Suspense>
             )}
 
             {commandPaletteOpen && (
-                <CommandPalette
-                    onAction={(action) => {
-                        setCommandPaletteOpen(false);
-                        handleMenuItemClickWrapper(action);
-                    }}
-                    onClose={() => setCommandPaletteOpen(false)}
-                />
+                <Suspense fallback={null}>
+                    <CommandPalette
+                        onAction={(action) => {
+                            setCommandPaletteOpen(false);
+                            handleMenuItemClickWrapper(action);
+                        }}
+                        onClose={() => setCommandPaletteOpen(false)}
+                    />
+                </Suspense>
             )}
         </div>
     );

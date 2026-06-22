@@ -340,7 +340,11 @@
     "error": "오류",
     "success": "성공",
     "info": "정보",
-    "renameFailed": "이름 바꾸기 실패"
+    "renameFailed": "이름 바꾸기 실패",
+    "unsavedChanges": "{name}에 저장되지 않은 변경 사항이 있습니다. 닫으시겠습니까?",
+    "cannotReadFile": "파일을 읽을 수 없습니다",
+    "cannotReloadFile": "파일을 다시 로드할 수 없습니다",
+    "fileNotExistOrUnreadable": "파일이 더 이상 존재하지 않거나 읽을 수 없습니다"
   },
   "welcome": {
     "subtitle": "고성능 마크다운 편집기",

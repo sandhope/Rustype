@@ -340,7 +340,11 @@
     "error": "エラー",
     "success": "成功",
     "info": "情報",
-    "renameFailed": "名前の変更に失敗しました"
+    "renameFailed": "名前の変更に失敗しました",
+    "unsavedChanges": "{name} に未保存の変更があります。閉じてもよろしいですか？",
+    "cannotReadFile": "ファイルを読み取れません",
+    "cannotReloadFile": "ファイルを再読み込みできません",
+    "fileNotExistOrUnreadable": "ファイルが存在しないか読み取れません"
   },
   "welcome": {
     "subtitle": "高性能 Markdown エディタ",

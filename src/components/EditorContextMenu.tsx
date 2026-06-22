@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, memo } from 'react';
 import { useI18n } from '../utils/i18n';
 import { readText as readClipboardText } from '@tauri-apps/plugin-clipboard-manager';
 import type { EditorHandle } from './Editor';
@@ -12,7 +12,7 @@ interface EditorContextMenuProps {
     onClose: () => void;
 }
 
-export default function EditorContextMenu({
+function EditorContextMenu({
     visible,
     x,
     y,
@@ -177,3 +177,10 @@ export default function EditorContextMenu({
         </div>
     );
 }
+
+export default memo(EditorContextMenu, (prev, next) => {
+    return prev.visible === next.visible
+        && prev.x === next.x
+        && prev.y === next.y
+        && prev.hasSelection === next.hasSelection;
+});

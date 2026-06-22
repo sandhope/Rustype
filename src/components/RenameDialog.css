@@ -1,0 +1,91 @@
+/* ============ Rename Dialog ============ */
+.rename-dialog {
+  background: var(--app-modal-bg);
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 320px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.rename-header {
+  margin-bottom: 16px;
+}
+
+.rename-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text-color);
+  margin: 0;
+}
+
+.rename-input-container {
+  margin-bottom: 16px;
+}
+
+.rename-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid var(--settings-input-border);
+  border-radius: 6px;
+  background: var(--settings-input-bg);
+  color: var(--app-text-color);
+  box-sizing: border-box;
+}
+
+.rename-input:focus {
+  outline: none;
+  border-color: var(--settings-btn-primary-bg);
+}
+
+.rename-label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--app-text-color);
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.rename-checkbox {
+  margin-right: 8px;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.rename-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rename-cancel-btn,
+.rename-confirm-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.rename-cancel-btn {
+  background-color: var(--settings-btn-secondary-bg);
+  color: var(--settings-btn-secondary-color);
+}
+
+.rename-cancel-btn:hover {
+  background-color: var(--settings-btn-secondary-hover);
+}
+
+.rename-confirm-btn {
+  background-color: var(--settings-btn-primary-bg);
+  color: #fff;
+}
+
+.rename-confirm-btn:hover {
+  background-color: var(--settings-btn-primary-hover);
+}
+

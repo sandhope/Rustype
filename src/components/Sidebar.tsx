@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import type { FileTreeNode } from '../utils/file';
 import { watch } from '@tauri-apps/plugin-fs';
 import folderIcon from '../assets/folder.svg';
@@ -556,7 +556,7 @@ function HighlightedLine({ match }: { match: FolderSearchMatch }) {
 const MIN_SIDEBAR_WIDTH = 160;
 const MAX_SIDEBAR_WIDTH = 600;
 
-export default function Sidebar({
+function Sidebar({
     activePanel,
     onPanelChange,
     projectTree,
@@ -1253,3 +1253,10 @@ export default function Sidebar({
         </div>
     );
 }
+
+export default memo(Sidebar, (prev, next) => {
+    return prev.activePanel === next.activePanel
+        && prev.projectTree === next.projectTree
+        && prev.activeFilePath === next.activeFilePath
+        && prev.tocItems === next.tocItems;
+});

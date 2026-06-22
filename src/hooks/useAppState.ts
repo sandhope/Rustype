@@ -8,6 +8,7 @@ import { readFileContent, getFileStat, grantDirectoryAccess, grantFileAccess, re
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
 import { getWelcomeMarkdown } from '../constants';
+import { t } from '../utils/i18n';
 
 let tabIdCounter = 0;
 export const getNextTabId = () => `tab-${++tabIdCounter}`;
@@ -151,38 +152,44 @@ export function useAppState() {
             }
 
             if (session.tabs.length > 0) {
-                const restoredTabs: Tab[] = [];
-                for (const savedTab of session.tabs) {
+                const tabPromises = session.tabs.map(async (savedTab) => {
                     if (savedTab.file?.path) {
                         try {
                             await grantFileAccess(savedTab.file.path);
-                            const content = await readFileContent(savedTab.file.path);
-                            const stat = await getFileStat(savedTab.file.path);
-                            const tabId = getNextTabId();
-                            restoredTabs.push({
-                                id: tabId,
+                            const [content, stat] = await Promise.all([
+                                readFileContent(savedTab.file.path),
+                                getFileStat(savedTab.file.path),
+                            ]);
+                            return {
+                                id: getNextTabId(),
                                 file: savedTab.file,
                                 content,
                                 dirty: false,
                                 lastModified: stat?.mtime,
                                 externallyModified: false,
                                 lineEnding: savedTab.lineEnding ?? 'lf',
-                            });
+                            } as Tab;
                         } catch {
                             // File was deleted or moved, skip this tab
+                            return null;
                         }
                     } else {
-                        const tabId = getNextTabId();
-                        restoredTabs.push({
-                            id: tabId,
+                        return {
+                            id: getNextTabId(),
                             file: null,
                             content: savedTab.content,
                             dirty: savedTab.content !== getWelcomeMarkdown(),
                             externallyModified: false,
                             lineEnding: savedTab.lineEnding ?? 'lf',
-                        });
+                        } as Tab;
                     }
-                }
+                });
+
+                const results = await Promise.allSettled(tabPromises);
+                const restoredTabs = results
+                    .filter((r): r is PromiseFulfilledResult<Tab | null> => r.status === 'fulfilled')
+                    .map(r => r.value)
+                    .filter((tab): tab is Tab => tab !== null);
 
                 if (restoredTabs.length > 0) {
                     setTabs(restoredTabs);
@@ -249,7 +256,7 @@ export function useAppState() {
             if (!tab) return prevTabs;
 
             if (tab.dirty) {
-                const confirmed = window.confirm(`${tab.file?.name || 'Untitled'} 有未保存的更改，确定要关闭吗？`);
+                const confirmed = window.confirm(t('messages.unsavedChanges', { name: tab.file?.name || 'Untitled' }));
                 if (!confirmed) return prevTabs;
             }
 

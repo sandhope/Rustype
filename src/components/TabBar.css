@@ -1,0 +1,122 @@
+/* ============ Tab Bar ============ */
+.tab-bar {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  background-color: var(--tab-bar-bg);
+  border-bottom: 1px solid var(--tab-bar-border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: default;
+  z-index: 1000;
+}
+
+.tab-bar:hover {
+  cursor: default;
+}
+
+.tab-bar::-webkit-scrollbar {
+  height: 3px;
+}
+
+.tab-bar::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 2px;
+}
+
+.tab-list {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  height: 100%;
+  font-size: 12px;
+  color: var(--tab-text-color);
+  background-color: var(--tab-bg);
+  border-right: 1px solid var(--app-header-border);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  max-width: 180px;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.tab:hover {
+  background-color: var(--tab-bg-hover);
+}
+
+.tab.active {
+  background-color: var(--app-tab-active-bg);
+  color: var(--tab-text-active-color);
+  font-weight: 500;
+}
+
+.tab-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-dirty-dot {
+  color: var(--tab-dirty-color);
+  font-size: 10px;
+}
+
+.tab-external-dot {
+  color: var(--tab-external-color);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.tab.externally-modified {
+  background-color: var(--tab-external-bg);
+}
+
+.tab.externally-modified.active {
+  background-color: var(--app-tab-active-bg);
+  border-bottom: 2px solid var(--tab-external-color);
+}
+
+.tab-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 14px;
+  color: var(--tab-close-color);
+  background: none;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background-color 0.15s;
+  flex-shrink: 0;
+}
+
+.tab:hover .tab-close {
+  opacity: 1;
+}
+
+.tab-close:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: var(--tab-text-active-color);
+}
+
+.tab.dirty .tab-close {
+  opacity: 0.5;
+}
+
+.tab.dirty:hover .tab-close {
+  opacity: 1;
+}
+

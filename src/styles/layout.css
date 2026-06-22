@@ -1,0 +1,355 @@
+/* ============ App Layout ============ */
+.app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ============ Header / Title Bar ============ */
+.app-header {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  background-color: var(--app-header-bg);
+  border-bottom: 1px solid var(--app-header-border);
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-app-region: drag;
+  z-index: 2000;
+}
+
+.title-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.app-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 100%;
+  color: var(--app-text-color);
+  font-size: 13px;
+  font-weight: 600;
+  -webkit-app-region: no-drag;
+}
+
+.app-title img {
+  flex-shrink: 0;
+}
+
+.app-name {
+  flex-shrink: 0;
+}
+
+/* Menu Container */
+.menu-bar {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+/* Menu Dropdown */
+.menu-dropdown {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.menu-trigger {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  height: 100%;
+  font-size: 13px;
+  color: var(--app-text-color);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+}
+
+.menu-trigger:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.menu-trigger.active {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Dropdown panel */
+.menu-dropdown-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  display: none;
+  min-width: 220px;
+  background: var(--float-bg-color);
+  border: 1px solid var(--float-border-color);
+  border-radius: 4px;
+  box-shadow: var(--float-shadow);
+  padding: 4px 0;
+  z-index: 2000;
+}
+
+/* Scrollable variant 鈥?use only when a dropdown has many items and no submenus */
+.menu-dropdown-content.scrollable {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.menu-dropdown-content.is-open {
+  display: block;
+}
+
+/* Menu item */
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--app-text-color);
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.menu-item:hover {
+  background-color: var(--float-hover-color);
+}
+
+.menu-item.danger {
+  color: var(--delete-color);
+}
+
+.menu-item.danger:hover {
+  background-color: rgba(255, 105, 105, 0.1);
+}
+
+.menu-item-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.menu-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Status column (鉁? */
+.menu-item-status {
+  font-size: 13px;
+  color: var(--app-text-color);
+  width: 14px; 
+  flex-shrink: 0;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Label column */
+.menu-item-label {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Shortcut column */
+.menu-item-shortcut {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  margin-left: 24px;
+  margin-right: 22px;
+  text-align: right;
+}
+
+.menu-divider {
+  height: 1px;
+  background-color: var(--float-border-color);
+  margin: 4px 0px;
+}
+
+/* Submenu */
+.menu-item-submenu {
+  position: relative;
+}
+
+.menu-item-arrow {
+  font-size: 18px;
+  line-height: 1;
+  color: var(--app-text-secondary);
+  margin-right: 10px;
+}
+
+.menu-submenu {
+  position: absolute;
+  top: -4px;
+  left: 100%;
+  min-width: 280px;
+  max-width: 400px;
+  background: var(--float-bg-color);
+  border: 1px solid var(--float-border-color);
+  border-radius: 4px;
+  box-shadow: var(--float-shadow);
+  padding: 4px 0;
+  z-index: 2001;
+  margin-left: 1px;
+}
+
+.menu-submenu-item {
+  display: flex;
+  align-items: center;
+  padding: 5px 20px;
+  font-size: 13px;
+  color: var(--app-text-color);
+  cursor: pointer;
+  transition: background-color 0.1s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-submenu-item:hover {
+  background-color: var(--float-hover-color);
+}
+
+.menu-submenu-item-icon {
+  font-size: 13px;
+}
+
+.menu-submenu-item-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-submenu-item-shortcut {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  text-align: right;
+}
+
+.menu-submenu-item-status {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+.menu-submenu-empty {
+  color: var(--app-text-secondary);
+  cursor: default;
+}
+
+.menu-submenu-empty:hover {
+  background-color: transparent;
+}
+
+.menu-submenu-divider {
+  height: 1px;
+  background-color: var(--float-border-color);
+  margin: 4px 8px;
+}
+
+.menu-submenu-hint {
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  white-space: nowrap;
+}
+
+.menu-submenu-item-danger {
+  color: var(--delete-color);
+}
+
+.menu-submenu-item-danger:hover {
+  background-color: rgba(255, 105, 105, 0.1);
+}
+
+/* File Info Section */
+.file-info {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 100%;
+  gap: 6px;
+  margin-left: auto;
+  -webkit-app-region: no-drag;
+}
+
+.file-name {
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.dirty-indicator {
+  font-size: 12px;
+  color: var(--app-text-color);
+  padding: 2px 6px;
+  border-radius: 2px;
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Window Controls */
+.window-controls {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-left: auto;
+  -webkit-app-region: no-drag;
+}
+
+.window-control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: var(--app-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.window-control-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.window-control-close:hover {
+  background-color: #e81123;
+  color: white;
+}
+
+/* ============ Main Content ============ */
+.app-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background-color: #ffffff;
+  min-height: 0;
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+

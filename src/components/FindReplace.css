@@ -1,0 +1,93 @@
+/* ============ Find & Replace Panel ============ */
+.find-replace-panel {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  width: 420px;
+  background: var(--app-modal-bg);
+  border: 1px solid var(--app-header-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  z-index: 1500;
+}
+
+.find-replace-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.find-input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid var(--settings-input-border);
+  border-radius: 4px;
+  outline: none;
+  background: var(--settings-input-bg);
+  color: var(--app-text-color);
+  transition: border-color 0.15s;
+}
+
+.find-input:focus {
+  border-color: var(--settings-input-focus);
+}
+
+.fr-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  background: var(--tab-bg);
+  border: 1px solid var(--app-header-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.fr-btn:hover {
+  background: var(--tab-bg-hover);
+  color: var(--app-text-color);
+}
+
+.fr-close {
+  font-size: 18px;
+}
+
+.find-replace-options {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--app-header-border);
+  font-size: 12px;
+  color: var(--app-text-secondary);
+}
+
+.fr-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fr-option input {
+  cursor: pointer;
+}
+
+.fr-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--settings-unit-color);
+  white-space: nowrap;
+}
+

@@ -340,7 +340,11 @@
     "error": "Erreur",
     "success": "Succès",
     "info": "Information",
-    "renameFailed": "Échec du renommage"
+    "renameFailed": "Échec du renommage",
+    "unsavedChanges": "{name} a des modifications non enregistrées. Voulez-vous vraiment fermer ?",
+    "cannotReadFile": "Impossible de lire le fichier",
+    "cannotReloadFile": "Impossible de recharger le fichier",
+    "fileNotExistOrUnreadable": "Le fichier n'existe plus ou est illisible"
   },
   "welcome": {
     "subtitle": "Un éditeur Markdown haute performance",

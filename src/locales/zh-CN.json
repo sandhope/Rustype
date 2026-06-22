@@ -340,7 +340,11 @@
     "error": "错误",
     "success": "成功",
     "info": "提示",
-    "renameFailed": "重命名失败"
+    "renameFailed": "重命名失败",
+    "unsavedChanges": "{name} 有未保存的更改，确定要关闭吗？",
+    "cannotReadFile": "无法读取文件",
+    "cannotReloadFile": "无法重新加载文件",
+    "fileNotExistOrUnreadable": "文件已不存在或无法读取"
   },
   "welcome": {
     "subtitle": "高性能 Markdown 编辑器",

@@ -220,8 +220,8 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             return;
         }
 
-        // 创建一个内层容器给 muya 使用
-        // 这样可以隔离 React 和 muya 的 DOM 操作
+        // Create an inner container for muya.
+        // This isolates React and muya's DOM operations.
         const muyaContainer = document.createElement('div');
         muyaContainer.className = 'muya-container';
         muyaContainerRef.current = muyaContainer;
@@ -236,7 +236,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             });
         }
         catch (err) {
-            // 如果初始化失败，清理创建的容器
+            // If initialization fails, clean up the created container
             try { container.removeChild(muyaContainer); } catch {}
             muyaContainerRef.current = null;
             return;
@@ -246,7 +246,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             muya.init();
         }
         catch (err) {
-            // 如果初始化失败，清理创建的容器
+            // If initialization fails, clean up the created container
             try { container.removeChild(muyaContainer); } catch {}
             muyaContainerRef.current = null;
             return;
@@ -274,16 +274,16 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             const muyaContainer = muyaContainerRef.current;
             destroyedRef.current = true;
 
-            // 如果 muya 已经被 dispose 方法清理过，跳过重复清理
+            // If muya has already been disposed, skip duplicate cleanup
             if (!muyaToDestroy) {
                 return;
             }
 
-            // 隐藏浮动工具
+            // Hide floating tools
             (muyaToDestroy as any).hideAllFloatTools?.();
 
-            // 将 muya 的容器从 React 容器中分离
-            // 这样 React 在卸载时只会清理空的外层容器，不会与 muya 的清理冲突
+            // Detach muya's container from the React container so React unmount
+            // only cleans the empty outer container, avoiding conflicts with muya's cleanup.
             if (muyaContainer && container) {
                 try {
                     if (muyaContainer.parentNode === container) {
@@ -293,7 +293,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
             }
             muyaContainerRef.current = null;
 
-            // 现在可以安全地销毁 muya，它的 DOM 已经与 React 分离
+            // Now safe to destroy muya -- its DOM is already detached from React
             setTimeout(() => {
                 if (destroyedRef.current && muyaRef.current === muyaToDestroy) {
                     muyaToDestroy.destroy();
@@ -487,11 +487,11 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
                 const container = containerRef.current;
                 if (!muyaToDestroy) return;
 
-                // 隐藏浮动工具
+                // Hide floating tools
                 (muyaToDestroy as any).hideAllFloatTools?.();
 
-                // 将 muya 的容器从 React 容器中分离
-                // 这样 React 在卸载时只会清理空的外层容器，不会与 muya 的清理冲突
+                // Detach muya's container from the React container so React unmount
+                // only cleans the empty outer container, avoiding conflicts with muya's cleanup.
                 if (muyaContainer && container) {
                     try {
                         if (muyaContainer.parentNode === container) {
@@ -501,7 +501,7 @@ const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
                 }
                 muyaContainerRef.current = null;
 
-                // 现在可以安全地销毁 muya，它的 DOM 已经与 React 分离
+                // Now safe to destroy muya -- its DOM is already detached from React
                 muyaToDestroy.destroy();
                 muyaRef.current = null;
             },

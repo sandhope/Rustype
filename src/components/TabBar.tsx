@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useI18n } from '../utils/i18n';
 import { type FileInfo } from '../utils/file';
 
@@ -21,7 +21,7 @@ interface TabBarProps {
     onNewFile?: () => void;
 }
 
-export default function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onTabReorder, onNewFile }: TabBarProps) {
+function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onTabReorder, onNewFile }: TabBarProps) {
     const { t } = useI18n();
     const [dragIndex, setDragIndex] = useState<number | null>(null);
 
@@ -81,3 +81,8 @@ export default function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onT
         </div>
     );
 }
+
+export default memo(TabBar, (prev, next) => {
+    return prev.tabs === next.tabs
+        && prev.activeTabId === next.activeTabId;
+});

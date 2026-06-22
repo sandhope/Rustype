@@ -2,6 +2,7 @@ import { useCallback, useEffect } from 'react';
 import { dirname } from '@tauri-apps/api/path';
 import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, grantDirectoryAccess, detectLineEnding, type FileInfo, type FileTreeNode } from '../utils/file';
 import { getRecentFiles, addRecentFile, removeRecentFile, getRecentFolders, addRecentFolder } from '../utils/recentFiles';
+import { t } from '../utils/i18n';
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
 import { getNextTabId } from './useAppState';
@@ -106,8 +107,10 @@ export function useFileOperations({
                 return;
             }
 
-            const fileContent = await readFileContent(filePath);
-            const fileStat = await getFileStat(filePath);
+            const [fileContent, fileStat] = await Promise.all([
+                readFileContent(filePath),
+                getFileStat(filePath),
+            ]);
             await addRecentFile(fileInfo);
             setRecentFolders(await getRecentFolders());
 
@@ -136,8 +139,10 @@ export function useFileOperations({
                     window.DIRNAME = fileDir;
                 }
 
-                const fileContent = await readFileContent(fileInfo.path);
-                const stat = await getFileStat(fileInfo.path);
+                const [fileContent, stat] = await Promise.all([
+                    readFileContent(fileInfo.path),
+                    getFileStat(fileInfo.path),
+                ]);
                 await addRecentFile(fileInfo);
                 setRecentFiles(await getRecentFiles());
 
@@ -162,7 +167,7 @@ export function useFileOperations({
                 }
             } catch (error) {
                 console.error('Failed to read file:', error);
-                alert('无法读取文件');
+                alert(t('messages.cannotReadFile'));
             }
         }
         setActiveMenu(null);
@@ -237,7 +242,7 @@ export function useFileOperations({
             }
         } catch (error) {
             console.error('Failed to reload file:', error);
-            alert('无法重新加载文件');
+            alert(t('messages.cannotReloadFile'));
         }
     }, [tabs, activeTabId, setTabs, setActiveTabId]);
 
@@ -248,8 +253,10 @@ export function useFileOperations({
                 window.DIRNAME = fileDir;
             }
 
-            const fileContent = await readFileContent(file.path);
-            const stat = await getFileStat(file.path);
+            const [fileContent, stat] = await Promise.all([
+                readFileContent(file.path),
+                getFileStat(file.path),
+            ]);
 
             const existingTab = tabs.find(t => t.file?.path === file.path);
             if (existingTab) {
@@ -274,25 +281,72 @@ export function useFileOperations({
             console.error('Failed to open recent file:', error);
             await removeRecentFile(file.path);
             setRecentFiles(await getRecentFiles());
-            alert('文件已不存在或无法读取');
+            alert(t('messages.fileNotExistOrUnreadable'));
         }
     }, [tabs, setTabs, setActiveTabId, setRecentFiles]);
 
+    // Watch open files for external modifications using Tauri's debounced watch API.
+    // Re-creates watcher when the set of open file paths changes.
     useEffect(() => {
-        const interval = setInterval(async () => {
+        const filePaths = tabs.map(t => t.file?.path).filter((p): p is string => !!p);
+        if (filePaths.length === 0) return;
+
+        let unwatchFn: (() => void) | null = null;
+        let cancelled = false;
+
+        (async () => {
+            try {
+                const { watch } = await import('@tauri-apps/plugin-fs');
+                if (cancelled) return;
+                unwatchFn = await watch(filePaths, async (event) => {
+                    // Extract the changed path from the event
+                    const changedPath = (event.paths && event.paths.length > 0)
+                        ? event.paths[0]
+                        : (event as any).path;
+                    if (!changedPath) return;
+
+                    try {
+                        const newStat = await getFileStat(changedPath);
+                        if (newStat?.mtime) {
+                            setTabs(prev => prev.map(t =>
+                                t.file?.path === changedPath && t.lastModified && newStat.mtime > t.lastModified
+                                    ? { ...t, externallyModified: true }
+                                    : t
+                            ));
+                        }
+                    } catch {
+                        // File may have been deleted, ignore
+                    }
+                }, { recursive: false });
+            } catch (err) {
+                console.warn('File watcher setup failed, falling back to polling:', err);
+            }
+        })();
+
+        // 30-second fallback poll for edge cases where watch may not fire
+        // (network drives, symlinks, Windows ReadDirectoryChangesW dropped events)
+        const fallbackInterval = setInterval(async () => {
             for (const tab of tabs) {
                 if (!tab.file) continue;
-                const stat = await getFileStat(tab.file.path);
-                if (stat && tab.lastModified && stat.mtime != null && stat.mtime > tab.lastModified) {
-                    setTabs(prev => prev.map(t =>
-                        t.id === tab.id ? { ...t, externallyModified: true } : t
-                    ));
+                try {
+                    const stat = await getFileStat(tab.file.path);
+                    if (stat && tab.lastModified && stat.mtime != null && stat.mtime > tab.lastModified) {
+                        setTabs(prev => prev.map(t =>
+                            t.id === tab.id ? { ...t, externallyModified: true } : t
+                        ));
+                    }
+                } catch {
+                    // ignore
                 }
             }
-        }, 3000);
+        }, 30000);
 
-        return () => clearInterval(interval);
-    }, [tabs, setTabs]);
+        return () => {
+            cancelled = true;
+            unwatchFn?.();
+            clearInterval(fallbackInterval);
+        };
+    }, [tabs.map(t => t.file?.path).join(','), setTabs, tabs]);
 
     useEffect(() => {
         const handleDragOver = (e: DragEvent) => {

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import logo from '../../src-tauri/icons/128x128.png';
 import type { FileInfo } from '../utils/file';
@@ -35,7 +36,7 @@ interface MenuBarProps {
     onClearRecentlyOpened: () => void;
 }
 
-export default function MenuBar({
+function MenuBar({
     activeMenu,
     openSubmenu,
     sourceMode,
@@ -779,3 +780,12 @@ export default function MenuBar({
         </header>
     );
 }
+
+export default memo(MenuBar, (prev, next) => {
+    return prev.activeMenu === next.activeMenu
+        && prev.openSubmenu === next.openSubmenu
+        && prev.sourceMode === next.sourceMode
+        && prev.focusMode === next.focusMode
+        && prev.recentFiles === next.recentFiles
+        && prev.recentFolders === next.recentFolders;
+});
