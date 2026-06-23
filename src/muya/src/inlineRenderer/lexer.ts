@@ -105,7 +105,7 @@ function tokenizerFac(src: string, beginRules: BeginRules | null, inlineRules: I
     }
 
     while (src.length) {
-    // backlash
+        // backlash
         const backTo = inlineRules.backlash.exec(src);
         if (backTo) {
             pushPending();
@@ -548,14 +548,14 @@ function tokenizerFac(src: string, beginRules: BeginRules | null, inlineRules: I
                 content: htmlTo[4],
                 children: htmlTo[4]
                     ? tokenizerFac(
-                            htmlTo[4],
-                            null,
-                            inlineRules,
-                            pos + htmlTo[2].length,
-                            false,
-                            labels,
-                            options,
-                        )
+                        htmlTo[4],
+                        null,
+                        inlineRules,
+                        pos + htmlTo[2].length,
+                        false,
+                        labels,
+                        options,
+                    )
                     : [],
                 range: {
                     start: pos,

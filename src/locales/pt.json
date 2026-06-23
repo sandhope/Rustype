@@ -352,7 +352,7 @@
     "newFile": "Novo arquivo",
     "openFile": "Abrir arquivo",
     "openFolder": "Abrir pasta",
-    "recentFiles": "Arquivos recentes"
+    "recents": "Recentes"
   },
   "commands": {
     "newTab": "Nova Aba",

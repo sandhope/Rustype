@@ -352,7 +352,7 @@
     "newFile": "Nuevo archivo",
     "openFile": "Abrir archivo",
     "openFolder": "Abrir carpeta",
-    "recentFiles": "Archivos recientes"
+    "recents": "Recientes"
   },
   "commands": {
     "newTab": "Nueva Pesta\u00f1a",

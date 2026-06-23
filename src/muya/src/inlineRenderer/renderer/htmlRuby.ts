@@ -22,34 +22,34 @@ export default function htmlRuby(
 
     return children?.length
         ? [
-                h(`span.${className}.${CLASS_NAMES.MU_RUBY}`, [
-                    h(
-                        `span.${CLASS_NAMES.MU_INLINE_RULE}.${CLASS_NAMES.MU_RUBY_TEXT}`,
-                        content,
-                    ),
-                    h(
-                        previewSelector,
-                        {
-                            attrs: {
-                                contenteditable: 'false',
-                                spellcheck: 'false',
-                            },
-                            dataset: {
-                                start: String(start + 6), // '<ruby>'.length
-                                end: String(end - 7), // '</ruby>'.length
-                            },
+            h(`span.${className}.${CLASS_NAMES.MU_RUBY}`, [
+                h(
+                    `span.${CLASS_NAMES.MU_INLINE_RULE}.${CLASS_NAMES.MU_RUBY_TEXT}`,
+                    content,
+                ),
+                h(
+                    previewSelector,
+                    {
+                        attrs: {
+                            contenteditable: 'false',
+                            spellcheck: 'false',
                         },
-                        vNode,
-                    ),
-                ]),
-                // if children is empty string, no need to render ruby characters...
-            ]
+                        dataset: {
+                            start: String(start + 6), // '<ruby>'.length
+                            end: String(end - 7), // '</ruby>'.length
+                        },
+                    },
+                    vNode,
+                ),
+            ]),
+            // if children is empty string, no need to render ruby characters...
+        ]
         : [
-                h(`span.${className}.${CLASS_NAMES.MU_RUBY}`, [
-                    h(
-                        `span.${CLASS_NAMES.MU_INLINE_RULE}.${CLASS_NAMES.MU_RUBY_TEXT}`,
-                        content,
-                    ),
-                ]),
-            ];
+            h(`span.${className}.${CLASS_NAMES.MU_RUBY}`, [
+                h(
+                    `span.${CLASS_NAMES.MU_INLINE_RULE}.${CLASS_NAMES.MU_RUBY_TEXT}`,
+                    content,
+                ),
+            ]),
+        ];
 }

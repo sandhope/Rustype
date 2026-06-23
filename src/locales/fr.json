@@ -352,7 +352,7 @@
     "newFile": "Nouveau fichier",
     "openFile": "Ouvrir un fichier",
     "openFolder": "Ouvrir un dossier",
-    "recentFiles": "Fichiers récents"
+    "recents": "Récents"
   },
   "commands": {
     "newTab": "Nouvel onglet",

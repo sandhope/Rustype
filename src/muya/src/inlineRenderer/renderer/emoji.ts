@@ -57,17 +57,17 @@ export default function emoji(
 
     const emojiVNode = validation
         ? h(
-                contentSelector,
-                {
-                    attrs: {
-                        spellcheck: 'false',
-                    },
-                    dataset: {
-                        emoji: validation.emoji,
-                    },
+            contentSelector,
+            {
+                attrs: {
+                    spellcheck: 'false',
                 },
-                content,
-            )
+                dataset: {
+                    emoji: validation.emoji,
+                },
+            },
+            content,
+        )
         : h(contentSelector, content);
 
     return [

@@ -792,12 +792,12 @@ export class Muya {
         // queryBlock mutates its path argument (path.shift()) — pass copies.
         const anchorBlock
             = cursor.anchorBlock
-                ?? cursor.block
-                ?? (anchorPath ? scrollPage.queryBlock([...anchorPath]) : null);
+            ?? cursor.block
+            ?? (anchorPath ? scrollPage.queryBlock([...anchorPath]) : null);
         const focusBlock
             = cursor.focusBlock
-                ?? cursor.block
-                ?? (focusPath ? scrollPage.queryBlock([...focusPath]) : null);
+            ?? cursor.block
+            ?? (focusPath ? scrollPage.queryBlock([...focusPath]) : null);
 
         if (anchorBlock == null || !anchorBlock.isContent())
             return;

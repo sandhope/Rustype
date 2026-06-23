@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { dirname } from '@tauri-apps/api/path';
 import { openMarkdownFile, readFileContent, saveMarkdownFile, getFileStat, openFolderDialog, readDirectoryTree, grantDirectoryAccess, detectLineEnding, type FileInfo, type FileTreeNode } from '../utils/file';
-import { getRecentFiles, addRecentFile, removeRecentFile, getRecentFolders, addRecentFolder } from '../utils/recentFiles';
+import { getRecentFiles, addRecentFile, removeRecentFile, getRecentFolders, addRecentFolder } from '../utils/recents';
 import { t } from '../utils/i18n';
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';

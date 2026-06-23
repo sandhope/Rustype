@@ -38,7 +38,7 @@ declare module '@muyajs/core' {
 
     export interface IMuyaPluginConstructor {
         pluginName: string;
-        new (muya: Muya, options?: any): any;
+        new(muya: Muya, options?: any): any;
     }
 
     export interface ITocItem {
@@ -127,4 +127,4 @@ declare module '@muyajs/core' {
     export function stableSlug(block: any): string;
 }
 
-declare module '@muyajs/core/assets/styles/*.css' {}
+declare module '@muyajs/core/assets/styles/*.css' { }

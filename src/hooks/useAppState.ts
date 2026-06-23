@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { dirname } from '@tauri-apps/api/path';
-import { getRecentFiles, getRecentFolders } from '../utils/recentFiles';
+import { getRecentFiles, getRecentFolders } from '../utils/recents';
 import { type AppSettings } from '../utils/settings';
 import { loadSession, saveSession } from '../utils/session';
 import { readFileContent, getFileStat, grantDirectoryAccess, grantFileAccess, readDirectoryTree, getDefaultLineEnding, saveMarkdownFile, type FileInfo, type FileTreeNode } from '../utils/file';

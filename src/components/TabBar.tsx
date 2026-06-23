@@ -79,7 +79,7 @@ function TabBar({ tabs, activeTabId, onTabSelect, onTabClose, onTabReorder, onNe
                         title={tab.externallyModified ? t('tab.externallyModified') : tab.file?.path || t('tab.untitled')}
                     >
                         <span className="tab-name">
-                            {tab.file?.name || 'Untitled'}
+                            {tab.file?.name || t('tab.untitled')}
                         </span>
                         {tab.externallyModified && <span className="tab-external-dot">⚠</span>}
                         {tab.dirty && <span className="tab-dirty-dot">●</span>}

@@ -84,13 +84,13 @@ export type TInlineRenderFn = (opts: ISyntaxRenderOptions) => VNode[];
 // Declaration-merged with the class below to expose mixin method signatures;
 // must share the class name, so the `I` prefix convention does not apply here.
 // eslint-disable-next-line ts/naming-convention
-interface Renderer extends InlineSyntaxRender {}
+interface Renderer extends InlineSyntaxRender { }
 
 @methodMixins(inlineSyntaxRenderer)
 class Renderer {
     public loadMathMap: Map<
         string,
-    string | VNode | (string | VNode)[] | undefined
+        string | VNode | (string | VNode)[] | undefined
     > = new Map();
 
     public loadImageMap: Map<
@@ -106,7 +106,7 @@ class Renderer {
 
     public urlMap: Map<string, string> = new Map();
 
-    constructor(public muya: Muya, public parent: InlineRenderer) {}
+    constructor(public muya: Muya, public parent: InlineRenderer) { }
 
     checkConflicted(block: Format, token: Token, cursor: ICursor = {}) {
         const anchor = cursor.anchor || cursor.start;

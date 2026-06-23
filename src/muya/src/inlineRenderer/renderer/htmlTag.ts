@@ -37,23 +37,23 @@ export default function htmlTag(
     const anchor
         = Array.isArray(children) && children.length && tag !== 'ruby' // important
             ? children.reduce((acc: VNode[], to: Token) => {
-                    // The original passed a `className` field here too, but
-                    // receivers read `outerClass` — so the field was
-                    // silently dropped under the previous `as any` cast.
-                    // Preserve that runtime behavior: don't propagate it.
-                    const chunk = this.dispatch(snakeToCamel(to.type), {
-                        h,
-                        cursor,
-                        block,
-                        token: to,
-                    });
+                // The original passed a `className` field here too, but
+                // receivers read `outerClass` — so the field was
+                // silently dropped under the previous `as any` cast.
+                // Preserve that runtime behavior: don't propagate it.
+                const chunk = this.dispatch(snakeToCamel(to.type), {
+                    h,
+                    cursor,
+                    block,
+                    token: to,
+                });
 
-                    return Array.isArray(chunk) ? [...acc, ...chunk] : [...acc, chunk];
-                }, [])
+                return Array.isArray(chunk) ? [...acc, ...chunk] : [...acc, chunk];
+            }, [])
             : '';
 
     switch (tag) {
-    // Handle html img.
+        // Handle html img.
         case 'img': {
             // `<img>` html_tag tokens and markdown image tokens overlap on the
             // fields `image()` actually reads (`raw`, `range`, `attrs.src/alt/

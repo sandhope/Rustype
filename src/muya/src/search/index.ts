@@ -15,7 +15,7 @@ export class Search {
         return this.muya.editor.scrollPage;
     }
 
-    constructor(public muya: Muya) {}
+    constructor(public muya: Muya) { }
 
     private _updateMatches(isClear = false) {
         const { matches, index } = this;

@@ -60,8 +60,7 @@ export default function image(
     }
 
     let wrapperSelector = id
-        ? `span#${isSuccess ? `${id}_${token.range.start}` : id}.${
-            CLASS_NAMES.MU_INLINE_IMAGE
+        ? `span#${isSuccess ? `${id}_${token.range.start}` : id}.${CLASS_NAMES.MU_INLINE_IMAGE
         }`
         : `span.${CLASS_NAMES.MU_INLINE_IMAGE}`;
 
@@ -92,7 +91,7 @@ export default function image(
 
     // the src image is still loading, so use the url Map base64.
     if (this.urlMap.has(src)) {
-    // fix: it will generate a new id if the image is not loaded.
+        // fix: it will generate a new id if the image is not loaded.
         if (
             selectedImage
             && selectedImage.token.attrs.src === src
@@ -117,7 +116,7 @@ export default function image(
     }
 
     if (src) {
-    // image is loading...
+        // image is loading...
         if (typeof isSuccess === 'undefined') {
             wrapperSelector += `.${CLASS_NAMES.MU_IMAGE_LOADING}`;
         }
@@ -178,15 +177,15 @@ export default function image(
 
         return isSuccess
             ? [
-                    h(wrapperSelector, data, [
-                        ...imageIcons,
-                        renderImageContainer(
-                            // An image description has inline elements as its contents.
-                            // When an image is rendered to HTML, this is used as the image’s alt attribute.
-                            renderImage(),
-                        ),
-                    ]),
-                ]
+                h(wrapperSelector, data, [
+                    ...imageIcons,
+                    renderImageContainer(
+                        // An image description has inline elements as its contents.
+                        // When an image is rendered to HTML, this is used as the image’s alt attribute.
+                        renderImage(),
+                    ),
+                ]),
+            ]
             : [h(wrapperSelector, data, [...imageIcons, renderImageContainer()])];
     }
     else {

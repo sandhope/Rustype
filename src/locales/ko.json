@@ -352,7 +352,7 @@
     "newFile": "새 파일",
     "openFile": "파일 열기",
     "openFolder": "폴더 열기",
-    "recentFiles": "최근 파일"
+    "recents": "최근 항목"
   },
   "commands": {
     "newTab": "새 탭",

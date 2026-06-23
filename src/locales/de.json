@@ -352,7 +352,7 @@
     "newFile": "Neue Datei",
     "openFile": "Datei \u00f6ffnen",
     "openFolder": "Ordner \u00f6ffnen",
-    "recentFiles": "Zuletzt verwendet"
+    "recents": "Zuletzt geöffnet"
   },
   "commands": {
     "newTab": "Neuer Tab",

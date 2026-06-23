@@ -18,7 +18,7 @@ import { useAppState, useFileOperations, useMenuActions, useKeyboardShortcuts } 
 import { getThemeById } from './utils/themes';
 import { useI18n } from './utils/i18n';
 import { updateImageConfig } from './utils/image';
-import { clearRecentlyOpened } from './utils/recentFiles';
+import { clearRecentlyOpened } from './utils/recents';
 import { grantDirectoryAccess, readDirectoryTree, fsRename, type FileInfo } from './utils/file';
 import { join } from '@tauri-apps/api/path';
 import logo from '../src-tauri/icons/128x128.png';
@@ -495,7 +495,7 @@ function App() {
                                         </div>
                                     </button>
                                     <button className="welcome-action-btn" onClick={handleOpenFile}>
-                                        <span className="welcome-action-icon">📂</span>
+                                        <span className="welcome-action-icon">📝</span>
                                         <div className="welcome-action-text">
                                             <span className="welcome-action-label">{t('welcome.openFile')}</span>
                                             <span className="welcome-action-shortcut">Ctrl+O</span>
@@ -509,27 +509,34 @@ function App() {
                                         </div>
                                     </button>
                                 </div>
-                                {recentFiles.length > 0 && (
+                                {recentFiles.length + recentFolders.length > 0 && (
                                     <div className="welcome-recent">
-                                        <h3 className="welcome-recent-title">{t('welcome.recentFiles')}</h3>
+                                        <h3 className="welcome-recent-title">{t('welcome.recents')}</h3>
                                         <ul className="welcome-recent-list">
-                                            {recentFiles.slice(0, 5).map((file, index) => (
+                                            {recentFolders.slice(0, 3).map((folder, index) => (
+                                                <li
+                                                    key={folder.path + index}
+                                                    className="welcome-recent-item"
+                                                    title={folder.path}
+                                                    onClick={() => {
+                                                        handleRecentFolderSelect(folder);
+                                                    }}
+                                                >
+                                                    <span className="welcome-recent-icon">📁</span>
+                                                    <span className="welcome-recent-name">{folder.name || folder.path.split(/[/\\]/).pop()}</span>
+                                                    <span className="welcome-recent-path">{folder.path}</span>
+                                                </li>
+                                            ))}
+                                            {recentFiles.slice(0, 3).map((file, index) => (
                                                 <li
                                                     key={file.path + index}
                                                     className="welcome-recent-item"
                                                     title={file.path}
                                                     onClick={() => {
-                                                        if (file.isDir) {
-                                                            readDirectoryTree(file.path, settings.excludedDirs).then(tree => {
-                                                                setProjectTree(tree);
-                                                                setActiveSidebarPanel('explorer');
-                                                            });
-                                                        } else {
-                                                            handleRecentFileSelect(file);
-                                                        }
+                                                        handleRecentFileSelect(file);
                                                     }}
                                                 >
-                                                    <span className="welcome-recent-icon">{file.isDir ? '📁' : '📄'}</span>
+                                                    <span className="welcome-recent-icon">📄</span>
                                                     <span className="welcome-recent-name">{file.name || file.path.split(/[/\\]/).pop()}</span>
                                                     <span className="welcome-recent-path">{file.path}</span>
                                                 </li>

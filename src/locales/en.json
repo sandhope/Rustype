@@ -358,7 +358,7 @@
     "newFile": "New File",
     "openFile": "Open File",
     "openFolder": "Open Folder",
-    "recentFiles": "Recent Files"
+    "recents": "Recents"
   },
   "commands": {
     "newTab": "New Tab",
