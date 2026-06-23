@@ -17,6 +17,7 @@ interface ExportActionsProps {
     activeTabId: string;
     editorRef: React.RefObject<EditorHandle | null>;
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
+    setExportingPdf?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 /**
@@ -105,18 +106,19 @@ export async function exportHtml(props: ExportActionsProps): Promise<void> {
         const extraCss = await getCssForOptions(opts);
         const toc = editorRef.current?.getTOC() || [];
         const htmlToc = getHtmlToc(toc as unknown as TocEntry[], tocOptions);
-        const htmlTitle = activeTab.file?.name?.replace(/\.md$/i, '') || 'Untitled';
         const htmlContent = await editorRef.current?.exportStyledHTML({
-            title: htmlTitle,
+            title: baseName,
             printOptimization: false,
             extraCSS: extraCss,
             toc: htmlToc,
         });
 
-        if (htmlContent) {
-            await writeTextFile(targetPath, htmlContent);
-            await message(t('messages.exportHtmlSuccess'), { title: t('messages.success'), kind: 'info' });
+        if (!htmlContent) {
+            throw new Error('HTML content is empty');
         }
+
+        await writeTextFile(targetPath, htmlContent);
+        await message(t('messages.exportHtmlSuccess'), { title: t('messages.success'), kind: 'info' });
     } catch (error) {
         console.error('Export HTML failed:', error);
         await message(t('messages.exportHtmlFailed'), { title: t('messages.error'), kind: 'error' });
@@ -126,7 +128,72 @@ export async function exportHtml(props: ExportActionsProps): Promise<void> {
 }
 
 export async function exportPdf(props: ExportActionsProps): Promise<void> {
-    return printDocument(props);
+    const { tabs, activeTabId, editorRef, setActiveMenu, setExportingPdf } = props;
+
+    // hide menu bar
+    setActiveMenu(null);
+
+    const activeTab = tabs.find(t => t.id === activeTabId);
+    if (!activeTab) {
+        await message(t('messages.openFileFirst'), { title: t('messages.error'), kind: 'error' });
+        return;
+    }
+
+    // Check TOC configuration
+    const tocOptions = await checkAndConfigureToc(editorRef);
+    if (tocOptions === null) return;
+
+    // show loading animation
+    setExportingPdf?.(true);
+
+    const baseName = activeTab.file?.path?.replace(/\.md$/i, '')
+        || activeTab.file?.name?.replace(/\.md$/i, '')
+        || 'Untitled';
+
+
+    try {
+        const targetPath = await save({
+            defaultPath: `${baseName}.pdf`,
+            filters: [{ name: 'PDF Files', extensions: ['pdf'] }],
+        });
+
+        if (!targetPath) return;
+
+        const opts: PdfCssOptions = {
+            type: 'styledHtml',
+            pageMarginTop: 20,
+            pageMarginRight: 20,
+            pageMarginBottom: 20,
+            pageMarginLeft: 20,
+            fontSize: 16,
+            lineHeight: 1.5,
+            autoNumberingHeadings: false,
+            showFrontMatter: true,
+        };
+
+        const extraCss = await getCssForOptions(opts);
+        const toc = editorRef.current?.getTOC() || [];
+        const htmlToc = getHtmlToc(toc as unknown as TocEntry[], tocOptions);
+        const htmlContent = await editorRef.current?.exportStyledHTML({
+            title: baseName,
+            printOptimization: true,
+            extraCSS: extraCss,
+            toc: htmlToc,
+        });
+
+        if (!htmlContent) {
+            throw new Error('HTML content is empty');
+        }
+
+        await invoke('html_to_pdf', { htmlContent, targetPath });
+        await message(t('messages.exportPdfSuccess'), { title: t('messages.success'), kind: 'info' });
+    } catch (error) {
+        console.error('Export PDF failed:', error);
+        await message(t('messages.exportPdfFailed'), { title: t('messages.error'), kind: 'error' });
+    } 
+
+    // close loading animation
+    setExportingPdf?.(false);
 }
 
 export async function printDocument(props: ExportActionsProps): Promise<void> {
@@ -178,12 +245,12 @@ export async function printDocument(props: ExportActionsProps): Promise<void> {
     } catch (error) {
         console.error('Print failed:', error);
         await message(t('messages.printFailed'), { title: t('messages.error'), kind: 'error' });
-    } finally {
-        setTimeout(() => {
-            printer.clearup();
-            console.log('Printing finished, temporary DOM has been safely cleaned up');
-        }, 1000);
     }
+
+    setTimeout(() => {
+        printer.clearup();
+        console.log('Printing finished, temporary DOM has been safely cleaned up');
+    }, 1000);
 
     setActiveMenu(null);
 }

@@ -60,7 +60,7 @@ function App() {
         activeMenu,
         openSubmenu,
         autoSave,
-        setAutoSave,
+        exportingPdf,
         setTabs,
         setActiveTabId,
         setActiveSidebarPanel,
@@ -78,6 +78,8 @@ function App() {
         setAlwaysOnTop,
         setActiveMenu,
         setOpenSubmenu,
+        setAutoSave,
+        setExportingPdf,
         currentLineEnding,
         setCurrentLineEnding,
         handleNewFile,
@@ -142,6 +144,7 @@ function App() {
         setActiveMenu,
         setCurrentLineEnding,
         setAutoSave,
+        setExportingPdf,
         setActiveTabId,
         handleNewFile,
         handleOpenFile,
@@ -362,6 +365,15 @@ function App() {
 
     return (
         <div className={appRootClass} onClick={() => setActiveMenu(null)} onContextMenu={(e) => e.preventDefault()}>
+            {exportingPdf && (
+                <div className="export-loading-overlay">
+                    <div className="export-loading-spinner">
+                        <svg viewBox="0 0 16 16" width="32" height="32" fill="currentColor">
+                            <path d="M8 1.5a6.5 6.5 0 1 0 6.5 6.5.75.75 0 0 1 1.5 0 8 8 0 1 1-8-8 .75.75 0 0 1 0 1.5z"/>
+                        </svg>
+                    </div>
+                </div>
+            )}
             <MenuBar
                 activeMenu={activeMenu}
                 openSubmenu={openSubmenu}

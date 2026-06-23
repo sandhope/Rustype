@@ -38,6 +38,7 @@ export interface MenuActionContext {
     setCheckingUpdate: React.Dispatch<React.SetStateAction<boolean>>;
     setAlwaysOnTop: React.Dispatch<React.SetStateAction<boolean>>;
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
+    setExportingPdf: React.Dispatch<React.SetStateAction<boolean>>;
     setCurrentLineEnding: (lineEnding: 'crlf' | 'lf') => void;
     setAutoSave: React.Dispatch<React.SetStateAction<boolean>>;
     setSettings: React.Dispatch<React.SetStateAction<AppSettings>>;
@@ -137,7 +138,7 @@ export const actionHandlers: Record<string, MenuActionHandler> = {
         await exportHtml({ tabs: ctx.tabs, activeTabId: ctx.activeTabId, editorRef: ctx.editorRef, setActiveMenu: ctx.setActiveMenu });
     },
     'exportPdf': async (ctx) => {
-        await exportPdf({ tabs: ctx.tabs, activeTabId: ctx.activeTabId, editorRef: ctx.editorRef, setActiveMenu: ctx.setActiveMenu });
+        await exportPdf({ tabs: ctx.tabs, activeTabId: ctx.activeTabId, editorRef: ctx.editorRef, setActiveMenu: ctx.setActiveMenu, setExportingPdf: ctx.setExportingPdf });
     },
     'print': async (ctx) => {
         await printDocument({ tabs: ctx.tabs, activeTabId: ctx.activeTabId, editorRef: ctx.editorRef, setActiveMenu: ctx.setActiveMenu });

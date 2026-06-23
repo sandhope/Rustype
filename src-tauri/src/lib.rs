@@ -148,6 +148,72 @@ fn toggle_fullscreen(app_handle: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn html_to_pdf(html_content: String, target_path: String) -> Result<(), String> {
+    use headless_chrome::{Browser, LaunchOptions};
+    use headless_chrome::types::PrintToPdfOptions;
+
+    // Create a temporary HTML file to avoid Data URI length limits
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+
+    let temp_html_path = std::env::temp_dir().join(format!("rustype_tauri_pdf_{}.html", timestamp));
+    fs::write(&temp_html_path, html_content).map_err(|e| format!("Failed to create temp file: {}", e))?;
+
+    // Convert to a browser-compatible file:// URL
+    let file_url = format!("file://{}", temp_html_path.to_string_lossy());
+
+    // Launch headless browser (sandbox disabled for better compatibility)
+    let browser = Browser::new(
+        LaunchOptions::default_builder()
+            .headless(true)
+            .args(vec![
+                "--no-sandbox".as_ref(),
+                "--disable-setuid-sandbox".as_ref(),
+                "--disable-gpu".as_ref(), // Disable GPU in headless mode to reduce errors
+            ])
+            .build()
+            .map_err(|e| e.to_string())?
+    ).map_err(|e| e.to_string())?;
+
+    // Open a new tab and navigate to the temp HTML file
+    let tab = browser.new_tab().map_err(|e| e.to_string())?;
+    tab.navigate_to(&file_url).map_err(|e| e.to_string())?;
+
+    // wait_until_navigated only guarantees DOM is loaded
+    tab.wait_until_navigated().map_err(|e| e.to_string())?;
+
+    // Wait for images and styles to finish rendering.
+    // For complex JS-rendered content, increase the delay or have the frontend
+    // signal readiness via a window variable.
+    std::thread::sleep(std::time::Duration::from_millis(500));
+
+    // Configure PDF print options.
+    // Passing None would use defaults (A4, with header/footer, default margins).
+    // Custom options are needed to remove the default header/footer (URL and date).
+    let pdf_options = PrintToPdfOptions {
+        display_header_footer: Some(false), // Hide header/footer (title and URL)
+        print_background: Some(true),       // Required for CSS background colors/images
+        paper_width: Some(8.27),            // A4 width (inches)
+        paper_height: Some(11.69),          // A4 height (inches)
+        margin_top: Some(0.4),              // Top margin (inches)
+        margin_bottom: Some(0.4),
+        margin_left: Some(0.4),
+        margin_right: Some(0.4),
+        ..Default::default()
+    };
+
+    let pdf_data = tab.print_to_pdf(Some(pdf_options)).map_err(|e| e.to_string())?;
+
+    // Save PDF and clean up temp file
+    fs::write(&target_path, pdf_data).map_err(|e| format!("Failed to save PDF: {}", e))?;
+    let _ = fs::remove_file(temp_html_path); // Remove temp HTML to free disk space
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -176,6 +242,7 @@ pub fn run() {
             grant_file_access,
             open_devtools,
             toggle_fullscreen,
+            html_to_pdf,
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();

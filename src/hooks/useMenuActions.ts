@@ -34,6 +34,7 @@ interface UseMenuActionsProps {
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
     setCurrentLineEnding: (lineEnding: 'crlf' | 'lf') => void;
     setAutoSave: React.Dispatch<React.SetStateAction<boolean>>;
+    setExportingPdf: React.Dispatch<React.SetStateAction<boolean>>;
     handleNewFile: () => void;
     handleOpenFile: () => void;
     handleOpenFolder: () => void;
@@ -179,6 +180,7 @@ export function useMenuActions(
         setActiveMenu,
         setCurrentLineEnding,
         setAutoSave,
+        setExportingPdf: props.setExportingPdf,
         setSettings,
         setRenameDialogOpen,
         setRenameFileName,

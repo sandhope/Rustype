@@ -55,6 +55,7 @@ export interface UseAppStateReturn {
     activeMenu: string | null;
     openSubmenu: string | null;
     autoSave: boolean;
+    exportingPdf: boolean;
     setTabs: React.Dispatch<React.SetStateAction<Tab[]>>;
     setActiveTabId: React.Dispatch<React.SetStateAction<string>>;
     setActiveSidebarPanel: React.Dispatch<React.SetStateAction<SidebarPanel | null>>;
@@ -73,6 +74,7 @@ export interface UseAppStateReturn {
     setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
     setOpenSubmenu: React.Dispatch<React.SetStateAction<string | null>>;
     setAutoSave: React.Dispatch<React.SetStateAction<boolean>>;
+    setExportingPdf: React.Dispatch<React.SetStateAction<boolean>>;
     currentLineEnding: 'crlf' | 'lf';
     setCurrentLineEnding: (lineEnding: 'crlf' | 'lf') => void;
     handleNewFile: () => void;
@@ -112,6 +114,7 @@ export function useAppState() {
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
     const [autoSave, setAutoSave] = useState(false);
+    const [exportingPdf, setExportingPdf] = useState(false);
 
     const isRestoringRef = useRef(false);
     const tabsRef = useRef<Tab[]>(tabs);
@@ -422,6 +425,7 @@ export function useAppState() {
         activeMenu,
         openSubmenu,
         autoSave,
+        exportingPdf,
         setTabs,
         setActiveTabId,
         setActiveSidebarPanel,
@@ -440,6 +444,7 @@ export function useAppState() {
         setActiveMenu,
         setOpenSubmenu,
         setAutoSave,
+        setExportingPdf,
         currentLineEnding,
         setCurrentLineEnding,
         handleNewFile,
