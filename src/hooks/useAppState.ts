@@ -1,14 +1,14 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { dirname } from '@tauri-apps/api/path';
 import { getRecentFiles, getRecentFolders } from '../utils/recentFiles';
-import { loadSettings, type AppSettings, DEFAULT_SETTINGS } from '../utils/settings';
-import { setZoomLevel } from '../utils/webview';
+import { type AppSettings } from '../utils/settings';
 import { loadSession, saveSession } from '../utils/session';
 import { readFileContent, getFileStat, grantDirectoryAccess, grantFileAccess, readDirectoryTree, getDefaultLineEnding, saveMarkdownFile, type FileInfo, type FileTreeNode } from '../utils/file';
 import type { Tab } from '../components/TabBar';
 import type { SidebarPanel } from '../components/Sidebar';
 import { getWelcomeMarkdown } from '../constants';
 import { t } from '../utils/i18n';
+import { useSettings } from '../contexts/SettingsContext';
 
 let tabIdCounter = 0;
 export const getNextTabId = () => `tab-${++tabIdCounter}`;
@@ -93,6 +93,8 @@ export interface UseAppStateReturn {
 }
 
 export function useAppState() {
+    const { settings, setSettings } = useSettings();
+
     const [tabs, setTabs] = useState<Tab[]>([]);
     const [activeTabId, setActiveTabId] = useState<string>('');
     const [activeSidebarPanel, setActiveSidebarPanel] = useState<SidebarPanel | null>(null);
@@ -103,7 +105,6 @@ export function useAppState() {
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [aboutOpen, setAboutOpen] = useState(false);
     const [shortcutsOpen, setShortcutsOpen] = useState(false);
-    const [settings, setSettings] = useState<AppSettings>({ ...DEFAULT_SETTINGS });
     const [findReplaceOpen, setFindReplaceOpen] = useState(false);
     const [sourceMode, setSourceMode] = useState(false);
     const [focusMode, setFocusMode] = useState(false);
@@ -122,15 +123,6 @@ export function useAppState() {
     const activeTabIdRef = useRef<string>(activeTabId);
     activeTabIdRef.current = activeTabId;
 
-    useEffect(() => {
-        loadSettings().then((loaded) => {
-            setSettings(loaded);
-            setZoomLevel(loaded.zoomLevel);
-        }).catch((err) => {
-            console.error('Failed to load settings:', err);
-        });
-    }, []);
-
     // Sync standalone autoSave state with settings.autoSave (from settings panel or menu)
     useEffect(() => {
         setAutoSave(settings.autoSave);
@@ -145,16 +137,24 @@ export function useAppState() {
     }, []);
 
     useEffect(() => {
-        const restore = async () => {
-            const session = await loadSession();
-            if (!session) return;
+        if (settings.startUpAction === 'blank') return;
 
-            isRestoringRef.current = true;
+        let cancelled = false;
+        isRestoringRef.current = true;
+
+        const restore = async () => {
+
+            const session = await loadSession();
+            if (cancelled || !session) {
+                isRestoringRef.current = false;
+                return;
+            }
 
             if (session.folderPath) {
                 try {
                     await grantDirectoryAccess(session.folderPath);
                     const tree = await readDirectoryTree(session.folderPath);
+                    if (cancelled) return;
                     setProjectTree(tree);
                     setActiveSidebarPanel('explorer');
                 } catch {
@@ -202,6 +202,8 @@ export function useAppState() {
                     .map(r => r.value)
                     .filter((tab): tab is Tab => tab !== null);
 
+                if (cancelled) return;
+
                 if (restoredTabs.length > 0) {
                     setTabs(restoredTabs);
                     const activeIdx = session.activeTabId
@@ -221,7 +223,12 @@ export function useAppState() {
         };
 
         restore();
-    }, []);
+
+        return () => {
+            cancelled = true;
+            isRestoringRef.current = false;
+        };
+    }, [settings.startUpAction]);
 
     useEffect(() => {
         if (!isRestoringRef.current) {
